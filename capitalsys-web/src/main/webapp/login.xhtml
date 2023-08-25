@@ -1,0 +1,49 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+ 	  xmlns:p="http://primefaces.org/ui">
+      
+      
+      <h:head>
+        <title>Capital Creditos</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <h:outputStylesheet library="css" name="login.css"></h:outputStylesheet>
+        <h:outputScript library="js" name="login.js" />
+    </h:head>
+    <body>
+        <p:growl id="growl" showDetail="true" />
+        <div id="wrapper">
+            <div class="user-icon"></div>
+            <div class="pass-icon"></div>
+            <h:form id="login-form" styleClass="login-form">
+                <script>
+                    window.onload = function () {
+                        document.getElementById('login-form:username').focus();
+                    };
+                </script>
+                <div class="header">
+                    <center>
+                        <p:graphicImage name="images/user.png" style="width: 100px; align-items: center;"/>
+                    </center>
+                </div>
+                <center>
+                    <span style="font-family: 'Bree Serif', serif;font-weight: 300;font-size: 15px; line-height:34px; color: #414848;text-shadow: 1px 1px 0 rgba(256,256,256,1.0); margin-bottom: 10px;">
+                        <p>Bienvenidos a</p>
+                        <p>Capital Creditos</p>
+                     </span>
+                </center>
+                <div class="content">
+				<p:inputText title="hola" id="username" value="#{loginController.username}"
+					styleClass="input username" label="username" />
+				<h:inputSecret id="password" value="#{loginController.password}" styleClass="input password"/>
+                </div>
+                <div class="footer">
+                    <h:commandButton update="login-form, growl" id="submit" value="Login" styleClass="button" action="#{loginController.login()}"/>
+                </div>
+
+            </h:form>
+        </div>
+        <div class="gradient"></div>
+    </body>
+      
+</html>
