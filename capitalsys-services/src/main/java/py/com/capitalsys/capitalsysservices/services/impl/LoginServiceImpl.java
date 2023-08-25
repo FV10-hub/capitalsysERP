@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import py.com.capitalsys.capitalsysdata.dao.base.BsUsuarioRepository;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
+import py.com.capitalsys.capitalsysservices.services.LoginService;
 
 
 /**
@@ -12,7 +13,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
  * Clase que implementa las funciones para la logica de negocio para la pantalla de login.
  */
 @Service
-public class LoginServiceImpl implements py.com.capitalsys.capitalsysservices.services.LoginService {
+public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	private BsUsuarioRepository bsUsuarioRepositoryImpl;
