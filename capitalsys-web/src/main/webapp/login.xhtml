@@ -1,49 +1,88 @@
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:h="http://java.sun.com/jsf/html"
- 	  xmlns:p="http://primefaces.org/ui">
-      
-      
-      <h:head>
-        <title>Capital Creditos</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <h:outputStylesheet library="css" name="login.css"></h:outputStylesheet>
-        <h:outputScript library="js" name="login.js" />
-    </h:head>
-    <body>
-        <p:growl id="growl" showDetail="true" />
-        <div id="wrapper">
-            <div class="user-icon"></div>
-            <div class="pass-icon"></div>
-            <h:form id="login-form" styleClass="login-form">
-                <script>
-                    window.onload = function () {
-                        document.getElementById('login-form:username').focus();
-                    };
-                </script>
-                <div class="header">
-                    <center>
-                        <p:graphicImage name="images/user.png" style="width: 100px; align-items: center;"/>
-                    </center>
-                </div>
-                <center>
-                    <span style="font-family: 'Bree Serif', serif;font-weight: 300;font-size: 15px; line-height:34px; color: #414848;text-shadow: 1px 1px 0 rgba(256,256,256,1.0); margin-bottom: 10px;">
-                        <p>Bienvenidos a</p>
-                        <p>Capital Creditos</p>
-                     </span>
-                </center>
-                <div class="content">
-				<p:inputText title="hola" id="username" value="#{loginController.username}"
-					styleClass="input username" label="username" />
-				<h:inputSecret id="password" value="#{loginController.password}" styleClass="input password"/>
-                </div>
-                <div class="footer">
-                    <h:commandButton update="login-form, growl" id="submit" value="Login" styleClass="button" action="#{loginController.login()}"/>
-                </div>
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
 
-            </h:form>
-        </div>
-        <div class="gradient"></div>
-    </body>
-      
+<h:head>
+	<f:facet name="first">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+	</f:facet>
+
+	<title>Login</title>
+
+	<script type="text/javascript">
+		$(function() {
+			var loginForms = $('.login-forms');
+			var login = $('.login');
+			var register = $('.register');
+
+			$('.tab').on('click', function(e) {
+				var tab = $(this);
+				tab.siblings('.active-tab').removeClass('active-tab');
+				tab.addClass('active-tab');
+
+				if (tab.hasClass('tab-1')) {
+					loginForms.css('transform', 'translate3d(0, 0, 0)');
+					login.css('opacity', '1');
+					register.css('opacity', '0');
+
+				} else if (tab.hasClass('tab-2')) {
+					loginForms.css('transform', 'translate3d(-100%, 0, 0)');
+					login.css('opacity', '0');
+					register.css('opacity', '1');
+				}
+				e.preventDefault();
+			});
+		});
+	</script>
+</h:head>
+
+<h:body styleClass="login-body">
+	<p:growl id="growl" showDetail="true" />
+	<div class="login-wrapper">
+		<div class="login-panel">
+			<div class="login-title">
+				<h4>Login a Capitalsys-ERP</h4>
+				<span> Bienvenido, por favor usa el formulario para
+					loguearte. </span>
+			</div>
+			<h:form class="login-forms-wrapper">
+				<div class="form-tabs">
+					<div class="tab tab-1 active-tab">LOGIN</div>
+				</div>
+				<div class="login-forms">
+					<div class="login-form login">
+						<div class="form-group">
+							<span>usuario</span>
+							<p:inputText placeholder="username"
+								value="#{loginController.username}" />
+						</div>
+						<div class="form-group">
+							<span>password</span>
+							<p:password placeholder="escribe tu password..."
+								value="#{loginController.password}" />
+						</div>
+						<div class="form-footer">
+							<p:commandButton value="ENTRAR"
+								action="#{loginController.login()}"
+								update=":growl" />
+						</div>
+
+					</div>
+				</div>
+			</h:form>
+		</div>
+		<div class="login-image"></div>
+	</div>
+
+	<h:outputStylesheet
+		name="css/layout-#{guestPreferences.layoutPrimaryColor}.css"
+		library="pandora-layout" />
+</h:body>
+
 </html>

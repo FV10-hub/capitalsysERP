@@ -24,7 +24,7 @@
     
     <context-param>
         <param-name>primefaces.THEME</param-name>
-        <param-value>pandora-blue</param-value>
+        <param-value>pandora-indigo</param-value>
     </context-param>
     
     <context-param>
@@ -92,7 +92,7 @@
 
 	<!-- Welcome page -->
 	<welcome-file-list>
-		<welcome-file>dashboard.xhtml</welcome-file>
+		<welcome-file>login.xhtml</welcome-file>
 	</welcome-file-list>
 
 	<!-- JSF mapping -->
