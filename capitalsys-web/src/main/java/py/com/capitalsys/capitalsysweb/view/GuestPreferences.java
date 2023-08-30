@@ -34,7 +34,7 @@ public class GuestPreferences implements Serializable {
     
     private String componentTheme = "bluegrey";
     
-    private String menuMode = "layout-slim-plus";
+    private String menuMode = "layout-static";
     
     private String menuColor = "light";
     

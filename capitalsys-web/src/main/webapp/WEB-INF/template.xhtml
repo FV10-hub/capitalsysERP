@@ -14,7 +14,7 @@
             <meta name="apple-mobile-web-app-capable" content="yes" />
             <link rel="shortcut icon" type="image/x-icon" href="#{request.contextPath}/pandora-layout/images/favicon.ico" />
         </f:facet>
-        <title><ui:insert name="title">PrimeFaces Pandora</ui:insert></title>
+        <title><ui:insert name="title">CapitalSys-ERP</ui:insert></title>
         <h:outputScript name="js/layout.js" library="pandora-layout" />
         <h:outputScript name="js/prism.js" library="pandora-layout"/>
         <h:outputScript name="js/sections.js" library="demo" />
@@ -28,7 +28,7 @@
             <ui:include src="./menu.xhtml"/>
 
             <div class="layout-main">
-                <!-- <ui:include src="./topbar.xhtml"/> -->
+                <ui:include src="./topbar.xhtml"/> 
                 <!-- <ui:include src="./breadcrumb.xhtml" /> -->
                 <div class="layout-content">
                     <ui:insert name="content"/>
