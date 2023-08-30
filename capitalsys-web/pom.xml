@@ -68,6 +68,14 @@
 			<artifactId>primefaces</artifactId>
 			<version>${primefaces-version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>pandora</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
 			<artifactId>primeflex</artifactId>
