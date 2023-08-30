@@ -24,7 +24,7 @@
     
     <context-param>
         <param-name>primefaces.THEME</param-name>
-        <param-value>pandora-indigo</param-value>
+        <param-value>pandora-green</param-value>
     </context-param>
     
     <context-param>

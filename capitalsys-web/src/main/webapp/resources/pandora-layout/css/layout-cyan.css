@@ -2005,7 +2005,6 @@ a {
   .layout-overlay.layout-overlay-active .menu-wrapper {
     transform: translate3d(0px, 0px, 0px);
   }
-
   .layout-static .menu-wrapper {
     transform: translate3d(-260px, 0px, 0px);
   }
@@ -2220,29 +2219,29 @@ a {
 }
 @media (min-width: 993px) {
   .layout-slim .menu-wrapper,
-.layout-slim-plus .menu-wrapper {
+  .layout-slim-plus .menu-wrapper {
     width: 60px;
     height: 100%;
   }
   .layout-slim .menu-wrapper .layout-menu-container,
-.layout-slim-plus .menu-wrapper .layout-menu-container {
+  .layout-slim-plus .menu-wrapper .layout-menu-container {
     overflow: visible;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile > .profile-image-icons,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile > .profile-image-icons {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile > .profile-image-icons {
     display: none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button {
     text-align: center;
     padding: 12px 0;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button img,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button img {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button img {
     width: 32px;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons {
     padding: 0;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -2252,15 +2251,15 @@ a {
     justify-content: center;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons .icons,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons .icons {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-image-icons .icons {
     display: none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-info-button,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-info-button {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-button .profile-info-button {
     display: none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu {
     top: 0;
     left: 60px;
     width: 230px;
@@ -2277,11 +2276,11 @@ a {
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li.info,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li.info {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li.info {
     display: block;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -2295,13 +2294,13 @@ a {
     width: 100%;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .layout-profile-userinfo .layout-profile-name,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .layout-profile-userinfo .layout-profile-name {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .layout-profile-userinfo .layout-profile-name {
     display: block;
     font-size: 14px;
     font-weight: 500;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -2310,20 +2309,20 @@ a {
     align-items: center;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons i,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons i {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile .layout-profile-menu li .profile-info .icons i {
     margin-left: 8px;
     cursor: pointer;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-profile.layout-profile-active .layout-profile-menu,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile.layout-profile-active .layout-profile-menu {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-profile.layout-profile-active .layout-profile-menu {
     display: block;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu {
     margin: 0;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip {
     display: none;
     padding: 0 5px;
     position: absolute;
@@ -2334,7 +2333,7 @@ a {
     border-radius: 1px;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-text,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-text {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-text {
     padding: 6px 8px;
     font-weight: 700;
     min-width: 75px;
@@ -2345,7 +2344,7 @@ a {
     box-shadow: 0 2px 10px 0 rgba(0, 3, 6, 0.16);
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-arrow,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-arrow {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu .layout-menu-tooltip .layout-menu-tooltip-arrow {
     position: absolute;
     width: 0;
     height: 0;
@@ -2357,20 +2356,20 @@ a {
     border-width: 5px 5px 5px 0;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu li.active-menuitem > ul,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu li.active-menuitem > ul {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu li.active-menuitem > ul {
     display: block;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li {
     position: relative;
     padding: 0;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li.layout-root-menuitem > div,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li.layout-root-menuitem > div {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li.layout-root-menuitem > div {
     display: none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > a,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a {
     padding: 12px 0;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -2393,26 +2392,26 @@ a {
     border-radius: 0px;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > a .layout-menuitem-text,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a .layout-menuitem-text {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a .layout-menuitem-text {
     display: none;
     margin: 0;
     font-size: 12px;
     font-weight: normal;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > a i,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a i {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a i {
     font-size: 24px;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > a i.layout-submenu-toggler,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a i.layout-submenu-toggler {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a i.layout-submenu-toggler {
     display: none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > a:hover + .layout-menu-tooltip,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a:hover + .layout-menu-tooltip {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > a:hover + .layout-menu-tooltip {
     display: block;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > ul,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > ul {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > ul {
     position: absolute;
     overflow: auto;
     top: 0;
@@ -2430,26 +2429,25 @@ a {
     border-bottom-right-radius: 2px;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li > ul > li,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > ul > li {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li > ul > li {
     border: 0 none;
   }
   .layout-slim .menu-wrapper .layout-menu-container .layout-menu > li.active-menuitem > a:hover + .layout-menu-tooltip,
-.layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li.active-menuitem > a:hover + .layout-menu-tooltip {
+  .layout-slim-plus .menu-wrapper .layout-menu-container .layout-menu > li.active-menuitem > a:hover + .layout-menu-tooltip {
     display: none;
   }
   .layout-slim .layout-topbar,
-.layout-slim-plus .layout-topbar {
+  .layout-slim-plus .layout-topbar {
     width: calc(100% - 60px);
   }
   .layout-slim .layout-topbar .layout-topbar-left .menu-button,
-.layout-slim-plus .layout-topbar .layout-topbar-left .menu-button {
+  .layout-slim-plus .layout-topbar .layout-topbar-left .menu-button {
     display: none;
   }
   .layout-slim .layout-main,
-.layout-slim-plus .layout-main {
+  .layout-slim-plus .layout-main {
     margin-left: 60px;
   }
-
   .layout-slim-plus .menu-wrapper {
     width: 80px;
   }
@@ -6020,7 +6018,7 @@ a {
 }
 .layout-dashboard .members .members-content .upload-area .upload:hover {
   border: solid 1px #d8dadc;
-  background-color: #dae9f8;
+  background-color: rgb(218, 233, 248);
 }
 .layout-dashboard .members .members-content button {
   width: 100%;
@@ -7689,29 +7687,25 @@ a {
   font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 400;
-  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-regular.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-regular.woff']}") format("woff");
-  /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-regular.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-regular.woff']}") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 @font-face {
   font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 500;
-  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-500.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-500.woff']}") format("woff");
-  /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-500.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-500.woff']}") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 @font-face {
   font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 600;
-  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-600.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-600.woff']}") format("woff");
-  /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-600.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-600.woff']}") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 @font-face {
   font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 700;
-  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-700.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-700.woff']}") format("woff");
-  /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+  src: url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-700.woff2']}") format("woff2"), url("#{resource['pandora-layout:fonts/ibm-plex-sans-v7-latin-ext_latin-700.woff']}") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 .help-page p {
   margin: 0;
@@ -7930,11 +7924,9 @@ a {
   body * {
     visibility: hidden;
   }
-
   #invoice-content * {
     visibility: visible;
   }
-
   #invoice-content {
     width: 100%;
     position: absolute;
@@ -7945,7 +7937,6 @@ a {
     background: #ffffff;
     color: #191a1c;
   }
-
   .invoice .invoice-to {
     border-top: 1px solid #dee2e6;
   }

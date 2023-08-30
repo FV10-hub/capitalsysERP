@@ -28,17 +28,17 @@ import javax.faces.bean.SessionScoped;
 @SessionScoped
 public class GuestPreferences implements Serializable {
     
-    private String layoutPrimaryColor = "teallight";
+    private String layoutPrimaryColor = "cyan";
     
-    private String topbarTheme = "teallight";
+    private String topbarTheme = "cyan";
     
     private String componentTheme = "bluegrey";
     
     private String menuMode = "layout-static";
     
     private String menuColor = "light";
-    
-    private String menuTheme = "teallight";
+    //teallight
+    private String menuTheme = "cyan";
 
     private String inputStyle = "outlined";
 
