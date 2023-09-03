@@ -12,37 +12,40 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import py.com.capitalsys.capitalsysdata.dao.base.BsMenuRepository;
+import py.com.capitalsys.capitalsysdata.dao.base.BsModuloRepository;
 import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
+import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysservices.services.base.BsMenuService;
+import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 
 /**
  * 
  */
 @Service
-public class BsMenuServiceImpl implements BsMenuService {
+public class BsModuloServiceImpl implements BsModuloService {
 	
 	@Autowired
-	private BsMenuRepository bsMenuRepositoryImpl;
+	private BsModuloRepository bsModuloRepositoryImpl;
 
 	@Override
-	public Page<BsMenu> listarTodos(Pageable pageable) {
-		Page<BsMenu> page =  this.bsMenuRepositoryImpl.buscarTodos(pageable);
+	public Page<BsModulo> listarTodos(Pageable pageable) {
+		Page<BsModulo> page =  this.bsModuloRepositoryImpl.buscarTodos(pageable);
 		return page;
 	}
 
 	@Override
-	public List<BsMenu> buscarTodosLista() {
-		return bsMenuRepositoryImpl.buscarTodosLista();
+	public List<BsModulo> buscarTodosLista() {
+		return bsModuloRepositoryImpl.buscarTodosLista();
 	}
 
 	@Override
-	public BsMenu guardar(BsMenu obj) {
-		return this.bsMenuRepositoryImpl.save(obj);
+	public BsModulo guardar(BsModulo obj) {
+		return this.bsModuloRepositoryImpl.save(obj);
 	}
 
 	@Override
 	public void eliminar(Long id) {
-		this.bsMenuRepositoryImpl.deleteById(id);
+		this.bsModuloRepositoryImpl.deleteById(id);
 	}
 
 }

@@ -10,7 +10,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
 /**
- * @author DevPredator Clase generada para crear funciones globales o comunes
+ * @author fvazquez Clase generada para crear funciones globales o comunes
  *         entre clases del proyecto.
  */
 public class CommonUtils {

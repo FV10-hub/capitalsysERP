@@ -1,84 +1,133 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template.xhtml">
-                
-    <ui:define name="title">Menus</ui:define>
-    <ui:define name="content">
-        <h:form id="form">
-        	<div class="grid crud-demo">
-        		<div class="col-12">
-        			<div class="card">
-        				<p:growl id="messages" showDetail="true" />
-        				<p:toolbar styleClass="mb-4">
-                            <p:toolbarGroup>
-                                <p:commandButton 
-	                                value="Nuevo" 
-	                                icon="pi pi-plus" 
-	                                actionListener="#{crudDemoView.openNew}" 
-	                                
-	                                oncomplete="PF('manageProductDialog').show()" 
-	                                styleClass="ui-button-success" 
-	                                style="margin-right: .5rem" />
-                                <p:commandButton 
-	                                id="delete-products-button" 
-	                                value="Eliminar" 
-	                                icon="pi pi-trash" 
-	                                actionListener="#{crudDemoView.deleteSelectedProducts}" 
-	                                styleClass="ui-button-danger" 
-	                                disabled="false" 
-	                                update="@this">
-                                    <p:confirm header="Confirmation" message="Delete the selected products?" icon="pi pi-exclamation-triangle" />
-                                </p:commandButton>
-                            </p:toolbarGroup>
-                        </p:toolbar>
-                        <p:dataTable id="dt-menu" 
-	                        widgetVar="dtMenu" 
-	                        var="menu" 
-	                        value="#{bsMenuController.lazyModel}" 
-	                        reflow="true" 
-                            selection="#{bsMenuController.bsMenuSelected}" 
-                            rowKey="#{menu.id}" 
-                            paginator="true" 
-                            rows="10"
-                            rowSelectMode="add" 
-                            paginatorPosition="bottom"
-                            emptyMessage="No hay Registros">
-                            <f:facet name="header">
-                                <div class="products-table-header">
-                                    <span style="font-weight: bold">Manejar Menus</span>
-                                
-                                    <span class="filter-container ui-input-icon-left">
-                                        <i class="pi pi-search"></i>
-                                        <p:inputText id="globalFilter" onkeyup="PF('dtMenu').filter()" placeholder="Buscar..." />
-                                    </span>
-                                </div>
-                            </f:facet>
-                            
-                           <!-- <p:ajax event="rowToggle" listener="#{crudDemoView.onRowToggle}" />
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template.xhtml">
+
+	<ui:define name="title">Menus</ui:define>
+	<ui:define name="content">
+		<h:form id="form">
+			<div class="grid crud-demo">
+				<div class="col-12">
+					<div class="card">
+						<p:growl id="messages" showDetail="true" />
+						<p:toolbar styleClass="mb-4">
+							<p:toolbarGroup>
+								<p:commandButton value="Nuevo" icon="pi pi-plus"
+									actionListener="#{bsMenuController.cleanFields}"
+									update="manage-menu" onclick="PF('manageMenutDialog').show()"
+									styleClass="ui-button-success" style="margin-right: .5rem" />
+							</p:toolbarGroup>
+						</p:toolbar>
+						<p:dataTable id="dt-menu" widgetVar="dtMenu" var="menu"
+							value="#{bsMenuController.lazyModel}" reflow="true"
+							selection="#{bsMenuController.bsMenuSelected}"
+							rowKey="#{menu.id}" paginator="true" rows="10"
+							rowSelectMode="add" paginatorPosition="bottom"
+							emptyMessage="No hay Registros">
+							<f:facet name="header">
+								<div class="products-table-header">
+									<span style="font-weight: bold">Administrar Menus</span> <span
+										class="filter-container ui-input-icon-left"> <i
+										class="pi pi-search"></i> <p:inputText id="globalFilter"
+											onkeyup="PF('dtMenu').filter()" placeholder="Buscar..." />
+									</span>
+								</div>
+							</f:facet>
+							<!--
+							<p:ajax event="rowSelect" listener="#{bsMenuController.menuRowSelect}" />
+							 <p:ajax event="rowToggle" listener="#{crudDemoView.onRowToggle}" />
                             <p:ajax event="rowSelect" update=":form:delete-products-button" />
                             <p:ajax event="rowUnselect" update=":form:delete-products-button" />
                             <p:ajax event="rowSelectCheckbox" update=":form:delete-products-button" />
                             <p:ajax event="rowUnselectCheckbox" update=":form:delete-products-button" />
                             <p:ajax event="toggleSelect" update=":form:delete-products-button" />
                              -->
-                            <p:column selectionMode="single" exportable="false"></p:column>
-                            <p:column headerText="Codigo" sortBy="#{menu.label}" filterBy="#{menu.label}">
-                                <h:outputText value="#{menu.label}" />
+							<p:column headerText="Codigo" sortBy="#{menu.label}"
+								filterBy="#{menu.label}">
+								<h:outputText value="#{menu.label}" />
+							</p:column>
+							<p:column headerText="Nombre" sortBy="#{menu.nombre}"
+								filterBy="#{menu.nombre}">
+								<h:outputText value="#{menu.nombre}" />
+							</p:column>
+							<p:column headerText="Modulo" sortBy="#{menu.bsModulo.nombre}"
+								filterBy="#{menu.bsModulo.nombre}">
+								<h:outputText value="#{menu.bsModulo.nombre}" />
+							</p:column>
+							<p:column exportable="false" headerText="Acciones">
+                                <p:commandButton icon="pi pi-pencil" update=":form:manage-menu" process="@this" oncomplete="PF('manageMenutDialog').show()" 
+                                    styleClass="edit-button rounded-button ui-button-warning">
+                                    <f:setPropertyActionListener value="#{menu}" target="#{bsMenuController.bsMenuSelected}" />
+                                </p:commandButton>
+                                <p:commandButton class="ui-button-danger rounded-button" icon="pi pi-trash" process="@this" oncomplete="PF('deleteMenuDialog').show()" >
+                                    <f:setPropertyActionListener value="#{menu}" target="#{bsMenuController.bsMenuSelected}" />
+                                </p:commandButton>
                             </p:column>
-                            <p:column headerText="Nombre" sortBy="#{menu.nombre}" filterBy="#{menu.nombre}">
-                                <h:outputText value="#{menu.nombre}" />
-                            </p:column>
-                            <p:column headerText="Modulo" sortBy="#{menu.bsModulo.nombre}" filterBy="#{menu.bsModulo.nombre}">
-                                <h:outputText value="#{menu.bsModulo.nombre}" />
-                            </p:column>
-                         </p:dataTable>
-        			</div>
-        		</div>
-        	</div>
-        </h:form>
-    </ui:define>
+						</p:dataTable>
+
+						<!-- Dialogos -->
+						<p:dialog showEffect="fade" modal="true"
+							widgetVar="manageMenutDialog" responsive="true">
+							<f:facet name="header">
+								<p:outputLabel
+									value="#{bsMenuController.bsMenu.id != null ? 'Editar' : 'Nuevo'}" />
+							</f:facet>
+							<p:outputPanel id="manage-menu" class="ui-fluid">
+								<p:outputPanel>
+									<div class="field">
+										<p:outputLabel for="label">Codigo</p:outputLabel>
+										<p:inputText id="label"
+											value="#{bsMenuController.bsMenu.label}" required="true" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="nombre">Nombre</p:outputLabel>
+										<p:inputText id="nombre"
+											value="#{bsMenuController.bsMenu.nombre}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="icono">Icono</p:outputLabel>
+										<p:inputText id="icono"
+											value="#{bsMenuController.bsMenu.icon}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="url">Url</p:outputLabel>
+										<p:inputText id="url" value="#{bsMenuController.bsMenu.url}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="modulolb">Modulo</p:outputLabel>
+										<p:selectOneMenu id="modulolb"
+											value="#{bsMenuController.bsMenu.bsModulo.id}">
+											<f:selectItem itemLabel="Seleccione un módulo"
+												itemValue="#{null}" noSelectionOption="true" />
+											<f:selectItems value="#{bsMenuController.lazyModelModulo}"
+												var="modulo" itemLabel="#{modulo.nombre}"
+												itemValue="#{modulo.id}" />
+										</p:selectOneMenu>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<f:facet name="footer">
+								<p:commandButton value="Guardar" icon="pi pi-check"
+									actionListener="#{bsMenuController.guardar}"
+									update=":form:manage-menu"/>
+								<p:commandButton value="Cancelar" icon="pi pi-times"
+									actionListener="#{bsMenuController.cleanFields}"
+									update=":form:manage-menu"
+									onclick="PF('manageMenutDialog').hide()"
+									class="ui-button-secondary" />
+							</f:facet>
+						</p:dialog>
+						<!-- confirms -->
+						 <p:confirmDialog widgetVar="deleteMenuDialog" showEffect="fade" width="300" message="Esta seguro que desea eliminar el registro?" header="Confirmacion" severity="warn">
+                            <p:commandButton value="Si" icon="pi pi-check" actionListener="#{bsMenuController.deleteMenu}" process="@this" oncomplete="PF('deleteMenuDialog').hide()"/>
+                            <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times" onclick="PF('deleteMenuDialog').hide()" />
+                        </p:confirmDialog>
+					</div>
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
 
 </ui:composition>

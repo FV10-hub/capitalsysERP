@@ -9,17 +9,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
+import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 
 /**
  * 
  */
-public interface BsMenuService {
+public interface BsModuloService {
 
-	Page<BsMenu> listarTodos(Pageable pageable);
+	Page<BsModulo> listarTodos(Pageable pageable);
 	
-	List<BsMenu> buscarTodosLista();
+	List<BsModulo> buscarTodosLista();
 	
-	BsMenu guardar(BsMenu obj);
+	BsModulo guardar(BsModulo obj);
 	
 	void eliminar(Long id);
 }
