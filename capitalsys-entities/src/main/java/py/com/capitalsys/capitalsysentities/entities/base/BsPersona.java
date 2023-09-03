@@ -1,6 +1,7 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -43,6 +44,11 @@ public class BsPersona extends Common {
 
 	public BsPersona() {
 		
+	}
+	
+	//METODOS
+	public String getNombreCompleto() {
+		return String.format("%s %s %s", this.nombre, this.primerApellido, this.segundoApellido);
 	}
 
 	// GETTERS & SETTERS
@@ -100,6 +106,23 @@ public class BsPersona extends Common {
 
 	public void setFecNacimiento(LocalDate fecNacimiento) {
 		this.fecNacimiento = fecNacimiento;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(email, id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BsPersona other = (BsPersona) obj;
+		return Objects.equals(email, other.email) && Objects.equals(id, other.id);
 	}
 
 

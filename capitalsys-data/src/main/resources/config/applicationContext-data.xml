@@ -18,6 +18,7 @@
 	<context:annotation-config></context:annotation-config>
 	<context:component-scan base-package="py.com.capitalsys"></context:component-scan>
 	
+	
 	<!-- ::::::::::::::: SE CARGA EL ARCHIVO DE CONFIGURACION PROPERTIES ::::::::::::::: -->
 	
 	<context:property-placeholder location="classpath*:config/application-properties.properties"/>

@@ -35,9 +35,41 @@ public class BsUsuario extends Common {
 	private BsPersona bsPersona;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "idRol")
+	@JoinColumn(name = "id_bs_rol")
 	private BsRol rol;
-		
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getCodUsuario() {
+		return codUsuario;
+	}
+
+	public void setCodUsuario(String codUsuario) {
+		this.codUsuario = codUsuario;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public BsPersona getBsPersona() {
+		return bsPersona;
+	}
+
+	public void setBsPersona(BsPersona bsPersona) {
+		this.bsPersona = bsPersona;
+	}
+
 	public BsRol getRol() {
 		return rol;
 	}
@@ -45,6 +77,7 @@ public class BsUsuario extends Common {
 	public void setRol(BsRol rol) {
 		this.rol = rol;
 	}
+		
 	
 	
 }

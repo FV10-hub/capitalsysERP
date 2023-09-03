@@ -8,7 +8,7 @@
 	<po:menu widgetVar="PandoraMenuWidget">
 		<p:submenu id="m_homepage" label="Favoritos" icon="pi pi-fw pi-home">
 			<p:menuitem id="m_dashboard" value="Dashboard"
-				icon="pi pi-fw pi-home" outcome="/dashboard" />
+				icon="pi pi-fw pi-home" outcome="/pages/commons/dashboard" />
 
 			<p:submenu id="m_components" label="Base" icon="pi pi-fw pi-star">
 				<p:menuitem id="m_formlayout" value="Form Layout"
@@ -23,8 +23,8 @@
 					icon="pi pi-fw pi-list">
 					<p:submenu id="m_sm11" label="Submenu 1.1"
 						icon="pi pi-fw pi-align-left">
-						<p:menuitem id="m_lnk111" value="Link 1.1.1"
-							icon="pi pi-fw pi-align-left" url="#" />
+						<p:menuitem id="m_lnk111" value="Menus"
+							icon="pi pi-fw pi-align-left" outcome="/pages/cliente/base/BsMenu" />
 						<p:menuitem id="m_lnk112" value="Link 1.1.2"
 							icon="pi pi-fw pi-align-left" url="#" />
 						<p:menuitem id="m_lnk113" value="Link 1.1.3"

@@ -1,5 +1,7 @@
 package py.com.capitalsys.capitalsysweb.utils;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 
 import javax.faces.application.FacesMessage;
@@ -35,5 +37,10 @@ public class CommonUtils {
 		ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 		String contextPath = externalContext.getRequestContextPath();
 		externalContext.redirect(contextPath + url);
+	}
+
+	public static final Object getPropertyValueViaReflection(Object o, String field)
+			throws ReflectiveOperationException, IllegalArgumentException, IntrospectionException {
+		return new PropertyDescriptor(field, o.getClass()).getReadMethod().invoke(o);
 	}
 }
