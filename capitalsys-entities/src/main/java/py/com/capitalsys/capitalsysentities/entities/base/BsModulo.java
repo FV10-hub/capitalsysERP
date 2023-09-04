@@ -24,6 +24,9 @@ public class BsModulo {
 	
 	@Column(name = "nombre")
     private String nombre;
+	
+	@Column(name = "estado")
+    private String estado;
 
 	public Long getId() {
 		return id;
@@ -48,7 +51,12 @@ public class BsModulo {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	
-	
 
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
 }

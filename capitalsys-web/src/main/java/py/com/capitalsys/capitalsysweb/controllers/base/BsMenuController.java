@@ -5,6 +5,7 @@ package py.com.capitalsys.capitalsysweb.controllers.base;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -34,6 +35,8 @@ public class BsMenuController {
 	private BsMenu bsMenu, bsMenuSelected;
 	private LazyDataModel<BsMenu> lazyModel;
 	private List<BsModulo> lazyModelModulo;
+	private List<String> tipoList;
+	private List<BsMenu> subMenuList;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -56,6 +59,8 @@ public class BsMenuController {
 		this.bsMenuSelected = null;
 		this.lazyModel = null;
 		this.lazyModelModulo = null;
+		this.tipoList = List.of("SUBMENU", "ITEM");
+		this.subMenuList = null;
 	}
 
 	// GETTERS & SETTERS
@@ -131,6 +136,30 @@ public class BsMenuController {
 	public void setLazyModelModulo(List<BsModulo> lazyModelModulo) {
 		this.lazyModelModulo = lazyModelModulo;
 	}
+	
+	public List<String> getTipoList() {
+		return tipoList;
+	}
+
+	public void setTipoList(List<String> tipoList) {
+		this.tipoList = tipoList;
+	}
+	
+	
+
+	public List<BsMenu> getSubMenuList() {
+		if(subMenuList.isEmpty() || subMenuList == null) {
+			subMenuList = bsMenuServiceImpl.buscarTodosLista()
+					.stream()
+					.filter(menu -> this.bsMenu.getBsModulo().getId() == menu.getBsModulo().getId())
+					.collect(Collectors.toList());
+		}
+		return subMenuList;
+	}
+
+	public void setSubMenuList(List<BsMenu> subMenuList) {
+		this.subMenuList = subMenuList;
+	}
 
 	// METODOS
 	public void guardar() {
@@ -165,6 +194,17 @@ public class BsMenuController {
 			e.printStackTrace(System.err);
 		}
        
+	}
+	
+	public void onRowSelectSubMenu(SelectEvent<BsMenu> event) {
+		if (!Objects.isNull(event.getObject())) {
+			this.bsMenu.setSubMenuPadre(event.getObject());
+			this.bsMenuSelected = null;
+			PrimeFaces.current().ajax().update("form:manage-menu");
+			PrimeFaces.current().executeScript("PF('dlgSubMenus').hide()");
+			
+		}
+		
 	}
 
 }

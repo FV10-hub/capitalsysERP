@@ -56,14 +56,19 @@
 								<h:outputText value="#{menu.bsModulo.nombre}" />
 							</p:column>
 							<p:column exportable="false" headerText="Acciones">
-                                <p:commandButton icon="pi pi-pencil" update=":form:manage-menu" process="@this" oncomplete="PF('manageMenutDialog').show()" 
-                                    styleClass="edit-button rounded-button ui-button-warning">
-                                    <f:setPropertyActionListener value="#{menu}" target="#{bsMenuController.bsMenuSelected}" />
-                                </p:commandButton>
-                                <p:commandButton class="ui-button-danger rounded-button" icon="pi pi-trash" process="@this" oncomplete="PF('deleteMenuDialog').show()" >
-                                    <f:setPropertyActionListener value="#{menu}" target="#{bsMenuController.bsMenuSelected}" />
-                                </p:commandButton>
-                            </p:column>
+								<p:commandButton icon="pi pi-pencil" update=":form:manage-menu"
+									process="@this" oncomplete="PF('manageMenutDialog').show()"
+									styleClass="edit-button rounded-button ui-button-warning">
+									<f:setPropertyActionListener value="#{menu}"
+										target="#{bsMenuController.bsMenuSelected}" />
+								</p:commandButton>
+								<p:commandButton class="ui-button-danger rounded-button"
+									icon="pi pi-trash" process="@this"
+									oncomplete="PF('deleteMenuDialog').show()">
+									<f:setPropertyActionListener value="#{menu}"
+										target="#{bsMenuController.bsMenuSelected}" />
+								</p:commandButton>
+							</p:column>
 						</p:dataTable>
 
 						<!-- Dialogos -->
@@ -105,13 +110,34 @@
 												itemValue="#{modulo.id}" />
 										</p:selectOneMenu>
 									</div>
+									<div class="field">
+										<p:outputLabel for="tipolb">Tipo Menu</p:outputLabel>
+										<p:selectOneMenu id="tipolb"
+											value="#{bsMenuController.bsMenu.tipoMenu}">
+											<f:selectItem itemLabel="Seleccione un tipo"
+												itemValue="#{null}" noSelectionOption="true" />
+											<f:selectItems value="#{bsMenuController.tipoList}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="field">
+										<p:outputLabel for="submenulb"
+											rendered="#{bsMenuController.bsMenu.tipoMenu eq 'SUBMENU'}">SubMenu</p:outputLabel>
+										<p:inputText
+											rendered="#{bsMenuController.bsMenu.tipoMenu eq 'SUBMENU'}"
+											placeholder="Pulse F9 para buscar"
+											value="#{bsMenuController.bsMenu.subMenuPadre.nombre}"
+											onkeydown="if (event.keyCode == 120) {
+                                             PF('dlgSubMenus').show()
+                                         }" />
+									</div>
+
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<f:facet name="footer">
 								<p:commandButton value="Guardar" icon="pi pi-check"
 									actionListener="#{bsMenuController.guardar}"
-									update=":form:manage-menu"/>
+									update=":form:manage-menu" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsMenuController.cleanFields}"
 									update=":form:manage-menu"
@@ -119,11 +145,35 @@
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
+
+						<p:dialog widgetVar="dlgSubMenus" header="Buscar menu">
+							<p:dataTable value="#{clientesController.subMenuList}"
+								var="subMenu" selection="#{bsMenuController.bsMenuSelected}"
+								selectionMode="single" rows="10" rowKey="#{subMenu.id}"
+								rowsPerPageTemplate="5,10,15,20" paginator="true">
+								<p:ajax event="rowSelect"
+									listener="#{bsMenuController.onRowSelectSubMenu}" />
+								<p:column headerText="Codigo" sortBy="#{subMenu.label}"
+									filterBy="#{subMenu.label}">
+									<h:outputText value="#{subMenu.label}" />
+								</p:column>
+								<p:column headerText="Nombre" sortBy="#{subMenu.nombre}"
+									filterBy="#{subMenu.nombre}">
+									<h:outputText value="#{subMenu.nombre}" />
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
 						<!-- confirms -->
-						 <p:confirmDialog widgetVar="deleteMenuDialog" showEffect="fade" width="300" message="Esta seguro que desea eliminar el registro?" header="Confirmacion" severity="warn">
-                            <p:commandButton value="Si" icon="pi pi-check" actionListener="#{bsMenuController.deleteMenu}" process="@this" oncomplete="PF('deleteMenuDialog').hide()"/>
-                            <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times" onclick="PF('deleteMenuDialog').hide()" />
-                        </p:confirmDialog>
+						<p:confirmDialog widgetVar="deleteMenuDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea eliminar el registro?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check"
+								actionListener="#{bsMenuController.deleteMenu}" process="@this"
+								oncomplete="PF('deleteMenuDialog').hide()" />
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('deleteMenuDialog').hide()" />
+						</p:confirmDialog>
 					</div>
 				</div>
 			</div>

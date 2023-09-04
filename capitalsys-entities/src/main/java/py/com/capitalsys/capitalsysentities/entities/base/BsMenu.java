@@ -38,6 +38,13 @@ public class BsMenu implements Serializable {
 	@Column(name = "url")
     private String url;
 	
+	@Column(name = "tipo_menu")
+    private String tipoMenu;
+	
+	@ManyToOne
+    @JoinColumn(name = "id_sub_menu")
+    private BsMenu subMenuPadre;
+	
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_bs_modulo")
 	private BsModulo bsModulo;
@@ -89,7 +96,21 @@ public class BsMenu implements Serializable {
 	public void setBsModulo(BsModulo bsModulo) {
 		this.bsModulo = bsModulo;
 	}
-	
-	
 
+	public String getTipoMenu() {
+		return tipoMenu;
+	}
+
+	public void setTipoMenu(String tipoMenu) {
+		this.tipoMenu = tipoMenu;
+	}
+
+	public BsMenu getSubMenuPadre() {
+		return subMenuPadre;
+	}
+
+	public void setSubMenuPadre(BsMenu subMenuPadre) {
+		this.subMenuPadre = subMenuPadre;
+	}
+	
 }
