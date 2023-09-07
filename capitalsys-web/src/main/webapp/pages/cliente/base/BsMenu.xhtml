@@ -6,7 +6,7 @@
 
 	<ui:define name="title">Menus</ui:define>
 	<ui:define name="content">
-		<h:form id="form">
+		<h:form id="form" prependId="false">
 			<div class="grid crud-demo">
 				<div class="col-12">
 					<div class="card">
@@ -56,8 +56,9 @@
 								<h:outputText value="#{menu.bsModulo.nombre}" />
 							</p:column>
 							<p:column exportable="false" headerText="Acciones">
-								<p:commandButton icon="pi pi-pencil" update=":form:manage-menu"
-									process="@this" oncomplete="PF('manageMenutDialog').show()"
+								<p:commandButton icon="pi pi-pencil"
+									update="form manage-menu lbHeader" process="@this"
+									oncomplete="PF('manageMenutDialog').show()"
 									styleClass="edit-button rounded-button ui-button-warning">
 									<f:setPropertyActionListener value="#{menu}"
 										target="#{bsMenuController.bsMenuSelected}" />
@@ -75,8 +76,8 @@
 						<p:dialog showEffect="fade" modal="true"
 							widgetVar="manageMenutDialog" responsive="true">
 							<f:facet name="header">
-								<p:outputLabel
-									value="#{bsMenuController.bsMenu.id != null ? 'Editar' : 'Nuevo'}" />
+								<p:outputLabel id="lbHeader"
+									value="#{bsMenuController.bsMenu.id == null ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-menu" class="ui-fluid">
 								<p:outputPanel>
@@ -108,28 +109,34 @@
 											<f:selectItems value="#{bsMenuController.lazyModelModulo}"
 												var="modulo" itemLabel="#{modulo.nombre}"
 												itemValue="#{modulo.id}" />
+											<p:ajax event="itemSelect"
+												listener="#{bsMenuController.onModuloChange}" />
 										</p:selectOneMenu>
 									</div>
 									<div class="field">
 										<p:outputLabel for="tipolb">Tipo Menu</p:outputLabel>
 										<p:selectOneMenu id="tipolb"
-											value="#{bsMenuController.bsMenu.tipoMenu}">
+											value="#{bsMenuController.tipoMenu}">
 											<f:selectItem itemLabel="Seleccione un tipo"
 												itemValue="#{null}" noSelectionOption="true" />
 											<f:selectItems value="#{bsMenuController.tipoList}" />
+											<p:ajax event="itemSelect" update="submenuIn" />
 										</p:selectOneMenu>
 									</div>
 									<div class="field">
-										<p:outputLabel for="submenulb"
-											rendered="#{bsMenuController.bsMenu.tipoMenu eq 'SUBMENU'}">SubMenu</p:outputLabel>
-										<p:inputText
-											rendered="#{bsMenuController.bsMenu.tipoMenu eq 'SUBMENU'}"
-											placeholder="Pulse F9 para buscar"
-											value="#{bsMenuController.bsMenu.subMenuPadre.nombre}"
-											onkeydown="if (event.keyCode == 120) {
+										<p:outputPanel  id="submenuIn">
+											<p:outputLabel rendered="#{!bsMenuController.isSubmenu}">SubMenu</p:outputLabel>
+											<p:inputText id="subMenuPadre"
+												rendered="#{!bsMenuController.isSubmenu}"
+												placeholder="Pulse F9 para buscar" update="dt-subMenus"
+												value="#{bsMenuController.bsMenu.subMenuPadre.nombre}"
+												onkeydown="if (event.keyCode == 120) {
                                              PF('dlgSubMenus').show()
                                          }" />
+
+										</p:outputPanel >
 									</div>
+
 
 								</p:outputPanel>
 							</p:outputPanel>
@@ -137,18 +144,20 @@
 							<f:facet name="footer">
 								<p:commandButton value="Guardar" icon="pi pi-check"
 									actionListener="#{bsMenuController.guardar}"
-									update=":form:manage-menu" />
+									update="form, manage-menu" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsMenuController.cleanFields}"
-									update=":form:manage-menu"
+									update="form, manage-menu"
 									onclick="PF('manageMenutDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
 
-						<p:dialog widgetVar="dlgSubMenus" header="Buscar menu">
-							<p:dataTable value="#{clientesController.subMenuList}"
-								var="subMenu" selection="#{bsMenuController.bsMenuSelected}"
+						<p:dialog widgetVar="dlgSubMenus" width="650" showEffect="fade" modal="true"
+							header="Buscar menu">
+							<p:dataTable value="#{bsMenuController.subMenuList}"
+								id="dt-subMenus" var="subMenu"
+								selection="#{bsMenuController.bsMenuSelected}"
 								selectionMode="single" rows="10" rowKey="#{subMenu.id}"
 								rowsPerPageTemplate="5,10,15,20" paginator="true">
 								<p:ajax event="rowSelect"

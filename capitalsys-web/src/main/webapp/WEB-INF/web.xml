@@ -92,7 +92,8 @@
 
 	<!-- Welcome page -->
 	<welcome-file-list>
-		<welcome-file>pages/cliente/base/BsMenu.xhtml</welcome-file>
+		<!--<welcome-file>pages/cliente/base/BsMenu.xhtml</welcome-file> -->
+		<welcome-file>login.xhtml</welcome-file>
 	</welcome-file-list>
 
 	<!-- JSF mapping -->

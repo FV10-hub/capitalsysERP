@@ -3,6 +3,8 @@ package py.com.capitalsys.capitalsysentities.entities.base;
 * Aug 30, 2023-5:34:18 PM-fvazquez
 **/
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,12 +13,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 
 @Entity
 @Table(name = "bs_permiso_rol")
-public class BsPermisoRol {
+public class BsPermisoRol extends Common {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +36,12 @@ public class BsPermisoRol {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_bs_menu")
 	private BsMenu bsMenu;
+	
+	@PrePersist
+	private void preInsert() {
+		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
 
 	public Long getId() {
 		return id;

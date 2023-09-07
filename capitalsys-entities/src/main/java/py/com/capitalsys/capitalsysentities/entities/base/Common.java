@@ -12,14 +12,14 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class Common {
 
-	@Column(name = "fechaCreacion", nullable = false)
+	@Column(name = "fecha_creacion")
 	private LocalDateTime fechaCreacion;
 
-	@Column(name = "fechaModificacion")
+	@Column(name = "fecha_modificacion")
 	private LocalDateTime fechaActualizacion;
 
-	@Column(name = "estatus")
-	private boolean estatus;
+	@Column(name = "estado")
+	private String estado;
 
 	/**
 	 * @return the fechaCreacion
@@ -49,17 +49,13 @@ public class Common {
 		this.fechaActualizacion = fechaActualizacion;
 	}
 
-	/**
-	 * @return the estatus
-	 */
-	public boolean isEstatus() {
-		return estatus;
+	public String getEstado() {
+		return estado;
 	}
 
-	/**
-	 * @param estatus the estatus to set
-	 */
-	public void setEstatus(boolean estatus) {
-		this.estatus = estatus;
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
+
+
 }

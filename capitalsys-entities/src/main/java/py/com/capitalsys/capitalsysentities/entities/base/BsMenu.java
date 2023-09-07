@@ -41,8 +41,11 @@ public class BsMenu implements Serializable {
 	@Column(name = "tipo_menu")
     private String tipoMenu;
 	
+	@Column(name = "nro_orden")
+    private String orden;
+	
 	@ManyToOne
-    @JoinColumn(name = "id_sub_menu")
+    @JoinColumn(name = "id_sub_menu", nullable = true)
     private BsMenu subMenuPadre;
 	
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -112,5 +115,15 @@ public class BsMenu implements Serializable {
 	public void setSubMenuPadre(BsMenu subMenuPadre) {
 		this.subMenuPadre = subMenuPadre;
 	}
+
+	public String getOrden() {
+		return orden;
+	}
+
+	public void setOrden(String orden) {
+		this.orden = orden;
+	}
+	
+	
 	
 }

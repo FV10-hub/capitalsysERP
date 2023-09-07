@@ -1,10 +1,13 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 /**
@@ -12,7 +15,7 @@ import javax.persistence.Table;
 **/
 @Entity
 @Table(name = "bs_modulo")
-public class BsModulo {
+public class BsModulo extends Common {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +28,13 @@ public class BsModulo {
 	@Column(name = "nombre")
     private String nombre;
 	
-	@Column(name = "estado")
-    private String estado;
-
+	@PrePersist
+	private void preInsert() {
+		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+	
+	
 	public Long getId() {
 		return id;
 	}
@@ -51,12 +58,6 @@ public class BsModulo {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+	
 
-	public String getEstado() {
-		return estado;
-	}
-
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
 }

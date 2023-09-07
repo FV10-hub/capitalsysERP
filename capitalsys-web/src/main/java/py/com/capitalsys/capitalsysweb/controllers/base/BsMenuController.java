@@ -13,6 +13,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
@@ -25,7 +26,8 @@ import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
 /**
- * descomentar si por algun motivo se necesita trabajar directo con spring //@Component y // @Autowired
+ * descomentar si por algun motivo se necesita trabajar directo con spring
+ * //@Component y // @Autowired
  */
 @ManagedBean
 @ViewScoped
@@ -37,6 +39,8 @@ public class BsMenuController {
 	private List<BsModulo> lazyModelModulo;
 	private List<String> tipoList;
 	private List<BsMenu> subMenuList;
+	private boolean isSubmenu;
+	private String tipoMenu;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -53,12 +57,14 @@ public class BsMenuController {
 		this.cleanFields();
 
 	}
-	
+
 	public void cleanFields() {
 		this.bsMenu = null;
 		this.bsMenuSelected = null;
 		this.lazyModel = null;
 		this.lazyModelModulo = null;
+		this.isSubmenu = true;
+		this.tipoMenu = null;
 		this.tipoList = List.of("SUBMENU", "ITEM");
 		this.subMenuList = null;
 	}
@@ -69,6 +75,7 @@ public class BsMenuController {
 		if (Objects.isNull(bsMenu)) {
 			this.bsMenu = new BsMenu();
 			this.bsMenu.setBsModulo(new BsModulo());
+			//this.bsMenu.setSubMenuPadre(new BsMenu());
 		}
 		return bsMenu;
 	}
@@ -82,6 +89,7 @@ public class BsMenuController {
 		if (Objects.isNull(bsMenuSelected)) {
 			this.bsMenuSelected = new BsMenu();
 			this.bsMenuSelected.setBsModulo(new BsModulo());
+			//this.bsMenuSelected.setSubMenuPadre(new BsMenu());
 		}
 
 		return bsMenuSelected;
@@ -90,7 +98,6 @@ public class BsMenuController {
 	public void setBsMenuSelected(BsMenu bsMenuSelected) {
 		if (!Objects.isNull(bsMenuSelected)) {
 			this.bsMenu = bsMenuSelected;
-			System.out.println("PASO POR SELECTED");
 		}
 		this.bsMenuSelected = bsMenuSelected;
 	}
@@ -106,7 +113,6 @@ public class BsMenuController {
 	public LazyDataModel<BsMenu> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsMenu>(bsMenuServiceImpl.buscarTodosLista());
-			System.out.println("PASO POR LAZY DATAMODEL");
 		}
 
 		return lazyModel;
@@ -127,7 +133,6 @@ public class BsMenuController {
 	public List<BsModulo> getLazyModelModulo() {
 		if (Objects.isNull(lazyModelModulo)) {
 			lazyModelModulo = this.bsModuloServiceImpl.buscarTodosLista();
-			System.out.println("PASO POR LAZYMODULO");
 		}
 
 		return lazyModelModulo;
@@ -136,7 +141,7 @@ public class BsMenuController {
 	public void setLazyModelModulo(List<BsModulo> lazyModelModulo) {
 		this.lazyModelModulo = lazyModelModulo;
 	}
-	
+
 	public List<String> getTipoList() {
 		return tipoList;
 	}
@@ -144,21 +149,45 @@ public class BsMenuController {
 	public void setTipoList(List<String> tipoList) {
 		this.tipoList = tipoList;
 	}
-	
-	
 
 	public List<BsMenu> getSubMenuList() {
-		if(subMenuList.isEmpty() || subMenuList == null) {
-			subMenuList = bsMenuServiceImpl.buscarTodosLista()
-					.stream()
-					.filter(menu -> this.bsMenu.getBsModulo().getId() == menu.getBsModulo().getId())
-					.collect(Collectors.toList());
+		if (!Objects.isNull(this.bsMenu.getBsModulo().getId())) {
+			if (CollectionUtils.isEmpty(subMenuList)) {
+				subMenuList = bsMenuServiceImpl.buscarTodosLista().stream()
+						.filter(menu -> this.bsMenu.getBsModulo().getId() == menu.getBsModulo().getId())
+						.collect(Collectors.toList());
+			}
+		} else {
+			subMenuList = bsMenuServiceImpl.buscarTodosLista();
 		}
+
 		return subMenuList;
 	}
 
 	public void setSubMenuList(List<BsMenu> subMenuList) {
 		this.subMenuList = subMenuList;
+	}
+
+	public boolean getIsSubmenu() {
+		return isSubmenu;
+	}
+
+	public void setIsSubmenu(boolean isSubmenu) {
+		this.isSubmenu = isSubmenu;
+	}
+
+	public String getTipoMenu() {
+		return tipoMenu;
+	}
+
+	public void setTipoMenu(String tipoMenu) {
+		if ("SUBMENU".equalsIgnoreCase(tipoMenu)) {
+			this.isSubmenu = false;
+		} else {
+			this.isSubmenu = true;
+		}
+		this.bsMenu.setTipoMenu(tipoMenu);
+		this.tipoMenu = tipoMenu;
 	}
 
 	// METODOS
@@ -178,9 +207,9 @@ public class BsMenuController {
 		PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
 
 	}
-	
+
 	public void deleteMenu() {
-        try {
+		try {
 			if (!Objects.isNull(this.bsMenuSelected)) {
 				this.bsMenuServiceImpl.eliminar(this.bsMenuSelected.getId());
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
@@ -193,18 +222,23 @@ public class BsMenuController {
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
-       
+
 	}
-	
+
 	public void onRowSelectSubMenu(SelectEvent<BsMenu> event) {
 		if (!Objects.isNull(event.getObject())) {
 			this.bsMenu.setSubMenuPadre(event.getObject());
 			this.bsMenuSelected = null;
 			PrimeFaces.current().ajax().update("form:manage-menu");
 			PrimeFaces.current().executeScript("PF('dlgSubMenus').hide()");
-			
+
 		}
-		
+
+	}
+
+	public void onModuloChange() {
+		this.getSubMenuList();
+
 	}
 
 }

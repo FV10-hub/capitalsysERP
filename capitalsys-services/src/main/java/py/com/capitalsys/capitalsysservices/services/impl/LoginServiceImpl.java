@@ -1,9 +1,12 @@
 package py.com.capitalsys.capitalsysservices.services.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import py.com.capitalsys.capitalsysdata.dao.base.BsUsuarioRepository;
+import py.com.capitalsys.capitalsysentities.dto.MenuDto;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 import py.com.capitalsys.capitalsysservices.services.LoginService;
 
@@ -21,6 +24,11 @@ public class LoginServiceImpl implements LoginService {
 	@Override
 	public BsUsuario consultarUsuarioLogin(String usuario, String password) {
 		return this.bsUsuarioRepositoryImpl.findByUsuarioAndPassword(usuario, password);
+	}
+
+	@Override
+	public List<MenuDto> consultarMenuPorUsuario(Long id) {
+		return bsUsuarioRepositoryImpl.findMenuByUser(id);
 	}
 
 }

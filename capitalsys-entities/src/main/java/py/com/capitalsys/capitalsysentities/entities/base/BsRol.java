@@ -1,10 +1,13 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 /**
@@ -21,6 +24,12 @@ public class BsRol extends Common {
 
 	@Column(name = "nombre", length = 45, nullable = false)
 	private String nombre;
+	
+	@PrePersist
+	private void preInsert() {
+		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
 
 	public Long getId() {
 		return id;

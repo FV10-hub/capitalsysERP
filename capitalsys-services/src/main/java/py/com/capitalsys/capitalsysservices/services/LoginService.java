@@ -3,6 +3,9 @@
  */
 package py.com.capitalsys.capitalsysservices.services;
 
+import java.util.List;
+
+import py.com.capitalsys.capitalsysentities.dto.MenuDto;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 
 /**
@@ -17,4 +20,6 @@ public interface LoginService {
 	 * @return {@link Persona} usuario encontrado en la base de datos.
 	 */
 	BsUsuario consultarUsuarioLogin(String usuario, String password);
+	
+	List<MenuDto> consultarMenuPorUsuario(Long id);
 }

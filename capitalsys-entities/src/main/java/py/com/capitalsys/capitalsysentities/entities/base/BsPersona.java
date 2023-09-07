@@ -1,6 +1,8 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -8,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 /**
@@ -26,11 +29,14 @@ public class BsPersona extends Common {
 	@Column(name = "nombre", length = 100, nullable = false)
 	private String nombre;
 
-	@Column(name = "primerApellido", length = 100, nullable = false)
+	@Column(name = "primer_apellido", length = 100, nullable = false)
 	private String primerApellido;
 
-	@Column(name = "segundoApellido", length = 45, nullable = false)
+	@Column(name = "segundo_apellido", length = 45)
 	private String segundoApellido;
+	
+	@Column(name = "nombre_completo", length = 100)
+	private String nombreCompleto;
 
 	@Column(name = "imagen", length = 100)
 	private String imagen;
@@ -41,14 +47,18 @@ public class BsPersona extends Common {
 	@Column(name = "fec_nacimiento")
 	private LocalDate fecNacimiento;
 	
+	@Column(name = "documento", length = 50)
+	private String documento;
+	
 
 	public BsPersona() {
 		
 	}
 	
-	//METODOS
-	public String getNombreCompleto() {
-		return String.format("%s %s %s", this.nombre, this.primerApellido, this.segundoApellido);
+	@PrePersist
+	private void preInsert() {
+		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
 	// GETTERS & SETTERS
@@ -106,6 +116,24 @@ public class BsPersona extends Common {
 
 	public void setFecNacimiento(LocalDate fecNacimiento) {
 		this.fecNacimiento = fecNacimiento;
+	}
+	
+	
+
+	public String getDocumento() {
+		return documento;
+	}
+
+	public void setDocumento(String documento) {
+		this.documento = documento;
+	}
+
+	public String getNombreCompleto() {
+		return nombreCompleto;
+	}
+
+	public void setNombreCompleto(String nombreCompleto) {
+		this.nombreCompleto = nombreCompleto;
 	}
 
 	@Override
