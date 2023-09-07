@@ -4,38 +4,26 @@ package py.com.capitalsys.capitalsysentities.dto;
 * esta clase me va servir para armar el menu segun los permisos del usuario
 **/
 
-import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
+import py.com.capitalsys.capitalsysentities.entities.base.BsMenuItem;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPermisoRol;
-import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 
 public class MenuDto {
 	
-	private BsUsuario usuario;
-	private BsRol rol;
+	private BsMenuItem menuItem;
 	private BsPermisoRol permiso;
-	private BsMenu menu;
-	public MenuDto() {
+	private BsUsuario usuario;
+	public MenuDto(BsMenuItem menuItem, BsPermisoRol permiso, BsUsuario usuario) {
 		super();
-	}
-	public MenuDto(BsUsuario usuario, BsRol rol, BsPermisoRol permiso, BsMenu menu) {
-		super();
-		this.usuario = usuario;
-		this.rol = rol;
+		this.menuItem = menuItem;
 		this.permiso = permiso;
-		this.menu = menu;
-	}
-	public BsUsuario getUsuario() {
-		return usuario;
-	}
-	public void setUsuario(BsUsuario usuario) {
 		this.usuario = usuario;
 	}
-	public BsRol getRol() {
-		return rol;
+	public BsMenuItem getMenuItem() {
+		return menuItem;
 	}
-	public void setRol(BsRol rol) {
-		this.rol = rol;
+	public void setMenuItem(BsMenuItem menuItem) {
+		this.menuItem = menuItem;
 	}
 	public BsPermisoRol getPermiso() {
 		return permiso;
@@ -43,12 +31,13 @@ public class MenuDto {
 	public void setPermiso(BsPermisoRol permiso) {
 		this.permiso = permiso;
 	}
-	public BsMenu getMenu() {
-		return menu;
+	public BsUsuario getUsuario() {
+		return usuario;
 	}
-	public void setMenu(BsMenu menu) {
-		this.menu = menu;
+	public void setUsuario(BsUsuario usuario) {
+		this.usuario = usuario;
 	}
+
 
 	
 }

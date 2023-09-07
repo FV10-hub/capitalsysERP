@@ -12,15 +12,21 @@ public interface BsUsuarioRepository extends PagingAndSortingRepository<BsUsuari
 
 	@Query("SELECT p FROM BsUsuario p WHERE p.codUsuario = ?1 AND p.password = ?2")
 	BsUsuario findByUsuarioAndPassword(String codUsuario, String password);
-	
-	@Query(value = "SELECT new py.com.capitalsys.capitalsysentities.dto.MenuDto(u, rol, per, me) "
-			+ "FROM bs_usuario u "
-			+ "inner join bs_rol rol "
-			+ "on u.id_bs_rol = rol.id "
-			+ "inner join bs_permiso_rol per "
-			+ "ON per.id_bs_rol = rol.id "
-			+ "inner join bs_menu me "
-			+ "on per.id_bs_menu = me.id "
-			+ "where u.id = ?1", nativeQuery = true)
+
+	/*
+	 * @Query(value =
+	 * "SELECT new py.com.capitalsys.capitalsysentities.dto.MenuDto(u, rol, per, me) "
+	 * + "FROM bs_usuario u " + "inner join bs_rol rol " +
+	 * "on u.id_bs_rol = rol.id " + "inner join bs_permiso_rol per " +
+	 * "ON per.id_bs_rol = rol.id " + "inner join bs_menu me " +
+	 * "on per.id_bs_menu = me.id " + "where u.id = ?1", nativeQuery = true)
+	 */
+	@Query(value = "SELECT new py.com.capitalsys.capitalsysentities.dto.MenuDto(mi, per, u) " 
+			+ "FROM BsUsuario u "
+			+ "JOIN u.rol rol " 
+			+ "JOIN rol.bsPermisoRol per " 
+			+ "JOIN per.bsMenu men " 
+			+ "JOIN men.bsMenuItem mi "
+			+ "where u.id = ?1")
 	List<MenuDto> findMenuByUser(Long idUsuario);
 }

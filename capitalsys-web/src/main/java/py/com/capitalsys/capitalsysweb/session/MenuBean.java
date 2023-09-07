@@ -3,6 +3,7 @@
  */
 package py.com.capitalsys.capitalsysweb.session;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.primefaces.model.menu.DefaultMenuItem;
 import org.primefaces.model.menu.DefaultMenuModel;
 import org.primefaces.model.menu.DefaultSubMenu;
@@ -21,6 +23,7 @@ import org.primefaces.model.menu.MenuModel;
 
 import py.com.capitalsys.capitalsysentities.dto.MenuDto;
 import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
+import py.com.capitalsys.capitalsysentities.entities.base.BsMenuItem;
 import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
@@ -31,8 +34,8 @@ import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
  * @author DevPredator Clase que mantendra la informacion en la sesion del
  *         usuario.
  */
-//@ManagedBean
-//@SessionScoped
+@ManagedBean
+@SessionScoped
 public class MenuBean {
 
 	private MenuModel modulosPrime;
@@ -55,20 +58,15 @@ public class MenuBean {
 
 	private MenuModel model;
 
-	@PostConstruct
-	public void init() {
-
-		this.ListarMenu();
-		this.construirMenu();
-
-	}
-
-	private void ListarMenu() {
+	private void ListarMenu(BsUsuario user) {
 		try {
-			this.menuListFromDB = this.loginServiceImpl.consultarMenuPorUsuario(this.usuarioLogueado.getId());
+			this.menuListFromDB = this.loginServiceImpl.consultarMenuPorUsuario(user.getId());
 			this.moduloList = this.bsModuloServiceImpl.buscarTodosLista();
+			if (CollectionUtils.isNotEmpty(menuListFromDB) && CollectionUtils.isNotEmpty(moduloList)) {
+				this.construirMenu();
+			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 
@@ -79,27 +77,26 @@ public class MenuBean {
 			DefaultSubMenu subMenuModulo = DefaultSubMenu.builder().label(modulo.getNombre()).icon("pi pi-fw pi-cog")
 					.build();
 			this.model.getElements().add(subMenuModulo);
+			
 			this.menuListFromDB.stream()
-			.filter(menmod -> menmod.getMenu().getBsModulo().getId() == modulo.getId())
+			.filter(menmod -> menmod.getMenuItem().getBsModulo().getId() == modulo.getId())
 			.forEach(menudtoFiltered -> {
-				if (menudtoFiltered.getMenu().getTipoMenu().equalsIgnoreCase("SUBMENU")) {
-					DefaultSubMenu primerSubMenu = DefaultSubMenu.builder().label(modulo.getNombre()).icon("pi pi-fw pi-cog")
-							.build();
-					BsMenu subMenu = menudtoFiltered.getMenu().getSubMenuPadre();
-					if (!Objects.isNull(subMenu)) {
-						if (subMenu.getLabel().equalsIgnoreCase(menudtoFiltered.getMenu().getLabel())) {
-							DefaultMenuItem itemHijo = DefaultMenuItem.builder()
-									.value(menudtoFiltered.getMenu().getNombre()).build();
-							primerSubMenu.getElements().add(itemHijo);
-						}
-						
-					}
-					this.model.getElements().add(primerSubMenu);
-				}else {
-					DefaultMenuItem itemHuerfano = DefaultMenuItem.builder()
-							.value(menudtoFiltered.getMenu().getNombre()).build();
-					model.getElements().add(itemHuerfano);
-				}
+				DefaultSubMenu segundoSubmenu;
+	            DefaultSubMenu tercerSubmenu;
+	            DefaultMenuItem item;
+				segundoSubmenu = DefaultSubMenu.builder().label(menudtoFiltered.getMenuItem().getTitulo()).build();
+                    if (menudtoFiltered.getMenuItem().getIdMenuItem() == null) {
+                        item = DefaultMenuItem.builder()
+                        		.title(menudtoFiltered.getMenuItem().getBsMenu().getNombre())
+                        		.url(menudtoFiltered.getMenuItem().getBsMenu().getUrl())
+                        		.icon(menudtoFiltered.getMenuItem().getBsMenu().getIcon())
+                        		.build();
+                        segundoSubmenu.getElements().add(item);
+                    } else {
+                        tercerSubmenu = DefaultSubMenu.builder().label(menudtoFiltered.getMenuItem().getTitulo()).build();
+                        //segundoSubmenu.getElements().add(cargaSubItems(moduloActual.getCodModulo(), titulo, itemTitulos.getId(), tercerSubmenu));
+                    }
+                    subMenuModulo.getElements().add(segundoSubmenu);
 			});
 		});
 	}
@@ -113,14 +110,33 @@ public class MenuBean {
 	}
 
 	public BsUsuario getUsuarioLogueado() {
-		if (!Objects.isNull(this.usuarioLogueado)) {
-			construirMenu();
-		}
+		
 		return usuarioLogueado;
 	}
 
 	public void setUsuarioLogueado(BsUsuario usuarioLogueado) {
+		if (!Objects.isNull(usuarioLogueado)) {
+			ListarMenu(usuarioLogueado);
+		}
 		this.usuarioLogueado = usuarioLogueado;
 	}
+
+	public LoginService getLoginServiceImpl() {
+		return loginServiceImpl;
+	}
+
+	public void setLoginServiceImpl(LoginService loginServiceImpl) {
+		this.loginServiceImpl = loginServiceImpl;
+	}
+
+	public BsModuloService getBsModuloServiceImpl() {
+		return bsModuloServiceImpl;
+	}
+
+	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
+		this.bsModuloServiceImpl = bsModuloServiceImpl;
+	}
+	
+	
 
 }

@@ -1,6 +1,7 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -51,6 +53,9 @@ public class BsMenu implements Serializable {
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_bs_modulo")
 	private BsModulo bsModulo;
+	
+	@OneToMany(mappedBy = "bsMenu")
+	private Set<BsMenuItem> bsMenuItem;
 
 	public Long getId() {
 		return id;
@@ -123,7 +128,16 @@ public class BsMenu implements Serializable {
 	public void setOrden(String orden) {
 		this.orden = orden;
 	}
-	
+
+	public Set<BsMenuItem> getBsMenuItem() {
+		return bsMenuItem;
+	}
+
+	public void setBsMenuItem(Set<BsMenuItem> bsMenuItem) {
+		this.bsMenuItem = bsMenuItem;
+	}
+
+
 	
 	
 }

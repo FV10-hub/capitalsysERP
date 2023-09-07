@@ -35,16 +35,17 @@ public class LoginController {
 	@ManagedProperty("#{sessionBean}")
 	private SessionBean sessionBean;
 
-	/*
-	 * @ManagedProperty("#{menuBean}") private MenuBean menuBean;
-	 */
+	
+	  @ManagedProperty("#{menuBean}") 
+	  private MenuBean menuBean;
+	 
 	// metodos
 	public void login() {
 		BsUsuario usuarioConsultado = this.loginServiceImpl.consultarUsuarioLogin(this.username, this.password);
 		if (usuarioConsultado != null) {
 			try {
 				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
-				//this.menuBean.setUsuarioLogueado(usuarioConsultado);
+				this.menuBean.setUsuarioLogueado(usuarioConsultado);
 
 				CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
 			} catch (IOException e) {
@@ -103,5 +104,15 @@ public class LoginController {
 	public void setSessionBean(SessionBean sessionBean) {
 		this.sessionBean = sessionBean;
 	}
+
+	public MenuBean getMenuBean() {
+		return menuBean;
+	}
+
+	public void setMenuBean(MenuBean menuBean) {
+		this.menuBean = menuBean;
+	}
+	
+	
 
 }
