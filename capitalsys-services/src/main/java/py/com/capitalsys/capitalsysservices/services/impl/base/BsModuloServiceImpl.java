@@ -48,4 +48,9 @@ public class BsModuloServiceImpl implements BsModuloService {
 		this.bsModuloRepositoryImpl.deleteById(id);
 	}
 
+	@Override
+	public List<BsModulo> buscarModulosActivosLista() {
+		return this.bsModuloRepositoryImpl.buscarModulosActivosLista();
+	}
+
 }

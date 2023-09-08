@@ -30,6 +30,12 @@ public class BsMenuItem extends Common implements Serializable {
     
     @Column(name = "nro_orden")
     private String orden;
+    
+	@Column(name = "icon")
+    private String icon;
+	
+	@Column(name = "tipo_menu")
+    private String tipoMenu;
         
     @Column(name = "id_menu_item")
     private Long idMenuItem;
@@ -88,6 +94,22 @@ public class BsMenuItem extends Common implements Serializable {
 
 	public void setBsModulo(BsModulo bsModulo) {
 		this.bsModulo = bsModulo;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	public String getTipoMenu() {
+		return tipoMenu;
+	}
+
+	public void setTipoMenu(String tipoMenu) {
+		this.tipoMenu = tipoMenu;
 	}
 
 	@Override

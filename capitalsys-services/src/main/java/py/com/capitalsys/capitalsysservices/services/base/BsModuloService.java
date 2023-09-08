@@ -20,6 +20,8 @@ public interface BsModuloService {
 	
 	List<BsModulo> buscarTodosLista();
 	
+	List<BsModulo> buscarModulosActivosLista();
+	
 	BsModulo guardar(BsModulo obj);
 	
 	void eliminar(Long id);

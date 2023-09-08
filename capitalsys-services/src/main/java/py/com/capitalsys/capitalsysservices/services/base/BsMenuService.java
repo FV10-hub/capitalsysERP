@@ -19,6 +19,8 @@ public interface BsMenuService {
 	
 	List<BsMenu> buscarTodosLista();
 	
+	List<BsMenu>  buscarMenuPorModuloLista(Long id);
+	
 	BsMenu guardar(BsMenu obj);
 	
 	void eliminar(Long id);

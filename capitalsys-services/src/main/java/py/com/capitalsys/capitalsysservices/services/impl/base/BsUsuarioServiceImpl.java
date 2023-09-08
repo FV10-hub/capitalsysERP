@@ -8,6 +8,7 @@ import py.com.capitalsys.capitalsysservices.services.base.BsUsuarioService;
 import py.com.capitalsys.capitalsysservices.services.impl.CommonServiceImpl;
 
 @Service
-public class BsUsuarioServiceImpl extends CommonServiceImpl<BsUsuario, BsUsuarioRepository> implements BsUsuarioService   {
+public class BsUsuarioServiceImpl 
+extends CommonServiceImpl<BsUsuario, BsUsuarioRepository> implements BsUsuarioService   {
 
 }

@@ -22,5 +22,8 @@ public interface BsMenuRepository extends PagingAndSortingRepository<BsMenu, Lon
 	
 	@Query("SELECT m FROM BsMenu m LEFT JOIN FETCH m.bsModulo mo")
 	List<BsMenu> buscarTodosLista();
+	
+	@Query("SELECT m FROM BsMenu m WHERE m.bsModulo.id = ?1")
+	List<BsMenu> buscarMenuPorModuloLista(Long id);
 
 }

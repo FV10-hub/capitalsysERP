@@ -31,9 +31,6 @@ public class BsMenu implements Serializable {
 	@Column(name = "label")
     private String label;
 	
-	@Column(name = "icon")
-    private String icon;
-	
 	@Column(name = "nombre")
     private String nombre;
 	
@@ -71,14 +68,6 @@ public class BsMenu implements Serializable {
 
 	public void setLabel(String label) {
 		this.label = label;
-	}
-
-	public String getIcon() {
-		return icon;
-	}
-
-	public void setIcon(String icon) {
-		this.icon = icon;
 	}
 
 	public String getNombre() {

@@ -45,4 +45,9 @@ public class BsMenuServiceImpl implements BsMenuService {
 		this.bsMenuRepositoryImpl.deleteById(id);
 	}
 
+	@Override
+	public List<BsMenu> buscarMenuPorModuloLista(Long id) {
+		return this.bsMenuRepositoryImpl.buscarMenuPorModuloLista(id);
+	}
+
 }

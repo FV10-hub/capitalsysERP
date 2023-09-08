@@ -9,10 +9,17 @@
 			<h:form id="menuform">
 				<div class="layout-profile">
 					<a class="layout-profile-button" href="#"> <span
-						class="profile-image-icons"> <p:graphicImage
-								name="images/menu/avatar.png" library="pandora-layout" /> <span
-							class="icons"> <i class="pi pi-fw pi-comment"><span></span></i>
-								<i class="pi pi-fw pi-bell" /> <i class="pi pi-fw pi-sign-out" />
+						class="profile-image-icons"> 
+						<p:graphicImage	name="images/menu/avatar.png" library="pandora-layout" /> 
+						<span class="icons"> 
+							<i class="pi pi-fw pi-comment"><span></span></i>
+							<i class="pi pi-fw pi-bell" /> 
+							<p:commandButton 
+							id="btnCerrarSesion"
+							style="color: #8b8e90 !important; background-color: #f8fafc !important; border-color: transparent;" 
+							icon="pi pi-fw pi-sign-out" action="#{sessionClosed.cerrarSesion()}"/>
+							<p:tooltip for="btnCerrarSesion" position="top" value="Cerrar Sesion"/>
+							
 						</span>
 					</span> <span class="profile-info-button"> <span
 							class="layout-profile-userinfo"> 
