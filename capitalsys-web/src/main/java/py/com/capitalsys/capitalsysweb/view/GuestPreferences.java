@@ -28,7 +28,8 @@ import javax.faces.bean.SessionScoped;
 @SessionScoped
 public class GuestPreferences implements Serializable {
     
-    private String layoutPrimaryColor = "cyan";
+
+	private String layoutPrimaryColor = "cyan";
     
     private String topbarTheme = "cyan";
     
@@ -42,7 +43,7 @@ public class GuestPreferences implements Serializable {
 
     private String inputStyle = "outlined";
 
-    private boolean groupedMenu = true;
+    private boolean groupedMenu = false;
 
     private boolean darkLogo;
 
@@ -62,6 +63,7 @@ public class GuestPreferences implements Serializable {
         topbarThemes = new ArrayList<>();
         menuColors = new HashMap<>();
         palettes = new ArrayList<>();
+        System.out.println("MENU ::: "+this.groupedMenu); 
 
         /************** Palettes ********************/
         
@@ -1132,6 +1134,7 @@ public class GuestPreferences implements Serializable {
     }
 
     public void setGroupedMenu(boolean value) {
+    	System.out.println("set MENU ::: "+value); 
         this.groupedMenu = value;
     }
     

@@ -9,7 +9,7 @@ import py.com.capitalsys.capitalsysentities.dto.MenuDto;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 
 /**
- * @author DevPredator
+ * @author favzquez
  * Interface que realiza la logica de negocio para el inicio de sesion de la persona.
  */
 public interface LoginService {
