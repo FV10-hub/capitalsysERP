@@ -77,7 +77,7 @@
 							widgetVar="manageMenutDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel id="lbHeader"
-									value="#{bsMenuController.bsMenu.id == null ? 'Nuevo' : 'Editar'}" />
+									value="#{bsMenuController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-menu" class="ui-fluid">
 								<p:outputPanel>
@@ -124,6 +124,15 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="field">
+										<p:outputLabel for="tipoAlb">Tipo Menu Agrupador</p:outputLabel>
+										<p:selectOneMenu id="tipoAlb"
+											value="#{bsMenuController.bsMenu.tipoMenuAgrupador}">
+											<f:selectItem itemLabel="Seleccione un tipo de Agrupador"
+												itemValue="#{null}" noSelectionOption="true" />
+											<f:selectItems value="#{bsMenuController.tipoListAgrupador}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="field">
 										<p:outputPanel  id="submenuIn">
 											<p:outputLabel rendered="#{!bsMenuController.isSubmenu}">SubMenu</p:outputLabel>
 											<p:inputText id="subMenuPadre"
@@ -147,7 +156,7 @@
 									update="form, manage-menu" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsMenuController.cleanFields}"
-									update="form, manage-menu"
+									update="form"
 									onclick="PF('manageMenutDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>

@@ -117,7 +117,7 @@
 							widgetVar="managePersonaDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel id="lbHeader"
-									value="#{bsPersonaController.bsPersona.id != null ? 'Editar' : 'Nuevo'}" />
+									value="#{bsPersonaController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-persona" class="ui-fluid">
 								<p:outputPanel>
@@ -173,7 +173,7 @@
 									update=":form:manage-persona" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsPersonaController.cleanFields}"
-									update=":form:manage-persona"
+									update=":form"
 									onclick="PF('managePersonaDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>

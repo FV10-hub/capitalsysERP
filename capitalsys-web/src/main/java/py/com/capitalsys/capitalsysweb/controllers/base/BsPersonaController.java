@@ -33,6 +33,7 @@ public class BsPersonaController {
 	private BsPersona bsPersona, bsPersonaSelected;
 	private LazyDataModel<BsPersona> lazyModel;
 	private List<String> estadoList;
+	private boolean esNuegoRegistro;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -54,6 +55,7 @@ public class BsPersonaController {
 		this.bsPersona = null;
 		this.bsPersonaSelected = null;
 		this.lazyModel = null;
+		this.esNuegoRegistro = true;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
@@ -82,6 +84,7 @@ public class BsPersonaController {
 	public void setBsPersonaSelected(BsPersona bsPersonaSelected) {
 		if (!Objects.isNull(bsPersonaSelected)) {
 			this.bsPersona = bsPersonaSelected;
+			this.esNuegoRegistro = false;
 		}
 		this.bsPersonaSelected = bsPersonaSelected;
 	}
@@ -120,6 +123,14 @@ public class BsPersonaController {
 
 	public void setEstadoList(List<String> estadoList) {
 		this.estadoList = estadoList;
+	}
+
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
+	}
+
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
 	}
 
 	// METODOS

@@ -35,6 +35,7 @@ public class BsRolController {
 	private List<String> estadoList;
 	private static final String DT_NAME = "dt-rol";
 	private static final String DT_DIALOG_NAME = "manageRolDialog";
+	private boolean esModificar;
 
 	@ManagedProperty("#{bsRolServiceImpl}")
 	private BsRolService bsRolServiceImpl;
@@ -49,6 +50,7 @@ public class BsRolController {
 		this.bsRol = null;
 		this.bsRolSelected = null;
 		this.lazyModel = null;
+		this.esModificar = false;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
@@ -74,6 +76,7 @@ public class BsRolController {
 	public void setBsRolSelected(BsRol bsRolSelected) {
 		if (!Objects.isNull(bsRolSelected)) {
 			this.bsRol = bsRolSelected;
+			this.esModificar = true;
 		}
 		this.bsRolSelected = bsRolSelected;
 	}
@@ -106,6 +109,14 @@ public class BsRolController {
 		this.bsRolServiceImpl = bsRolServiceImpl;
 	}
 
+	public boolean isEsModificar() {
+		return esModificar;
+	}
+
+	public void setEsModificar(boolean esModificar) {
+		this.esModificar = esModificar;
+	}
+
 	// METODOS
 	public void guardar() {
 		try {
@@ -118,6 +129,7 @@ public class BsRolController {
 			this.cleanFields();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 		PrimeFaces.current().executeScript("PF('"+DT_DIALOG_NAME+"').hide()");
 		PrimeFaces.current().ajax().update("form:messages", "form:"+DT_NAME);
@@ -137,6 +149,7 @@ public class BsRolController {
 			PrimeFaces.current().ajax().update("form:messages", "form:"+DT_NAME);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 
 	}

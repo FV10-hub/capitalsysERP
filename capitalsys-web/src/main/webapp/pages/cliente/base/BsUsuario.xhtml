@@ -70,7 +70,7 @@
 							widgetVar="manageUsuarioDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel id="lbHeader"
-									value="#{bsUsuarioController.bsUsuario.id != null ? 'Editar' : 'Nuevo'}" />
+									value="#{bsUsuarioController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-usuario" class="ui-fluid">
 								<p:outputPanel>
@@ -134,9 +134,9 @@
 											target="#{bsUsuarioController.bsPersonaSelected}" />
 									</p:commandButton>
 								</p:column>
-								<p:column headerText="Nombre" sortBy="#{persona.nombre}"
-									filterBy="#{persona.nombre}">
-									<h:outputText value="#{persona.getNombreCompleto()}" />
+								<p:column headerText="Nombre" sortBy="#{persona.nombreCompleto}"
+									filterBy="#{persona.nombreCompleto}">
+									<h:outputText value="#{persona.nombreCompleto}" />
 								</p:column>
 								<p:column headerText="Documento" sortBy="#{persona.documento}"
 									filterBy="#{persona.documento}">

@@ -15,7 +15,7 @@
 							<p:toolbarGroup>
 								<p:commandButton value="Nuevo" icon="pi pi-plus"
 									actionListener="#{bsRolController.cleanFields}"
-									update="manage-rol" onclick="PF('manageRolDialog').show()"
+									update=":form:manage-rol" onclick="PF('manageRolDialog').show()"
 									styleClass="ui-button-success" style="margin-right: .5rem" />
 							</p:toolbarGroup>
 						</p:toolbar>
@@ -62,7 +62,7 @@
 							widgetVar="manageRolDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel id="lbHeader"
-									value="#{bsRolController.bsRol.id == null ? 'Nuevo' : 'Editar'}" />
+									value="#{bsRolController.esModificar ? 'Editar' : 'Nuevo'}" />
 							</f:facet>
 							<p:outputPanel id="manage-rol" class="ui-fluid">
 
@@ -90,7 +90,7 @@
 									update=":form:manage-rol" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsRolController.cleanFields}"
-									update=":form:manage-rol"
+									update=":form"
 									onclick="PF('manageRolDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>

@@ -11,7 +11,7 @@ import py.com.capitalsys.capitalsysservices.services.base.BsMenuItemService;
 import py.com.capitalsys.capitalsysservices.services.impl.CommonServiceImpl;
 
 @Service
-public class BsMenuItemServiceImpl extends CommonServiceImpl<BsUsuario, BsMenuItemRepository> implements BsMenuItemService   {
+public class BsMenuItemServiceImpl extends CommonServiceImpl<BsMenuItem, BsMenuItemRepository> implements BsMenuItemService   {
 	
 	@Override
 	public List<BsMenuItem> findMenuAgrupado(Long idModulo) {

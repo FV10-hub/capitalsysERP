@@ -38,9 +38,11 @@ public class BsMenuController {
 	private LazyDataModel<BsMenu> lazyModel;
 	private List<BsModulo> lazyModelModulo;
 	private List<String> tipoList;
+	private List<String> tipoListAgrupador;
 	private List<BsMenu> subMenuList;
 	private boolean isSubmenu;
 	private String tipoMenu;
+	private boolean esNuegoRegistro;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -65,7 +67,9 @@ public class BsMenuController {
 		this.lazyModelModulo = null;
 		this.isSubmenu = true;
 		this.tipoMenu = null;
+		this.esNuegoRegistro = true;
 		this.tipoList = List.of("SUBMENU", "ITEM");
+		this.tipoListAgrupador  = List.of("DEFINICION", "MOVIMIENTO", "REPORTE");
 		this.subMenuList = null;
 	}
 
@@ -98,6 +102,7 @@ public class BsMenuController {
 	public void setBsMenuSelected(BsMenu bsMenuSelected) {
 		if (!Objects.isNull(bsMenuSelected)) {
 			this.bsMenu = bsMenuSelected;
+			this.esNuegoRegistro = false;
 		}
 		this.bsMenuSelected = bsMenuSelected;
 	}
@@ -190,6 +195,23 @@ public class BsMenuController {
 		this.tipoMenu = tipoMenu;
 	}
 
+	
+	public List<String> getTipoListAgrupador() {
+		return tipoListAgrupador;
+	}
+
+	public void setTipoListAgrupador(List<String> tipoListAgrupador) {
+		this.tipoListAgrupador = tipoListAgrupador;
+	}
+
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
+	}
+
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
+	}
+
 	// METODOS
 	public void guardar() {
 		try {
@@ -202,6 +224,7 @@ public class BsMenuController {
 			this.cleanFields();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 		PrimeFaces.current().executeScript("PF('manageMenutDialog').hide()");
 		PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
@@ -221,6 +244,7 @@ public class BsMenuController {
 			PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 
 	}

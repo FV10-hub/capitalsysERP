@@ -33,6 +33,7 @@ public class BsModuloController {
 	private BsModulo bsModulo, bsModuloSelected;
 	private LazyDataModel<BsModulo> lazyModel;
 	private List<String> estadoList;
+	private boolean esNuegoRegistro;
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
@@ -47,6 +48,7 @@ public class BsModuloController {
 		this.bsModulo = null;
 		this.bsModuloSelected = null;
 		this.lazyModel = null;
+		this.esNuegoRegistro = true;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
@@ -65,6 +67,7 @@ public class BsModuloController {
 	public BsModulo getBsModuloSelected() {
 		if (Objects.isNull(bsModuloSelected)) {
 			this.bsModuloSelected = new BsModulo();
+			
 		}
 		return bsModuloSelected;
 	}
@@ -72,6 +75,7 @@ public class BsModuloController {
 	public void setBsModuloSelected(BsModulo bsModuloSelected) {
 		if (!Objects.isNull(bsModuloSelected)) {
 			this.bsModulo = bsModuloSelected;
+			this.esNuegoRegistro = false;
 		}
 		this.bsModuloSelected = bsModuloSelected;
 	}
@@ -103,6 +107,14 @@ public class BsModuloController {
 	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
 		this.bsModuloServiceImpl = bsModuloServiceImpl;
 	}
+	
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
+	}
+
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
+	}
 
 	// METODOS
 	public void guardar() {
@@ -116,6 +128,7 @@ public class BsModuloController {
 			this.cleanFields();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 		PrimeFaces.current().executeScript("PF('manageModuloDialog').hide()");
 		PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
@@ -135,6 +148,7 @@ public class BsModuloController {
 			PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 
 	}

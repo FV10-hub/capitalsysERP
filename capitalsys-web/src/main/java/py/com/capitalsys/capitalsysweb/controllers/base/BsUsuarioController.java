@@ -50,6 +50,7 @@ public class BsUsuarioController implements Serializable {
 	private BsUsuario bsUsuario, bsUsuarioSelected;
 	private BsPersona bsPersonaSelected;
 	private BsRol bsRolSelected;
+	private boolean esNuegoRegistro;
 
 	// listas
 	private List<String> estadoList;
@@ -78,6 +79,7 @@ public class BsUsuarioController implements Serializable {
 		this.bsUsuarioSelected = null;
 		this.bsPersonaSelected = null;
 		this.bsRolSelected = null;
+		this.esNuegoRegistro = true;
 
 		this.lazyModel = null;
 		this.lazyPersonaList = null;
@@ -112,6 +114,7 @@ public class BsUsuarioController implements Serializable {
 	public void setBsUsuarioSelected(BsUsuario bsUsuarioSelected) {
 		if (!Objects.isNull(bsUsuarioSelected)) {
 			this.bsUsuario = bsUsuarioSelected;
+			this.esNuegoRegistro = false;
 		}
 		this.bsUsuarioSelected = bsUsuarioSelected;
 	}
@@ -131,8 +134,6 @@ public class BsUsuarioController implements Serializable {
 	public void setBsUsuarioServiceImpl(BsUsuarioService bsUsuarioServiceImpl) {
 		this.bsUsuarioServiceImpl = bsUsuarioServiceImpl;
 	}
-
-
 
 	public BsPersona getBsPersonaSelected() {
 		if(Objects.isNull(bsPersonaSelected)) {
@@ -179,6 +180,14 @@ public class BsUsuarioController implements Serializable {
 
 	public void setBsRolServiceImpl(BsRolService bsRolServiceImpl) {
 		this.bsRolServiceImpl = bsRolServiceImpl;
+	}
+
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
+	}
+
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
 	}
 
 	// LAZY
@@ -228,6 +237,7 @@ public class BsUsuarioController implements Serializable {
 			this.cleanFields();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
 		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
@@ -247,6 +257,7 @@ public class BsUsuarioController implements Serializable {
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 		}
 
 	}

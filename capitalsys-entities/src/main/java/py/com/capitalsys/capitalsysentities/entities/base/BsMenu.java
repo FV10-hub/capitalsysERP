@@ -40,6 +40,9 @@ public class BsMenu implements Serializable {
 	@Column(name = "tipo_menu")
     private String tipoMenu;
 	
+	@Column(name = "tipo_menu_agrupador")
+    private String tipoMenuAgrupador;
+	
 	@Column(name = "nro_orden")
     private String orden;
 	
@@ -126,7 +129,13 @@ public class BsMenu implements Serializable {
 		this.bsMenuItem = bsMenuItem;
 	}
 
+	public String getTipoMenuAgrupador() {
+		return tipoMenuAgrupador;
+	}
 
-	
+	public void setTipoMenuAgrupador(String tipoMenuAgrupador) {
+		this.tipoMenuAgrupador = tipoMenuAgrupador;
+	}
+
 	
 }

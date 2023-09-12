@@ -71,7 +71,7 @@
 							widgetVar="manageModuloDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel
-									value="#{bsModuloController.bsModulo.id != null ? 'Editar' : 'Nuevo'}" />
+									value="#{bsModuloController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-modulo" class="ui-fluid">
 								<p:outputPanel>
@@ -84,6 +84,11 @@
 										<p:outputLabel for="nombre">Nombre</p:outputLabel>
 										<p:inputText id="nombre"
 											value="#{bsModuloController.bsModulo.nombre}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="icono">Icono</p:outputLabel>
+										<p:inputText id="icono"
+											value="#{bsModuloController.bsModulo.icon}" />
 									</div>
 									<div class="field">
 										<p:outputLabel for="modulolb">Estado</p:outputLabel>

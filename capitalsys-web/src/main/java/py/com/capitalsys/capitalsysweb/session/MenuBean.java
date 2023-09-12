@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.PreDestroy;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
@@ -61,6 +62,13 @@ public class MenuBean {
 	private int indexForIdAgrupador;
 	private int indexForIdAgrupadorItemSubMenu;
 	private int indexForIdAgrupadorItem;
+	
+	@PreDestroy
+	private void destroy(){
+		this.model = null;
+		this.subMenuModulo = null;
+		System.out.println("SE DESTRUYO EL MENU");
+	}
 
 	private void ListarMenu(BsUsuario user) {
 		try {
