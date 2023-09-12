@@ -70,15 +70,14 @@
 							widgetVar="manageUsuarioDialog" responsive="true">
 							<f:facet name="header">
 								<p:outputLabel id="lbHeader"
-									value="#{bsUsuarioController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
+									value="#{bsUsuarioController.esNuegoRegistro ? 'Nuevo' : 'Editarc'}" />
 							</f:facet>
 							<p:outputPanel id="manage-usuario" class="ui-fluid">
 								<p:outputPanel>
 									<div class="field">
 										<p:outputLabel for="label">Codigo</p:outputLabel>
 										<p:inputText id="label"
-											value="#{bsUsuarioController.bsUsuario.codUsuario}"
-											required="true" />
+											value="#{bsUsuarioController.bsUsuario.codUsuario}"/>
 									</div>
 									<div class="field">
 										<p:outputLabel for="pass">Contraseña</p:outputLabel>
@@ -112,7 +111,7 @@
 									update=":form:manage-usuario" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsUsuarioController.cleanFields}"
-									update=":form:manage-usuario"
+									update=":form"
 									onclick="PF('manageUsuarioDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>

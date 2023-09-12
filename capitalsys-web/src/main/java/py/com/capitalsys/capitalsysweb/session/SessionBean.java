@@ -24,7 +24,6 @@ public class SessionBean {
 	
 	@PostConstruct
 	public void init() {
-		System.out.println("Creando sesion...");
 	}
 
 	public BsUsuario getUsuarioLogueado() {

@@ -15,7 +15,7 @@
 							<p:toolbarGroup>
 								<p:commandButton value="Nuevo" icon="pi pi-plus"
 									actionListener="#{bsModuloController.cleanFields}"
-									update="manage-modulo" onclick="PF('manageModuloDialog').show()"
+									update=":form:manage-modulo :form:headerLb" onclick="PF('manageModuloDialog').show()"
 									styleClass="ui-button-success" style="margin-right: .5rem" />
 							</p:toolbarGroup>
 						</p:toolbar>
@@ -56,7 +56,7 @@
 								<h:outputText value="#{modulo.estado}" />
 							</p:column>
 							<p:column exportable="false" headerText="Acciones">
-                                <p:commandButton icon="pi pi-pencil" update=":form:manage-modulo" process="@this" oncomplete="PF('manageModuloDialog').show()" 
+                                <p:commandButton icon="pi pi-pencil" update=":form:manage-modulo :form:headerLb" process="@this" oncomplete="PF('manageModuloDialog').show()" 
                                     styleClass="edit-button rounded-button ui-button-warning">
                                     <f:setPropertyActionListener value="#{modulo}" target="#{bsModuloController.bsModuloSelected}" />
                                 </p:commandButton>
@@ -70,7 +70,7 @@
 						<p:dialog showEffect="fade" modal="true"
 							widgetVar="manageModuloDialog" responsive="true">
 							<f:facet name="header">
-								<p:outputLabel
+								<p:outputLabel id="headerLb"
 									value="#{bsModuloController.esNuegoRegistro ? 'Nuevo' : 'Editar'}" />
 							</f:facet>
 							<p:outputPanel id="manage-modulo" class="ui-fluid">
@@ -78,7 +78,7 @@
 									<div class="field">
 										<p:outputLabel for="label">Codigo</p:outputLabel>
 										<p:inputText id="label"
-											value="#{bsModuloController.bsModulo.codigo}" required="true" />
+											value="#{bsModuloController.bsModulo.codigo}"/>
 									</div>
 									<div class="field">
 										<p:outputLabel for="nombre">Nombre</p:outputLabel>
@@ -108,7 +108,7 @@
 									update=":form:manage-modulo"/>
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsModuloController.cleanFields}"
-									update=":form:manage-modulo"
+									update=":form"
 									onclick="PF('manageModuloDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>

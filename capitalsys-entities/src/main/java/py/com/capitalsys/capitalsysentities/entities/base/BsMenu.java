@@ -3,6 +3,7 @@ package py.com.capitalsys.capitalsysentities.entities.base;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,7 +55,7 @@ public class BsMenu implements Serializable {
 	@JoinColumn(name = "id_bs_modulo")
 	private BsModulo bsModulo;
 	
-	@OneToMany(mappedBy = "bsMenu")
+	@OneToMany(mappedBy = "bsMenu", cascade = CascadeType.REMOVE)
 	private Set<BsMenuItem> bsMenuItem;
 
 	public Long getId() {

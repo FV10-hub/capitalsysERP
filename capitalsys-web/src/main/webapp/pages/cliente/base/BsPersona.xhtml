@@ -52,7 +52,7 @@
 							<p:toolbarGroup>
 								<p:commandButton value="Nuevo" icon="pi pi-plus"
 									actionListener="#{bsPersonaController.cleanFields}"
-									update="manage-persona"
+									update=":form:manage-persona"
 									onclick="PF('managePersonaDialog').show()"
 									styleClass="ui-button-success" style="margin-right: .5rem" />
 							</p:toolbarGroup>
@@ -139,8 +139,7 @@
 									<div class="field">
 										<p:outputLabel for="documento">Documento</p:outputLabel>
 										<p:inputText id="documento"
-											value="#{bsPersonaController.bsPersona.documento}"
-											required="true" />
+											value="#{bsPersonaController.bsPersona.documento}"/>
 									</div>
 									<div class="field">
 										<p:outputLabel for="email">Email</p:outputLabel>

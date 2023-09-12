@@ -63,7 +63,6 @@ public class GuestPreferences implements Serializable {
         topbarThemes = new ArrayList<>();
         menuColors = new HashMap<>();
         palettes = new ArrayList<>();
-        System.out.println("MENU ::: "+this.groupedMenu); 
 
         /************** Palettes ********************/
         
