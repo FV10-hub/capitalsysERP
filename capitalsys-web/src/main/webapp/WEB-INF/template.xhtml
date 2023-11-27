@@ -14,6 +14,8 @@
             <meta name="apple-mobile-web-app-capable" content="yes" />
             <link rel="icon" type="image/png" sizes="32x32" href="#{request.contextPath}/resources/pandora-layout/images/favicon-32x32.png"/>
         </f:facet>
+        <!-- con esta etiqueta hacemos que al refrescar la pagina evalue si tiene sesion activa -->
+        <meta http-equiv="refresh" content="#{facesContext.externalContext.sessionMaxInactiveInterval};url=#{request.contextPath}/login.xhtml"/>
         <title><ui:insert name="title">CapitalSys-ERP</ui:insert></title>
         <h:outputScript name="js/layout.js" library="pandora-layout" />
         <h:outputScript name="js/prism.js" library="pandora-layout"/>

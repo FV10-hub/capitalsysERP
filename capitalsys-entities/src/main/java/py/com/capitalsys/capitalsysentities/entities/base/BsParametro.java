@@ -39,7 +39,7 @@ public class BsParametro extends Common {
     
     @ManyToOne
     @JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
-    private BsEmpresa bsEmpresas;
+    private BsEmpresa bsEmpresa;
     
     @ManyToOne
     @JoinColumn(name = "bs_modulo_id", referencedColumnName = "id", nullable = false)
@@ -96,17 +96,17 @@ public class BsParametro extends Common {
 		this.bsModulo = bsModulo;
 	}
 	
-	public BsEmpresa getBsEmpresas() {
-		return bsEmpresas;
+	public BsEmpresa getBsEmpresa() {
+		return bsEmpresa;
 	}
 
-	public void setBsEmpresas(BsEmpresa bsEmpresas) {
-		this.bsEmpresas = bsEmpresas;
+	public void setBsEmpresa(BsEmpresa bsEmpresa) {
+		this.bsEmpresa = bsEmpresa;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(bsEmpresas, bsModulo, id, parametro);
+		return Objects.hash(bsEmpresa, bsModulo, id, parametro);
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class BsParametro extends Common {
 		if (getClass() != obj.getClass())
 			return false;
 		BsParametro other = (BsParametro) obj;
-		return Objects.equals(bsEmpresas, other.bsEmpresas) && Objects.equals(bsModulo, other.bsModulo)
+		return Objects.equals(bsEmpresa, other.bsEmpresa) && Objects.equals(bsModulo, other.bsModulo)
 				&& Objects.equals(id, other.id) && Objects.equals(parametro, other.parametro);
 	}
 

@@ -108,4 +108,22 @@
 		<servlet-name>Faces Servlet</servlet-name>
 		<url-pattern>*.xhtml</url-pattern>
 	</servlet-mapping>
+	
+	<!-- Aca se configura el tiempo en minutos para inactivar la sesion -->
+	<session-config>
+		<session-timeout>1</session-timeout>
+	</session-config>
+	
+	<!-- Aca se configura para que tome nuestro filtro -->
+	<filter>
+		<filter-name>Login Filter</filter-name>
+		<filter-class>py.com.capitalsys.capitalsysweb.filters.LoginFilter</filter-class>
+	</filter>
+	
+	<!-- Aca se configura los paths por los que va pasar el filtro -->
+	<filter-mapping>
+		<filter-name>Login Filter</filter-name>
+		<url-pattern>/pages/*</url-pattern>
+	</filter-mapping>
+	
 </web-app>

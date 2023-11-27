@@ -88,7 +88,8 @@
 							</p:column>
 							<p:column>
 								<f:facet name="header">Fecha Nacimiento</f:facet>
-								<h:outputText value="#{persona.fecNacimiento}" converter="localDateConverter">
+								<h:outputText value="#{persona.fecNacimiento}"
+									converter="localDateConverter">
 								</h:outputText>
 							</p:column>
 							<p:column headerText="Estado" sortBy="#{persona.estado}"
@@ -139,12 +140,17 @@
 									<div class="field">
 										<p:outputLabel for="documento">Documento</p:outputLabel>
 										<p:inputText id="documento"
-											value="#{bsPersonaController.bsPersona.documento}"/>
+											value="#{bsPersonaController.bsPersona.documento}" />
 									</div>
 									<div class="field">
 										<p:outputLabel for="email">Email</p:outputLabel>
 										<p:inputText id="email"
-											value="#{bsPersonaController.bsPersona.email}" />
+											value="#{bsPersonaController.bsPersona.email}"
+											required="true" requiredMessage="El email es requerido"
+											validatorMessage="El formato del email es incorrecto">
+											<f:validateRegex
+												pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+										</p:inputText>
 									</div>
 									<div class="field">
 										<p:outputLabel for="fehcaNacimiento">Fehca Nacimiento</p:outputLabel>
@@ -172,8 +178,7 @@
 									update=":form:manage-persona" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsPersonaController.cleanFields}"
-									update=":form"
-									onclick="PF('managePersonaDialog').hide()"
+									update=":form" onclick="PF('managePersonaDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
