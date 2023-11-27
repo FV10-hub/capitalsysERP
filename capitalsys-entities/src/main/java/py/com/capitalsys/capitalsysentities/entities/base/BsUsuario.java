@@ -14,6 +14,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
+import org.jasypt.util.password.StrongPasswordEncryptor;
+
 /**
  * Aug 25, 2023
  * fvazquez
@@ -87,6 +89,16 @@ public class BsUsuario extends Common {
 		this.rol = rol;
 	}
 		
+	public void encryptPassword() {
+        StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+        this.password = passwordEncryptor.encryptPassword(this.password);
+    }
+
+    // Método para verificar la contraseña al hacer login
+    public boolean checkPassword(String inputPassword) {
+        StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+        return passwordEncryptor.checkPassword(inputPassword, this.password);
+    }
 	
 	
 }

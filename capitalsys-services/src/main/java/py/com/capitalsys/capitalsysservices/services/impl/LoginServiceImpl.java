@@ -31,4 +31,9 @@ public class LoginServiceImpl implements LoginService {
 		return bsUsuarioRepositoryImpl.findMenuByUser(id);
 	}
 
+	@Override
+	public BsUsuario findByUsuario(String codUsuario) {
+		return this.bsUsuarioRepositoryImpl.findByUsuario(codUsuario);
+	}
+
 }

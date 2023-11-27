@@ -228,6 +228,7 @@ public class BsUsuarioController implements Serializable {
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsUsuario.encryptPassword();
 			if (!Objects.isNull(bsUsuarioServiceImpl.save(this.bsUsuario))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

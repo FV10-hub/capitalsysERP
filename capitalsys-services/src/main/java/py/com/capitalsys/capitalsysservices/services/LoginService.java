@@ -21,5 +21,7 @@ public interface LoginService {
 	 */
 	BsUsuario consultarUsuarioLogin(String usuario, String password);
 	
+	BsUsuario findByUsuario(String codUsuario);
+	
 	List<MenuDto> consultarMenuPorUsuario(Long id);
 }

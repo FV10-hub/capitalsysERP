@@ -68,7 +68,7 @@
 			<artifactId>primefaces</artifactId>
 			<version>${primefaces-version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>pandora</artifactId>
@@ -80,22 +80,23 @@
 			<artifactId>primeflex</artifactId>
 			<version>3.3.1</version>
 		</dependency>
-		
+
 		<!-- utilidades de apache -->
 		<dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
-        
-        <!-- https://mvnrepository.com/artifact/org.primefaces.extensions/primefaces-extensions -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.primefaces.extensions/primefaces-extensions -->
 		<dependency>
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>primefaces-extensions</artifactId>
 			<version>${primefaces-extensions-version}</version>
 		</dependency>
-        
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+
+		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -109,7 +110,14 @@
 			<artifactId>gson</artifactId>
 			<version>${gson-version}</version>
 		</dependency>
-        
+
+		<!-- Esta dependencia es para encriptar la contraseña -->
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>${jasypt-version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

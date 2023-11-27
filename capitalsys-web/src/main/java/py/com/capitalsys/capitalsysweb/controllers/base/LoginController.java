@@ -1,6 +1,7 @@
 package py.com.capitalsys.capitalsysweb.controllers.base;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -42,7 +43,28 @@ public class LoginController {
 	// metodos
 	public void login() {
 		BsUsuario usuarioConsultado = this.loginServiceImpl.consultarUsuarioLogin(this.username, this.password);
-		if (usuarioConsultado != null) {
+		if (!Objects.isNull(usuarioConsultado)) {
+			try {
+				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
+				this.menuBean.setUsuarioLogueado(usuarioConsultado);
+
+				CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
+			} catch (IOException e) {
+				e.printStackTrace();
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!",
+						"Formato incorrecto en cual se ingresa a la pantalla deseada.");
+			}
+		} else {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡UPS!",
+					"El usuario y/o contraseña son incorrectos");
+		}
+
+	}
+	
+	public void loginEncrypt() {
+		BsUsuario usuarioConsultado = this.loginServiceImpl.findByUsuario(this.username);
+		boolean passDesencriptado = usuarioConsultado.checkPassword(this.password);
+		if (passDesencriptado) {
 			try {
 				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
 				this.menuBean.setUsuarioLogueado(usuarioConsultado);

@@ -13,6 +13,9 @@ public interface BsUsuarioRepository extends PagingAndSortingRepository<BsUsuari
 	@Query("SELECT p FROM BsUsuario p WHERE p.codUsuario = ?1 AND p.password = ?2")
 	BsUsuario findByUsuarioAndPassword(String codUsuario, String password);
 	
+	@Query("SELECT p FROM BsUsuario p WHERE p.codUsuario = ?1")
+	BsUsuario findByUsuario(String codUsuario);
+	
 	@Query(value = "SELECT new py.com.capitalsys.capitalsysentities.dto.MenuDto(mi, per, u) " 
 			+ "FROM BsUsuario u "
 			+ "JOIN u.rol rol " 

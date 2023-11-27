@@ -29,6 +29,14 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate-version}</version>
 		</dependency>
+		
+		<!-- Esta dependencia es para encriptar la contraseña -->
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>${jasypt-version}</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

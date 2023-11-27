@@ -110,9 +110,12 @@
 	</servlet-mapping>
 	
 	<!-- Aca se configura el tiempo en minutos para inactivar la sesion -->
-	<session-config>
-		<session-timeout>1</session-timeout>
-	</session-config>
+	<!-- <session-config><session-timeout>1</session-timeout></session-config> -->
+	
+	<!--Aca configuramos la validacion de la secion-->
+	<listener>
+        <listener-class>py.com.capitalsys.capitalsysweb.filters.SessionManager</listener-class>
+    </listener>
 	
 	<!-- Aca se configura para que tome nuestro filtro -->
 	<filter>
