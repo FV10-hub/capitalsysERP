@@ -43,6 +43,10 @@ public class BsUsuario extends Common {
 	@JoinColumn(name = "id_bs_rol")
 	private BsRol rol;
 	
+	@OneToOne
+    @JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = true)
+    private BsEmpresa bsEmpresa;
+	
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
@@ -89,6 +93,14 @@ public class BsUsuario extends Common {
 		this.rol = rol;
 	}
 		
+	public BsEmpresa getBsEmpresa() {
+		return bsEmpresa;
+	}
+
+	public void setBsEmpresa(BsEmpresa bsEmpresa) {
+		this.bsEmpresa = bsEmpresa;
+	}
+
 	public void encryptPassword() {
         StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
         this.password = passwordEncryptor.encryptPassword(this.password);

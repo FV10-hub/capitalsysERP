@@ -17,10 +17,12 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
 
+import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
+import py.com.capitalsys.capitalsysservices.services.base.BsEmpresaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsRolService;
 import py.com.capitalsys.capitalsysservices.services.base.BsUsuarioService;
@@ -45,13 +47,15 @@ public class BsUsuarioController implements Serializable {
 	private LazyDataModel<BsUsuario> lazyModel;
 	private LazyDataModel<BsPersona> lazyPersonaList;
 	private LazyDataModel<BsRol> lazyRolList;
+	private LazyDataModel<BsEmpresa> lazyEmpresaList;
 
 	// objetos
 	private BsUsuario bsUsuario, bsUsuarioSelected;
 	private BsPersona bsPersonaSelected;
 	private BsRol bsRolSelected;
 	private boolean esNuegoRegistro;
-
+	private BsEmpresa bsEmpresaSelected;
+	
 	// listas
 	private List<String> estadoList;
 
@@ -67,6 +71,9 @@ public class BsUsuarioController implements Serializable {
 
 	@ManagedProperty("#{bsRolServiceImpl}")
 	private BsRolService bsRolServiceImpl;
+	
+	@ManagedProperty("#{bsEmpresaServiceImpl}")
+	private BsEmpresaService bsEmpresaServiceImpl;
 
 	@PostConstruct
 	public void init() {
@@ -80,6 +87,7 @@ public class BsUsuarioController implements Serializable {
 		this.bsPersonaSelected = null;
 		this.bsRolSelected = null;
 		this.esNuegoRegistro = true;
+		this.bsEmpresaSelected = null;
 
 		this.lazyModel = null;
 		this.lazyPersonaList = null;
@@ -93,6 +101,7 @@ public class BsUsuarioController implements Serializable {
 		if (Objects.isNull(bsUsuario)) {
 			this.bsUsuario = new BsUsuario();
 			this.bsUsuario.setBsPersona(new BsPersona());
+			this.bsUsuario.setBsEmpresa(new BsEmpresa());
 			this.bsUsuario.setRol(new BsRol());
 		}
 		return bsUsuario;
@@ -106,6 +115,7 @@ public class BsUsuarioController implements Serializable {
 		if (Objects.isNull(bsUsuarioSelected)) {
 			this.bsUsuarioSelected = new BsUsuario();
 			this.bsUsuarioSelected.setBsPersona(new BsPersona());
+			this.bsUsuarioSelected.setBsEmpresa(new BsEmpresa());
 			this.bsUsuarioSelected.setRol(new BsRol());
 		}
 		return bsUsuarioSelected;
@@ -117,6 +127,22 @@ public class BsUsuarioController implements Serializable {
 			this.esNuegoRegistro = false;
 		}
 		this.bsUsuarioSelected = bsUsuarioSelected;
+	}
+	
+	public BsEmpresa getBsEmpresaSelected() {
+		if (Objects.isNull(bsEmpresaSelected)) {
+			this.bsEmpresaSelected = new BsEmpresa();
+			this.bsEmpresaSelected.setBsPersona(new BsPersona());
+		}
+		return bsEmpresaSelected;
+	}
+
+	public void setBsEmpresaSelected(BsEmpresa bsEmpresaSelected) {
+		if (!Objects.isNull(bsEmpresaSelected.getId())) {
+			this.bsUsuario.setBsEmpresa(bsEmpresaSelected);
+			bsEmpresaSelected = null;
+		}
+		this.bsEmpresaSelected = bsEmpresaSelected;
 	}
 
 	public List<String> getEstadoList() {
@@ -190,6 +216,14 @@ public class BsUsuarioController implements Serializable {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
 
+	public BsEmpresaService getBsEmpresaServiceImpl() {
+		return bsEmpresaServiceImpl;
+	}
+
+	public void setBsEmpresaServiceImpl(BsEmpresaService bsEmpresaServiceImpl) {
+		this.bsEmpresaServiceImpl = bsEmpresaServiceImpl;
+	}
+
 	// LAZY
 	public LazyDataModel<BsUsuario> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
@@ -224,9 +258,28 @@ public class BsUsuarioController implements Serializable {
 	public void setLazyPersonaList(LazyDataModel<BsPersona> lazyPersonaList) {
 		this.lazyPersonaList = lazyPersonaList;
 	}
+	
+	public LazyDataModel<BsEmpresa> getLazyEmpresaList() {
+		if (Objects.isNull(lazyEmpresaList)) {
+			lazyEmpresaList = new GenericLazyDataModel<BsEmpresa>((List<BsEmpresa>) bsEmpresaServiceImpl.findAll());
+		}
+		return lazyEmpresaList;
+	}
+
+	public void setLazyEmpresaList(LazyDataModel<BsEmpresa> lazyEmpresaList) {
+		this.lazyEmpresaList = lazyEmpresaList;
+	}
 
 	// METODOS
 	public void guardar() {
+		if(Objects.isNull(bsUsuario.getBsEmpresa()) && Objects.isNull(bsUsuario.getBsEmpresa().getId())) {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Empresa.");
+			return;
+		}
+		if(Objects.isNull(bsUsuario.getBsPersona()) && Objects.isNull(bsUsuario.getBsPersona().getId())) {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Persona.");
+			return;
+		}
 		try {
 			this.bsUsuario.encryptPassword();
 			if (!Objects.isNull(bsUsuarioServiceImpl.save(this.bsUsuario))) {

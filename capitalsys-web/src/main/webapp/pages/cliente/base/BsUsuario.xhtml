@@ -101,6 +101,23 @@
                                              PF('dlgRol').show()
                                          }" />
 									</div>
+									<div class="field">
+										<p:outputLabel for="empresalb">Empresa</p:outputLabel>
+										<p:inputText id="empresalb" placeholder="Pulse F9 para buscar"
+											value="#{bsUsuarioController.bsUsuario.bsEmpresa.nombreFantasia}"
+											onkeydown="if (event.keyCode == 120) {
+                                             PF('dlgEmpresa').show()
+                                         }" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="estadolb">Estado</p:outputLabel>
+										<p:selectOneMenu id="estadolb"
+											value="#{bsUsuarioController.bsUsuario.estado}">
+											<f:selectItem itemLabel="Seleccione un estado"
+												itemValue="#{null}" noSelectionOption="true" />
+											<f:selectItems value="#{bsUsuarioController.estadoList}" />
+										</p:selectOneMenu>
+									</div>
 
 								</p:outputPanel>
 							</p:outputPanel>
@@ -165,6 +182,34 @@
 								</p:column>
 							</p:dataTable>
 						</p:dialog>
+						
+						<p:dialog widgetVar="dlgEmpresa" header="Buscar Empresa"
+							width="650" showEffect="fade" modal="true">
+							<p:dataTable widgetVar="wdlgEmpresa" var="empresa"
+								value="#{bsUsuarioController.lazyEmpresaList}" id="dt-empresa"
+								paginator="true" rows="10" paginatorPosition="bottom"
+								emptyMessage="No hay Registros">
+								<p:column style="width:3rem;text-align: center">
+									<p:commandButton oncomplete="PF('dlgEmpresa').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:empresalb">
+										<f:setPropertyActionListener value="#{empresa}"
+											target="#{bsUsuarioController.bsEmpresaSelected}" />
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="Nombre Fantasia"
+									sortBy="#{empresa.nombreFantasia}"
+									filterBy="#{empresa.nombreFantasia}">
+									<h:outputText value="#{empresa.nombreFantasia}" />
+								</p:column>
+								<p:column headerText="Nombre"
+									sortBy="#{empresa.bsPersona.nombre}"
+									filterBy="#{empresa.bsPersona.nombre}">
+									<h:outputText value="#{empresa.bsPersona.nombreCompleto}" />
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
+						
 						<!-- confirms -->
 						<p:confirmDialog widgetVar="deleteMenuDialog" showEffect="fade"
 							width="300" message="Esta seguro que desea eliminar el registro?"
