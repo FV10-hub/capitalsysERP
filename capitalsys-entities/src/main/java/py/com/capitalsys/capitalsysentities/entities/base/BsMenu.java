@@ -45,7 +45,7 @@ public class BsMenu implements Serializable {
     private String tipoMenuAgrupador;
 	
 	@Column(name = "nro_orden")
-    private String orden;
+    private int nroOrden;
 	
 	@ManyToOne
     @JoinColumn(name = "id_sub_menu", nullable = true)
@@ -114,12 +114,12 @@ public class BsMenu implements Serializable {
 		this.subMenuPadre = subMenuPadre;
 	}
 
-	public String getOrden() {
-		return orden;
+	public int getNroOrden() {
+		return nroOrden;
 	}
 
-	public void setOrden(String orden) {
-		this.orden = orden;
+	public void setNroOrden(int nroOrden) {
+		this.nroOrden = nroOrden;
 	}
 
 	public Set<BsMenuItem> getBsMenuItem() {

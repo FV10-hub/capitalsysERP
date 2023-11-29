@@ -108,6 +108,7 @@ public class MenuBean {
 						DefaultSubMenu subMenuAgrupador = DefaultSubMenu.builder().id(idAgrupador)
 								.label(agrupador.getTitulo()).icon(agrupador.getIcon()).build();
 
+						//Aca ordeno el menu por que aca recorre los menus por iteAgrupador
 						List<BsMenuItem> listaItemDelAgrupador = this.bsMenuItemServiceImpl
 								.findMenuItemAgrupado(agrupador.getId());
 						if (CollectionUtils.isNotEmpty(listaItemDelAgrupador)) {

@@ -1,6 +1,8 @@
 package py.com.capitalsys.capitalsysservices.services.impl;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,14 @@ public class LoginServiceImpl implements LoginService {
 
 	@Override
 	public List<MenuDto> consultarMenuPorUsuario(Long id) {
-		return bsUsuarioRepositoryImpl.findMenuByUser(id);
+		List<MenuDto> menuList = bsUsuarioRepositoryImpl.findMenuByUser(id);
+
+	    // Ordenar la lista por nroOrden utilizando Stream
+	    List<MenuDto> menuOrdenado = menuList.stream()
+	            .sorted(Comparator.comparing(menuDto -> menuDto.getMenuItem().getBsMenu().getNroOrden()))
+	            .collect(Collectors.toList());
+
+	    return menuOrdenado;
 	}
 
 	@Override

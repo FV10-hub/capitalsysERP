@@ -31,6 +31,10 @@ public class BsModulo extends Common {
 	@Column(name = "icon")
     private String icon;
 	
+	@Column(name = "nro_orden")
+    private int nroOrden;
+	
+	
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
@@ -69,6 +73,16 @@ public class BsModulo extends Common {
 	
 	public void setIcon(String icon) {
 		this.icon = icon;
+	}
+
+
+	public int getNroOrden() {
+		return nroOrden;
+	}
+
+
+	public void setNroOrden(int nroOrden) {
+		this.nroOrden = nroOrden;
 	}
 
 }

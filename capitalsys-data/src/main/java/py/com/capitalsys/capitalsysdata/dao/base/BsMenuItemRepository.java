@@ -14,7 +14,7 @@ public interface BsMenuItemRepository extends PagingAndSortingRepository<BsMenuI
 	@Query(value = "SELECT m FROM BsMenuItem m where m.tipoMenu IN ('DEFINICION','MOVIMIENTOS','REPORTES') AND m.bsModulo.id = ?1")
 	List<BsMenuItem> findMenuAgrupado(Long idModulo);
 	
-	@Query(value = "SELECT m FROM BsMenuItem m where m.idMenuItem = ?1")
+	@Query(value = "SELECT m FROM BsMenuItem m where m.idMenuItem = ?1 ORDER BY m.bsMenu.nroOrden asc")
 	List<BsMenuItem> findMenuItemAgrupado(Long idMenuItemAgrupador);
 	
 	

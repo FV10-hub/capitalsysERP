@@ -8,6 +8,10 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 import py.com.capitalsys.capitalsysservices.services.LoginService;
 import py.com.capitalsys.capitalsysweb.session.MenuBean;
@@ -20,6 +24,13 @@ import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 @ManagedBean
 @ViewScoped
 public class LoginController {
+	
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 */
+	//private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+	
 	// atributos
 	private String username;
 	private String password;
@@ -47,10 +58,11 @@ public class LoginController {
 			try {
 				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
 				this.menuBean.setUsuarioLogueado(usuarioConsultado);
-
+				LOGGER.warn("WARN");
+				LOGGER.info("INFO");
+				LOGGER.error("error");
 				CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
 			} catch (IOException e) {
-				e.printStackTrace();
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!",
 						"Formato incorrecto en cual se ingresa a la pantalla deseada.");
 			}
@@ -68,7 +80,9 @@ public class LoginController {
 			try {
 				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
 				this.menuBean.setUsuarioLogueado(usuarioConsultado);
-
+				LOGGER.warn("WARN");
+				LOGGER.info("INFO");
+				LOGGER.error("error");
 				CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
 			} catch (IOException e) {
 				e.printStackTrace();

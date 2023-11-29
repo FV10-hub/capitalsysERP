@@ -22,7 +22,8 @@ public interface BsUsuarioRepository extends PagingAndSortingRepository<BsUsuari
 			+ "JOIN rol.bsPermisoRol per " 
 			+ "JOIN per.bsMenu men " 
 			+ "JOIN men.bsMenuItem mi "
-			+ "where u.id = ?1")
+			+ "where u.id = ?1 ")
+			//+ "ORDER BY men.nroOrden ASC")
 	List<MenuDto> findMenuByUser(Long idUsuario);
 	
 	
