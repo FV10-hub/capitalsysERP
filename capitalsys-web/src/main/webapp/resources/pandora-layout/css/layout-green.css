@@ -6561,6 +6561,7 @@ a {
   vertical-align: middle;
 }
 .login-body .login-wrapper .login-image {
+  margin-left: -300px !important;
   overflow: hidden;
   width: 60%;
   background-image: url("#{resource['pandora-layout:images/pages/asset-loginbg.jpg']}");

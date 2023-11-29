@@ -9,8 +9,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.logging.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 import py.com.capitalsys.capitalsysservices.services.LoginService;
@@ -28,8 +27,7 @@ public class LoginController {
 	/**
 	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
 	 */
-	//private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
-	private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
 	
 	// atributos
 	private String username;
