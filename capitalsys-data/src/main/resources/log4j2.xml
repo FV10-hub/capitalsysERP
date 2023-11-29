@@ -6,18 +6,24 @@
 	<Appenders>
 		<Console name="LogToConsole" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+				pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36}- linea [%L] -  %msg%n" />
 		</Console>
+		<!-- con esta configuracion los acrchivos se van a crear cuando la fecha es diferente a la fecha
+		del archivo semilla Capitalsys.log y cuando el archivo supera los 30 mb 
+		https://mkyong.com/logging/log4j2-xml-example/
+		-->
 		<RollingFile name="LogToFile"
 			fileName="${log.file.location}/Capitalsys.log"
 			filePattern="${log.file.location}/Capitalsys.%d{dd-MM-yyyy}.log"
 			ignoreExceptions="false">
 			<PatternLayout>
-				<Pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36} -
+				<Pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36}- linea [%L] -
 					%msg%n</Pattern>
 			</PatternLayout>
 			<Policies>
+				
 				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="30 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="5" />
 		</RollingFile>

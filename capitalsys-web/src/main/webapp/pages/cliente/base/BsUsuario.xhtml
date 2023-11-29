@@ -22,7 +22,7 @@
 						</p:toolbar>
 						<p:dataTable id="dt-usuario" widgetVar="dtUsuario" var="usuario"
 							value="#{bsUsuarioController.lazyModel}" reflow="true"
-							selection="#{bsUsuarioController.bsUsuarioSelected}"
+							lazy="true" selection="#{bsUsuarioController.bsUsuarioSelected}"
 							rowKey="#{usuario.id}" paginator="true" rows="10"
 							rowSelectMode="add" paginatorPosition="bottom"
 							emptyMessage="No hay Registros">
@@ -36,16 +36,17 @@
 								</div>
 							</f:facet>
 							<p:column headerText="Codigo" sortBy="#{usuario.codUsuario}"
-								filterBy="#{usuario.codUsuario}">
+								filterBy="#{usuario.codUsuario}" filterMatchMode="contains">
 								<h:outputText value="#{usuario.codUsuario}" />
 							</p:column>
 							<p:column headerText="Nombre"
 								sortBy="#{usuario.bsPersona.nombre}"
-								filterBy="#{usuario.bsPersona.nombre}">
+								filterBy="#{usuario.bsPersona.nombre}"
+								filterMatchMode="contains">
 								<h:outputText value="#{usuario.bsPersona.nombreCompleto}" />
 							</p:column>
 							<p:column headerText="Rol" sortBy="#{usuario.rol.nombre}"
-								filterBy="#{usuario.rol.nombre}">
+								filterBy="#{usuario.rol.nombre}" filterMatchMode="contains">
 								<h:outputText value="#{usuario.rol.nombre}" />
 							</p:column>
 							<p:column exportable="false" headerText="Acciones">
@@ -77,7 +78,7 @@
 									<div class="field">
 										<p:outputLabel for="label">Codigo</p:outputLabel>
 										<p:inputText id="label"
-											value="#{bsUsuarioController.bsUsuario.codUsuario}"/>
+											value="#{bsUsuarioController.bsUsuario.codUsuario}" />
 									</div>
 									<div class="field">
 										<p:outputLabel for="pass">Contraseña</p:outputLabel>
@@ -128,8 +129,7 @@
 									update=":form:manage-usuario" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{bsUsuarioController.cleanFields}"
-									update=":form"
-									onclick="PF('manageUsuarioDialog').hide()"
+									update=":form" onclick="PF('manageUsuarioDialog').hide()"
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
@@ -137,15 +137,13 @@
 						<p:dialog widgetVar="dlgPersona" header="Buscar Persona"
 							width="650" showEffect="fade" modal="true">
 							<p:dataTable widgetVar="wdlgPersona" var="persona"
-								value="#{bsUsuarioController.lazyPersonaList}"
-								id="dt-persona" paginator="true" rows="10"
-								paginatorPosition="bottom" emptyMessage="No hay Registros">
+								value="#{bsUsuarioController.lazyPersonaList}" id="dt-persona"
+								paginator="true" rows="10" paginatorPosition="bottom"
+								emptyMessage="No hay Registros">
 								<p:column style="width:3rem;text-align: center">
-									<p:commandButton 
-										oncomplete="PF('dlgPersona').hide()"
-										icon="pi pi-check-circle"
-										title="Seleccionar"
-										update=":form:personalb" >
+									<p:commandButton oncomplete="PF('dlgPersona').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:personalb">
 										<f:setPropertyActionListener value="#{persona}"
 											target="#{bsUsuarioController.bsPersonaSelected}" />
 									</p:commandButton>
@@ -163,15 +161,12 @@
 						<p:dialog widgetVar="dlgRol" header="Buscar Rol" width="650"
 							showEffect="fade" modal="true">
 							<p:dataTable value="#{bsUsuarioController.lazyRolList}" var="rol"
-								id="dt-rol" rows="10"
-								rowsPerPageTemplate="5,10,15,20" 
+								id="dt-rol" rows="10" rowsPerPageTemplate="5,10,15,20"
 								paginator="true">
 								<p:column style="width:3rem;text-align: center">
-									<p:commandButton 
-										oncomplete="PF('dlgRol').hide()"
-										icon="pi pi-check-circle"
-										title="Seleccionar"
-										update=":form:rollb" >
+									<p:commandButton oncomplete="PF('dlgRol').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:rollb">
 										<f:setPropertyActionListener value="#{rol}"
 											target="#{bsUsuarioController.bsRolSelected}" />
 									</p:commandButton>
@@ -182,7 +177,7 @@
 								</p:column>
 							</p:dataTable>
 						</p:dialog>
-						
+
 						<p:dialog widgetVar="dlgEmpresa" header="Buscar Empresa"
 							width="650" showEffect="fade" modal="true">
 							<p:dataTable widgetVar="wdlgEmpresa" var="empresa"
@@ -209,7 +204,7 @@
 								</p:column>
 							</p:dataTable>
 						</p:dialog>
-						
+
 						<!-- confirms -->
 						<p:confirmDialog widgetVar="deleteMenuDialog" showEffect="fade"
 							width="300" message="Esta seguro que desea eliminar el registro?"
