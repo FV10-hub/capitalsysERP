@@ -72,6 +72,7 @@ public class BsPermisoRolController {
 	public BsPermisoRol getBsPermisoRol() {
 		if(Objects.isNull(bsPermisoRol)) {
 			bsPermisoRol = new BsPermisoRol();
+			bsPermisoRol.setDescripcion("PERMISOS");
 			bsPermisoRol.setBsMenu(new BsMenu());
 			bsPermisoRol.setRol(new BsRol());
 		}

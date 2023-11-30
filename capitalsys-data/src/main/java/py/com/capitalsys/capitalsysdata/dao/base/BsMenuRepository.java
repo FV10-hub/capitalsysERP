@@ -20,7 +20,7 @@ public interface BsMenuRepository extends PagingAndSortingRepository<BsMenu, Lon
 	@Query("SELECT m FROM BsMenu m JOIN m.bsModulo l")
 	Page<BsMenu> buscarTodos(Pageable pageable);
 	
-	@Query("SELECT m FROM BsMenu m LEFT JOIN FETCH m.bsModulo mo")
+	@Query("SELECT m FROM BsMenu m LEFT JOIN FETCH m.bsModulo mo ORDER BY m.id DESC")
 	List<BsMenu> buscarTodosLista();
 	
 	@Query("SELECT m FROM BsMenu m WHERE m.bsModulo.id = ?1")

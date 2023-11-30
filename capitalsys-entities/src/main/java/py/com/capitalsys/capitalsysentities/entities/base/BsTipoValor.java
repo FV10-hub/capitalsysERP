@@ -39,7 +39,7 @@ public class BsTipoValor extends Common implements Serializable {
 	@Column(name = "usa_efectivo")
     private String usaEfectivo;
 	
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "id_bs_modulo")
 	private BsModulo bsModulo;
 	
