@@ -35,7 +35,7 @@ public class BsUsuario extends Common {
 	@Column(name = "password")
     private String password;
 	
-	@OneToOne
+	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_bs_persona")
 	private BsPersona bsPersona;
 	
@@ -43,7 +43,7 @@ public class BsUsuario extends Common {
 	@JoinColumn(name = "id_bs_rol")
 	private BsRol rol;
 	
-	@OneToOne
+	@OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = true)
     private BsEmpresa bsEmpresa;
 	
@@ -110,6 +110,10 @@ public class BsUsuario extends Common {
     public boolean checkPassword(String inputPassword) {
         StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
         return passwordEncryptor.checkPassword(inputPassword, this.password);
+    }
+    
+    public String getPersonaNombreCompleto() {
+        return bsPersona != null ? bsPersona.getNombreCompleto() : null;
     }
 	
 	

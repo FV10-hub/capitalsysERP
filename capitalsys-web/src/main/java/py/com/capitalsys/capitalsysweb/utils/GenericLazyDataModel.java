@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.lang.reflect.Method;
 
 import javax.faces.context.FacesContext;
 
@@ -23,6 +24,7 @@ import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 import org.primefaces.util.LocaleUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * esta clase se va encargar de manejar la carga perezosa de los datatables en
@@ -30,22 +32,22 @@ import org.primefaces.util.LocaleUtils;
  */
 public class GenericLazyDataModel<T> extends LazyDataModel<T> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private List<T> datasource;
-    private Field field;
+	private List<T> datasource;
+	private Field field;
 
-    public GenericLazyDataModel(List<T> datasource) {
-        this.datasource = datasource;
-    }
+	public GenericLazyDataModel(List<T> datasource) {
+		this.datasource = datasource;
+	}
 
-    @Override
+	@Override
 	public T getRowData(String rowKey) {
-		for(T o : datasource) {
-            if(getFieldData(o, "id").equals(rowKey))
-                return o;
-        }
-        return null;
+		for (T o : datasource) {
+			if (getFieldData(o, "id").equals(rowKey))
+				return o;
+		}
+		return null;
 	}
 
 	@Override
@@ -54,80 +56,115 @@ public class GenericLazyDataModel<T> extends LazyDataModel<T> {
 		return String.valueOf(entity.hashCode());
 	}
 
-    @Override
-    public int count(Map<String, FilterMeta> filterBy) {
-        return (int) datasource.stream()
-                .filter(o -> filter(FacesContext.getCurrentInstance(), filterBy.values(), o))
-                .count();
-    }
+	@Override
+	public int count(Map<String, FilterMeta> filterBy) {
+		return (int) datasource.stream().filter(o -> filter(FacesContext.getCurrentInstance(), filterBy.values(), o))
+				.count();
+	}
 
-    @Override
-    public List<T> load(int offset, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
-        // Aplica el desplazamiento y los filtros
-        List<T> data = datasource.stream()
-                .skip(offset)
-                .filter(o -> filter(FacesContext.getCurrentInstance(), filterBy.values(), o))
-                .limit(pageSize)
-                .collect(Collectors.toList());
+	@Override
+	public List<T> load(int offset, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
+		// Aplica el desplazamiento y los filtros
+		List<T> data = datasource.stream().skip(offset)
+				.filter(o -> filter(FacesContext.getCurrentInstance(), filterBy.values(), o)).limit(pageSize)
+				.collect(Collectors.toList());
 
-        // Ordena
-        if (!sortBy.isEmpty()) {
-            List<Comparator<T>> comparators = sortBy.values().stream()
-                    .map(o -> new LazySorter<T>(o.getField(), o.getOrder()))
-                    .collect(Collectors.toList());
-            Comparator<T> cp = ComparatorUtils.chainedComparator(comparators); // desde apache
-            data.sort(cp);
-        }
-
-        return data;
-    }
-
-    private boolean filter(FacesContext context, Collection<FilterMeta> filterBy, Object o) {
-        boolean matching = false;
-        if (filterBy.size() == 0) {
-        	System.out.println("ENTRO EN TRUE");
-        	matching = true;
+		// Ordena
+		if (!sortBy.isEmpty()) {
+			List<Comparator<T>> comparators = sortBy.values().stream()
+					.map(o -> new LazySorter<T>(o.getField(), o.getOrder())).collect(Collectors.toList());
+			Comparator<T> cp = ComparatorUtils.chainedComparator(comparators); // desde apache
+			data.sort(cp);
 		}
-        for (FilterMeta filter : filterBy) {
-            if (filter.getField().equals("globalFilter")) {
-                // Filtrar globalmente
-                String filterValue = filter.getFilterValue().toString().toLowerCase();
 
-                for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(o.getClass())) {
-                    String propertyName = descriptor.getName();
-                    if (!propertyName.equals("class")) {  // Ignorar la propiedad "class"
-                        try {
-                            Object columnValue = PropertyUtils.getProperty(o, propertyName);
-                            if (columnValue != null && columnValue.toString().toLowerCase().contains(filterValue)) {
-                                matching = true;
-                                break;
-                            }
-                        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            // Manejar excepciones según sea necesario
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } else {
-                // Filtrar por columna específica (tu lógica actual)
-                try {
-                    Object columnValue = CommonUtils.getPropertyValueViaReflection(o, filter.getField());
-                    matching = filter.getConstraint().isMatching(context, columnValue, filter.getFilterValue(), LocaleUtils.getCurrentLocale());
-                } catch (ReflectiveOperationException | IntrospectionException e) {
-                    matching = false;
-                }
-            }
+		return data;
+	}
 
-            if (matching) {
-                break;
-            }
-        }
+	private boolean filter(FacesContext context, Collection<FilterMeta> filterBy, Object o) {
+		boolean matching = false;
 
-        return matching;
-    }
+		if (filterBy.size() == 0) {
+			matching = true;
+		}
 
-    
-    public String getFieldData(Object o, String key) {
+		for (FilterMeta filter : filterBy) {
+			if (filter.getField().equals("globalFilter")) {
+				// Filtrar globalmente
+				String filterValue = filter.getFilterValue().toString().toLowerCase();
+
+				for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(o.getClass())) {
+					String propertyName = descriptor.getName();
+					if (!propertyName.equals("class")) {
+						try {
+							Object propertyValue = PropertyUtils.getProperty(o, propertyName);
+
+							if (propertyValue != null) {
+								String stringValue = String.valueOf(propertyValue).toLowerCase();
+
+								if (stringValue.contains(filterValue)) {
+									matching = true;
+									break;
+								}
+							}
+						} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+							// Manejar excepciones según sea necesario
+							e.printStackTrace();
+						}
+					}
+				}
+			} else {
+				// Filtrar por columna específica
+				try {
+					Object columnValue = CommonUtils.getPropertyValueViaReflection(o, filter.getField());
+
+					if (isNestedProperty(columnValue) && containsValue(columnValue, filter.getFilterValue())) {
+						return true; // La propiedad es anidada, verifica su contenido
+					} else {
+						matching = filter.getConstraint().isMatching(context, columnValue, filter.getFilterValue(),
+								LocaleUtils.getCurrentLocale());
+					}
+				} catch (ReflectiveOperationException | IntrospectionException e) {
+					matching = false;
+				}
+			}
+
+			if (matching) {
+				break;
+			}
+		}
+
+		return matching;
+	}
+
+	private boolean isNestedProperty(Object propertyValue) {
+		return propertyValue != null && !ClassUtils.isPrimitiveOrWrapper(propertyValue.getClass());
+	}
+
+	private boolean containsValue(Object propertyValue, Object filterValue) {
+		// Verifica si el valor de la propiedad anidada contiene el valor del filtro
+		if (propertyValue != null && filterValue != null) {
+			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(propertyValue.getClass())) {
+				String propertyName = descriptor.getName();
+				if (!propertyName.equals("class")) {
+					try {
+						Object nestedValue = PropertyUtils.getProperty(propertyValue, propertyName);
+						String stringValue = String.valueOf(nestedValue).toLowerCase();
+
+						if (stringValue.contains(String.valueOf(filterValue).toLowerCase())) {
+							return true;
+						}
+					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+						// Maneja las excepciones según sea necesario
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public String getFieldData(Object o, String key) {
 		String g = null;
 		try {
 			if (key.contains(".")) {

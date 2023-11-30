@@ -42,8 +42,9 @@
 								<h:outputText value="#{usuario.codUsuario}" />
 							</p:column>
 							<p:column headerText="Nombre"
-								sortBy="#{usuario.bsPersona.nombre}"
-								filterBy="#{usuario.bsPersona.nombre}" filterStyle="display:none; visibility:hidden;"
+								sortBy="#{usuario.bsPersona.nombreCompleto}"
+								filterBy="#{usuario.bsPersona.nombreCompleto}" 
+								filterStyle="display:none; visibility:hidden;"
 								filtarable="true"
 								filterMatchMode="contains">
 								<h:outputText value="#{usuario.bsPersona.nombreCompleto}" />

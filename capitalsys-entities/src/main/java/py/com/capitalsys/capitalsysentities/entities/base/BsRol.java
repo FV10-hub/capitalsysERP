@@ -1,10 +1,12 @@
 package py.com.capitalsys.capitalsysentities.entities.base;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,16 +29,18 @@ public class BsRol extends Common {
 	@Column(name = "nombre", length = 45, nullable = false)
 	private String nombre;
 	
-	@OneToMany(mappedBy = "rol")
+	@OneToMany(mappedBy = "rol", fetch = FetchType.EAGER)
     private Set<BsUsuario> bsUsuariosSet;
 	
-	@OneToMany(mappedBy = "rol")
+	@OneToMany(mappedBy = "rol", fetch = FetchType.EAGER)
     private Set<BsPermisoRol> bsPermisoRol;
 	
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
 		this.setFechaActualizacion(LocalDateTime.now());
+		this.bsUsuariosSet = new HashSet<BsUsuario>();
+		this.bsPermisoRol = new HashSet<BsPermisoRol>();
 	}
 
 	public Long getId() {
