@@ -131,7 +131,7 @@ public class BsTipoComprobante extends Common implements Serializable {
 
 	public boolean isIndSaldoAux() {
 		if (indSaldo != null) {
-			indStockAux = indSaldo.equals("S");
+			indSaldoAux = indSaldo.equals("S");
 		}
 		return indSaldoAux;
 	}
