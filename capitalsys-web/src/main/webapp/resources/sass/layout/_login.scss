@@ -162,6 +162,8 @@
             background-image: url("\#{resource['pandora-layout:images/pages/asset-loginbg.jpg']}");
             background-size: cover;
             background-repeat: no-repeat;
+            background-color: rgba(0, 0, 0, 0.5);
+            filter: brightness(50%);
         }
     }
 }

@@ -4,8 +4,10 @@
 package py.com.capitalsys.capitalsysweb.utils;
 
 import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.faces.context.FacesContext;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
@@ -80,27 +83,49 @@ public class GenericLazyDataModel<T> extends LazyDataModel<T> {
     }
 
     private boolean filter(FacesContext context, Collection<FilterMeta> filterBy, Object o) {
-        boolean matching = true;
-
+        boolean matching = false;
+        if (filterBy.size() == 0) {
+        	System.out.println("ENTRO EN TRUE");
+        	matching = true;
+		}
         for (FilterMeta filter : filterBy) {
-            FilterConstraint constraint = filter.getConstraint();
-            Object filterValue = filter.getFilterValue();
+            if (filter.getField().equals("globalFilter")) {
+                // Filtrar globalmente
+                String filterValue = filter.getFilterValue().toString().toLowerCase();
 
-            try {
-                Object columnValue = String.valueOf(CommonUtils.getPropertyValueViaReflection(o, filter.getField()));
-                matching = constraint.isMatching(context, columnValue, filterValue, LocaleUtils.getCurrentLocale());
-            }
-            catch (ReflectiveOperationException | IntrospectionException e) {
-                matching = false;
+                for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(o.getClass())) {
+                    String propertyName = descriptor.getName();
+                    if (!propertyName.equals("class")) {  // Ignorar la propiedad "class"
+                        try {
+                            Object columnValue = PropertyUtils.getProperty(o, propertyName);
+                            if (columnValue != null && columnValue.toString().toLowerCase().contains(filterValue)) {
+                                matching = true;
+                                break;
+                            }
+                        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            // Manejar excepciones según sea necesario
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } else {
+                // Filtrar por columna específica (tu lógica actual)
+                try {
+                    Object columnValue = CommonUtils.getPropertyValueViaReflection(o, filter.getField());
+                    matching = filter.getConstraint().isMatching(context, columnValue, filter.getFilterValue(), LocaleUtils.getCurrentLocale());
+                } catch (ReflectiveOperationException | IntrospectionException e) {
+                    matching = false;
+                }
             }
 
-            if (!matching) {
+            if (matching) {
                 break;
             }
         }
 
         return matching;
     }
+
     
     public String getFieldData(Object o, String key) {
 		String g = null;

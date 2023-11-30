@@ -22,30 +22,34 @@
 						</p:toolbar>
 						<p:dataTable id="dt-usuario" widgetVar="dtUsuario" var="usuario"
 							value="#{bsUsuarioController.lazyModel}" reflow="true"
-							lazy="true" selection="#{bsUsuarioController.bsUsuarioSelected}"
+							selection="#{bsUsuarioController.bsUsuarioSelected}"
 							rowKey="#{usuario.id}" paginator="true" rows="10"
 							rowSelectMode="add" paginatorPosition="bottom"
+							filteredValue="#{bsUsuarioController.listafiltrada}"
 							emptyMessage="No hay Registros">
 							<f:facet name="header">
 								<div class="products-table-header">
 									<span style="font-weight: bold">Administrar Usuarios</span> <span
 										class="filter-container ui-input-icon-left"> <i
-										class="pi pi-search"></i> <p:inputText id="globalFilter"
+										class="pi pi-search"></i> <p:inputText id="globalFilter" widgetVar="dtUsuarioGlobalFilter"
 											onkeyup="PF('dtUsuario').filter()" placeholder="Buscar..." />
 									</span>
 								</div>
 							</f:facet>
-							<p:column headerText="Codigo" sortBy="#{usuario.codUsuario}"
+							<p:column headerText="Codigo" sortBy="#{usuario.codUsuario}" filterStyle="display:none; visibility:hidden;"
+							filtarable="true"
 								filterBy="#{usuario.codUsuario}" filterMatchMode="contains">
 								<h:outputText value="#{usuario.codUsuario}" />
 							</p:column>
 							<p:column headerText="Nombre"
 								sortBy="#{usuario.bsPersona.nombre}"
-								filterBy="#{usuario.bsPersona.nombre}"
+								filterBy="#{usuario.bsPersona.nombre}" filterStyle="display:none; visibility:hidden;"
+								filtarable="true"
 								filterMatchMode="contains">
 								<h:outputText value="#{usuario.bsPersona.nombreCompleto}" />
 							</p:column>
-							<p:column headerText="Rol" sortBy="#{usuario.rol.nombre}"
+							<p:column headerText="Rol" sortBy="#{usuario.rol.nombre}" filterStyle="display:none; visibility:hidden;"
+							filtarable="true"
 								filterBy="#{usuario.rol.nombre}" filterMatchMode="contains">
 								<h:outputText value="#{usuario.rol.nombre}" />
 							</p:column>

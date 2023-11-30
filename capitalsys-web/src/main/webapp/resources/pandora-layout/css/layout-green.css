@@ -6567,6 +6567,7 @@ a {
   background-image: url("#{resource['pandora-layout:images/pages/asset-loginbg.jpg']}");
   background-size: cover;
   background-repeat: no-repeat;
+  filter: brightness(50%);
 }
 
 @media (max-width: 992px) {

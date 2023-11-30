@@ -4,6 +4,7 @@
 package py.com.capitalsys.capitalsysweb.controllers.base;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +49,7 @@ public class BsUsuarioController implements Serializable {
 	private LazyDataModel<BsPersona> lazyPersonaList;
 	private LazyDataModel<BsRol> lazyRolList;
 	private LazyDataModel<BsEmpresa> lazyEmpresaList;
+	public List<BsUsuario> listafiltrada;
 
 	// objetos
 	private BsUsuario bsUsuario, bsUsuarioSelected;
@@ -88,6 +90,7 @@ public class BsUsuarioController implements Serializable {
 		this.bsRolSelected = null;
 		this.esNuegoRegistro = true;
 		this.bsEmpresaSelected = null;
+		this.listafiltrada= new ArrayList<BsUsuario>(); 
 
 		this.lazyModel = null;
 		this.lazyPersonaList = null;
