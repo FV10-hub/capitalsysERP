@@ -29,14 +29,12 @@ public class SessionClosed {
 		try {
 			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 			HttpServletResponse response = (HttpServletResponse) externalContext.getResponse();
-			externalContext = ((ExternalContext) externalContext.getSession(false));
 			externalContext.invalidateSession();
 			
 			// Controlar la caché del navegador
 			response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 			response.setHeader("Pragma", "no-cache");
 			response.setDateHeader("Expires", 0);
-			
 			CommonUtils.redireccionar("/login.xhtml");
 		} catch (IOException e) {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡Ups!",
