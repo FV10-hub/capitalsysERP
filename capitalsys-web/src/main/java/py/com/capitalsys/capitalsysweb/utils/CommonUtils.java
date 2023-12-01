@@ -9,6 +9,8 @@ import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.primefaces.PrimeFaces;
+
 /**
  * @author fvazquez Clase generada para crear funciones globales o comunes
  *         entre clases del proyecto.
@@ -37,6 +39,8 @@ public class CommonUtils {
 		ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 		String contextPath = externalContext.getRequestContextPath();
 		externalContext.redirect(contextPath + url);
+		//FacesContext.getCurrentInstance().getPartialViewContext().getRenderIds().add("form");
+		//PrimeFaces.current().ajax().update("form");
 	}
 
 	public static final Object getPropertyValueViaReflection(Object o, String field)

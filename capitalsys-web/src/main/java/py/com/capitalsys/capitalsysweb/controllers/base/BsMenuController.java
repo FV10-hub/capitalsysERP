@@ -69,7 +69,7 @@ public class BsMenuController {
 		this.tipoMenu = null;
 		this.esNuegoRegistro = true;
 		this.tipoList = List.of("SUBMENU", "ITEM");
-		this.tipoListAgrupador  = List.of("DEFINICION", "MOVIMIENTO", "REPORTE");
+		this.tipoListAgrupador  = List.of("DEFINICION", "MOVIMIENTOS", "REPORTES");
 		this.subMenuList = null;
 	}
 

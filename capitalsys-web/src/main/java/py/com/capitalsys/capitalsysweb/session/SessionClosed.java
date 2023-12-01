@@ -8,7 +8,9 @@ import java.io.IOException;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 
@@ -25,7 +27,16 @@ public class SessionClosed {
 	 */
 	public void cerrarSesion() {
 		try {
-			FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+			HttpServletResponse response = (HttpServletResponse) externalContext.getResponse();
+			externalContext = ((ExternalContext) externalContext.getSession(false));
+			externalContext.invalidateSession();
+			
+			// Controlar la caché del navegador
+			response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+			response.setHeader("Pragma", "no-cache");
+			response.setDateHeader("Expires", 0);
+			
 			CommonUtils.redireccionar("/login.xhtml");
 		} catch (IOException e) {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡Ups!",

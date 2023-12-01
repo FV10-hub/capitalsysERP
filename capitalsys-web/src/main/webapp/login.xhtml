@@ -11,7 +11,8 @@
 		<meta name="viewport"
 			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-        <link rel="icon" type="image/png" sizes="32x32" href="./resources/pandora-layout/images/favicon-32x32.png"/>
+		<link rel="icon" type="image/png" sizes="32x32"
+			href="./resources/pandora-layout/images/favicon-32x32.png" />
 	</f:facet>
 
 	<title>Login</title>
@@ -60,7 +61,7 @@
 					<div class="login-form login">
 						<div class="form-group">
 							<span>usuario</span>
-							<p:inputText placeholder="username"
+							<p:inputText placeholder="username" autocomplete="off"
 								value="#{loginController.username}" />
 						</div>
 						<div class="form-group">
@@ -70,8 +71,7 @@
 						</div>
 						<div class="form-footer">
 							<p:commandButton value="INGRESAR"
-								action="#{loginController.loginEncrypt()}"
-								update=":growl" />
+								action="#{loginController.loginEncrypt()}" update=":growl" />
 						</div>
 
 					</div>
