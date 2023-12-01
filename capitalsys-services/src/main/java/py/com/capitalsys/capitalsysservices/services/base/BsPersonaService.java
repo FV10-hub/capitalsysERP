@@ -20,6 +20,10 @@ public interface BsPersonaService {
 	
 	List<BsPersona> buscarTodosLista();
 	
+	List<BsPersona> personasSinFichaClientePorEmpresa(Long idEmpresa);
+	
+	List<BsPersona> personasSinFichaCobradorPorEmpresaNativo(Long idEmpresa);
+	
 	BsPersona guardar(BsPersona obj);
 	
 	void eliminar(Long id);

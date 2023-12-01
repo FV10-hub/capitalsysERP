@@ -177,7 +177,8 @@ public class CobCobradorController {
 
 	public LazyDataModel<BsPersona> getLazyPersonaList() {
 		if (Objects.isNull(lazyPersonaList)) {
-			lazyPersonaList = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl.buscarTodosLista());
+			lazyPersonaList = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl
+					.personasSinFichaCobradorPorEmpresaNativo(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyPersonaList;
 	}

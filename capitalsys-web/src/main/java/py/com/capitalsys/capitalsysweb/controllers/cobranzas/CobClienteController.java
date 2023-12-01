@@ -32,33 +32,33 @@ public class CobClienteController {
 	private CobCliente cobCliente, cobClienteSelected;
 	private LazyDataModel<CobCliente> lazyModel;
 	private LazyDataModel<BsPersona> lazyPersonaList;
-	
+
 	private BsPersona bsPersonaSelected;
 	private boolean esNuegoRegistro;
-	
+
 	private List<String> estadoList;
 
 	private static final String DT_NAME = "dt-cliente";
 	private static final String DT_DIALOG_NAME = "manageClienteDialog";
-		
+
 	@ManagedProperty("#{bsPersonaServiceImpl}")
 	private BsPersonaService bsPersonaServiceImpl;
 
 	@ManagedProperty("#{cobClienteServiceImpl}")
 	private CobClienteService cobClienteServiceImpl;
-	
+
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
 	 */
 	@ManagedProperty("#{sessionBean}")
 	private SessionBean sessionBean;
-	
+
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
 
 	}
-	
+
 	public void cleanFields() {
 		this.cobCliente = null;
 		this.cobClienteSelected = null;
@@ -71,7 +71,7 @@ public class CobClienteController {
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
-	//GETTERS Y SETTERS
+	// GETTERS Y SETTERS
 	public CobCliente getCobCliente() {
 		if (Objects.isNull(cobCliente)) {
 			this.cobCliente = new CobCliente();
@@ -102,11 +102,11 @@ public class CobClienteController {
 		}
 		this.cobClienteSelected = cobClienteSelected;
 	}
-	
+
 	public boolean isEsNuegoRegistro() {
 		return esNuegoRegistro;
 	}
-	
+
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
@@ -134,7 +134,7 @@ public class CobClienteController {
 	public void setCobClienteServiceImpl(CobClienteService cobClienteServiceImpl) {
 		this.cobClienteServiceImpl = cobClienteServiceImpl;
 	}
-	
+
 	public SessionBean getSessionBean() {
 		return sessionBean;
 	}
@@ -142,9 +142,9 @@ public class CobClienteController {
 	public void setSessionBean(SessionBean sessionBean) {
 		this.sessionBean = sessionBean;
 	}
-	
+
 	public BsPersona getBsPersonaSelected() {
-		if(Objects.isNull(bsPersonaSelected)) {
+		if (Objects.isNull(bsPersonaSelected)) {
 			bsPersonaSelected = new BsPersona();
 		}
 		return bsPersonaSelected;
@@ -155,17 +155,15 @@ public class CobClienteController {
 			this.cobCliente.setBsPersona(bsPersonaSelected);
 			bsPersonaSelected = null;
 		}
-		
+
 		this.bsPersonaSelected = bsPersonaSelected;
 	}
 
-	
-
-	//LAZY
+	// LAZY
 	public LazyDataModel<CobCliente> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<CobCliente>((List<CobCliente>) 
-					cobClienteServiceImpl.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+			lazyModel = new GenericLazyDataModel<CobCliente>((List<CobCliente>) cobClienteServiceImpl
+					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getId()));
 		}
 		return lazyModel;
 	}
@@ -174,10 +172,10 @@ public class CobClienteController {
 		this.lazyModel = lazyModel;
 	}
 
-
 	public LazyDataModel<BsPersona> getLazyPersonaList() {
 		if (Objects.isNull(lazyPersonaList)) {
-			lazyPersonaList = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl.buscarTodosLista());
+			lazyPersonaList = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl
+					.personasSinFichaClientePorEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyPersonaList;
 	}
@@ -185,50 +183,49 @@ public class CobClienteController {
 	public void setLazyPersonaList(LazyDataModel<BsPersona> lazyPersonaList) {
 		this.lazyPersonaList = lazyPersonaList;
 	}
-	
 
-	//METODOS
-		public void guardar() {
-			if(Objects.isNull(cobCliente.getBsPersona()) && Objects.isNull(cobCliente.getBsPersona().getId())) {
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Persona.");
-				return;
+	// METODOS
+	public void guardar() {
+		if (Objects.isNull(cobCliente.getBsPersona()) && Objects.isNull(cobCliente.getBsPersona().getId())) {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Persona.");
+			return;
+		}
+		try {
+			this.cobCliente.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			if (!Objects.isNull(cobClienteServiceImpl.save(this.cobCliente))) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se guardo correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
-			try {
-				this.cobCliente.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
-				if (!Objects.isNull(cobClienteServiceImpl.save(this.cobCliente))) {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se guardo correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
-				}
-				this.cleanFields();
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			this.cleanFields();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
+		}
+		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+
+	}
+
+	public void delete() {
+		try {
+			if (!Objects.isNull(this.cobCliente)) {
+				this.cobClienteServiceImpl.deleteById(this.cobCliente.getId());
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se elimino correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
 			}
-			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		
-		public void delete() {
-			try {
-				if (!Objects.isNull(this.cobCliente)) {
-					this.cobClienteServiceImpl.deleteById(this.cobCliente.getId());
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se elimino correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
-				}
-				this.cleanFields();
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
-			}
 
-		}
-	
-	
-	
+	}
+
 }

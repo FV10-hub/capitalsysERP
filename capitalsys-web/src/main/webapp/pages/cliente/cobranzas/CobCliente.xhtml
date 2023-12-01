@@ -114,7 +114,7 @@
 							<f:facet name="footer">
 								<p:commandButton value="Guardar" icon="pi pi-check"
 									actionListener="#{cobClienteController.guardar}"
-									update=":form:manage-cliente" />
+									update=":form :form:manage-cliente" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{cobClienteController.cleanFields}"
 									update=":form" onclick="PF('manageClienteDialog').hide()"
