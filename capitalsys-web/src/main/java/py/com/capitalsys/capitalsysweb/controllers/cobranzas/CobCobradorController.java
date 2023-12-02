@@ -9,6 +9,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -28,6 +30,11 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ManagedBean
 @ViewScoped
 public class CobCobradorController {
+	
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(CobCobradorController.class);
 
 	private CobCobrador cobCobrador, cobCobradorSelected;
 	private LazyDataModel<CobCobrador> lazyModel;
@@ -190,7 +197,7 @@ public class CobCobradorController {
 
 	//METODOS
 		public void guardar() {
-			if(Objects.isNull(cobCobrador.getBsPersona()) && Objects.isNull(cobCobrador.getBsPersona().getId())) {
+			if(Objects.isNull(cobCobrador.getBsPersona()) || Objects.isNull(cobCobrador.getBsPersona().getId())) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Persona.");
 				return;
 			}
@@ -204,7 +211,8 @@ public class CobCobradorController {
 				}
 				this.cleanFields();
 			} catch (Exception e) {
-				e.printStackTrace(System.err);
+				LOGGER.error("Ocurrio un error al Guardar", System.err);
+				//e.printStackTrace(System.err);
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 			}
 			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
@@ -224,7 +232,8 @@ public class CobCobradorController {
 				this.cleanFields();
 				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 			} catch (Exception e) {
-				e.printStackTrace(System.err);
+				LOGGER.error("Ocurrio un error al eliminar", System.err);
+				//e.printStackTrace(System.err);
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
 			}
 

@@ -34,6 +34,9 @@ public class BsModulo extends Common {
 	@Column(name = "nro_orden")
     private int nroOrden;
 	
+	@Column(name = "path")
+    private String path;
+	
 	
 	@PrePersist
 	private void preInsert() {
@@ -84,5 +87,16 @@ public class BsModulo extends Common {
 	public void setNroOrden(int nroOrden) {
 		this.nroOrden = nroOrden;
 	}
+
+
+	public String getPath() {
+		return path;
+	}
+
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+	
 
 }

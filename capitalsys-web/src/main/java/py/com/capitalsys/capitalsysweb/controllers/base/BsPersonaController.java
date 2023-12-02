@@ -12,6 +12,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -23,12 +25,19 @@ import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
 /**
- * descomentar si por algun motivo se necesita trabajar directo con spring //@Component y // @Autowired
+ * descomentar si por algun motivo se necesita trabajar directo con spring
+ * //@Component y // @Autowired
  */
 @ManagedBean
 @ViewScoped
 //@Component
 public class BsPersonaController {
+
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(BsPersonaController.class);
 
 	private BsPersona bsPersona, bsPersonaSelected;
 	private LazyDataModel<BsPersona> lazyModel;
@@ -50,7 +59,7 @@ public class BsPersonaController {
 		this.cleanFields();
 
 	}
-	
+
 	public void cleanFields() {
 		this.bsPersona = null;
 		this.bsPersonaSelected = null;
@@ -143,16 +152,19 @@ public class BsPersonaController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('managePersonaDialog').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		PrimeFaces.current().executeScript("PF('managePersonaDialog').hide()");
-		PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
 
 	}
-	
+
 	public void delete() {
-        try {
+		try {
 			if (!Objects.isNull(this.bsPersonaSelected)) {
 				this.bsPersonaServiceImpl.eliminar(this.bsPersonaSelected.getId());
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
@@ -163,9 +175,12 @@ public class BsPersonaController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-       
+
 	}
 
 }

@@ -12,6 +12,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -29,6 +31,12 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ViewScoped
 //@Component
 public class BsModuloController {
+
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(BsModuloController.class);
 
 	private BsModulo bsModulo, bsModuloSelected;
 	private LazyDataModel<BsModulo> lazyModel;
@@ -67,7 +75,7 @@ public class BsModuloController {
 	public BsModulo getBsModuloSelected() {
 		if (Objects.isNull(bsModuloSelected)) {
 			this.bsModuloSelected = new BsModulo();
-			
+
 		}
 		return bsModuloSelected;
 	}
@@ -99,7 +107,7 @@ public class BsModuloController {
 	public void setLazyModel(LazyDataModel<BsModulo> lazyModel) {
 		this.lazyModel = lazyModel;
 	}
-	
+
 	public BsModuloService getBsModuloServiceImpl() {
 		return bsModuloServiceImpl;
 	}
@@ -107,7 +115,7 @@ public class BsModuloController {
 	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
 		this.bsModuloServiceImpl = bsModuloServiceImpl;
 	}
-	
+
 	public boolean isEsNuegoRegistro() {
 		return esNuegoRegistro;
 	}
@@ -126,12 +134,14 @@ public class BsModuloController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('manageModuloDialog').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		PrimeFaces.current().executeScript("PF('manageModuloDialog').hide()");
-		PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
 
 	}
 
@@ -147,8 +157,10 @@ public class BsModuloController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
 	}

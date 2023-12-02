@@ -14,6 +14,8 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
@@ -22,6 +24,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
 import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysservices.services.base.BsMenuService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
+import py.com.capitalsys.capitalsysweb.utils.ApplicationConstant;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
@@ -33,6 +36,12 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ViewScoped
 //@Component
 public class BsMenuController {
+
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(BsMenuController.class);
 
 	private BsMenu bsMenu, bsMenuSelected;
 	private LazyDataModel<BsMenu> lazyModel;
@@ -69,7 +78,7 @@ public class BsMenuController {
 		this.tipoMenu = null;
 		this.esNuegoRegistro = true;
 		this.tipoList = List.of("SUBMENU", "ITEM");
-		this.tipoListAgrupador  = List.of("DEFINICION", "MOVIMIENTOS", "REPORTES");
+		this.tipoListAgrupador = List.of("DEFINICION", "MOVIMIENTOS", "REPORTES");
 		this.subMenuList = null;
 	}
 
@@ -79,7 +88,7 @@ public class BsMenuController {
 		if (Objects.isNull(bsMenu)) {
 			this.bsMenu = new BsMenu();
 			this.bsMenu.setBsModulo(new BsModulo());
-			//this.bsMenu.setSubMenuPadre(new BsMenu());
+			// this.bsMenu.setSubMenuPadre(new BsMenu());
 		}
 		return bsMenu;
 	}
@@ -93,7 +102,7 @@ public class BsMenuController {
 		if (Objects.isNull(bsMenuSelected)) {
 			this.bsMenuSelected = new BsMenu();
 			this.bsMenuSelected.setBsModulo(new BsModulo());
-			//this.bsMenuSelected.setSubMenuPadre(new BsMenu());
+			// this.bsMenuSelected.setSubMenuPadre(new BsMenu());
 		}
 
 		return bsMenuSelected;
@@ -195,7 +204,6 @@ public class BsMenuController {
 		this.tipoMenu = tipoMenu;
 	}
 
-	
 	public List<String> getTipoListAgrupador() {
 		return tipoListAgrupador;
 	}
@@ -215,6 +223,23 @@ public class BsMenuController {
 	// METODOS
 	public void guardar() {
 		try {
+			if (bsMenu.getTipoMenuAgrupador().length() < 3) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"Debe seleccionar un agrupador de menu.");
+				return;
+			}
+			if (Objects.isNull(bsMenu.getBsModulo()) || Objects.isNull(bsMenu.getBsModulo().getId())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Modulo.");
+				return;
+			}
+			try {
+				String pathAbsoluto = construirPathAbsoluto(bsMenu);
+				bsMenu.setUrl(pathAbsoluto);
+			} catch (NullPointerException e) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El path no se puede construir.");
+				return;
+			}
+
 			if (!Objects.isNull(bsMenuServiceImpl.guardar(bsMenu))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
@@ -222,12 +247,14 @@ public class BsMenuController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('manageMenutDialog').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
 		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		PrimeFaces.current().executeScript("PF('manageMenutDialog').hide()");
-		PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
 
 	}
 
@@ -243,8 +270,10 @@ public class BsMenuController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:dt-menu");
 		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
 			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
 	}
@@ -263,6 +292,33 @@ public class BsMenuController {
 	public void onModuloChange() {
 		this.getSubMenuList();
 
+	}
+
+	private String construirPathAbsoluto(BsMenu menu) {
+		String pathAgrupador = menu.getTipoMenuAgrupador().toLowerCase();
+		String pathModulo = this.bsModuloServiceImpl.buscarTodosLista().stream()
+				.filter(modulo -> modulo.getId() == menu.getBsModulo().getId()).map(mod -> mod.getPath()).findFirst()
+				.orElse(null);
+		if (pathModulo == null) {
+			throw new NullPointerException("El campo pathModulo no puede ser nulo");
+		}
+		String path = String.join("/", ApplicationConstant.PATH_BASE_MENU_CLIENTE, pathModulo, pathAgrupador,
+				construirNombrePanralla(menu.getNombre()));
+		return path;
+	}
+
+	public static String construirNombrePanralla(String input) {
+		String[] palabras = input.split("\\s");
+
+		StringBuilder resultadoBuilder = new StringBuilder();
+		for (String palabra : palabras) {
+			if (!palabra.isEmpty()) {
+				resultadoBuilder.append(Character.toUpperCase(palabra.charAt(0)));
+				resultadoBuilder.append(palabra.substring(1).toLowerCase());
+			}
+		}
+		resultadoBuilder.append(".xhtml");
+		return resultadoBuilder.toString();
 	}
 
 }

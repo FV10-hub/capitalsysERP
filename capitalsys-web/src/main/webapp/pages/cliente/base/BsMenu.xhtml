@@ -92,12 +92,8 @@
 											value="#{bsMenuController.bsMenu.nombre}" />
 									</div>
 									<div class="field">
-										<p:outputLabel for="url">Url</p:outputLabel>
-										<p:inputText id="url" value="#{bsMenuController.bsMenu.url}" />
-									</div>
-									<div class="field">
 										<p:outputLabel for="modulolb">Modulo</p:outputLabel>
-										<p:selectOneMenu id="modulolb"
+										<p:selectOneMenu id="modulolb" required="true"
 											value="#{bsMenuController.bsMenu.bsModulo.id}">
 											<f:selectItem itemLabel="Seleccione un módulo"
 												itemValue="#{null}" noSelectionOption="true" />
@@ -120,7 +116,7 @@
 									</div>
 									<div class="field">
 										<p:outputLabel for="tipoAlb">Tipo Menu Agrupador</p:outputLabel>
-										<p:selectOneMenu id="tipoAlb"
+										<p:selectOneMenu id="tipoAlb" required="true"
 											value="#{bsMenuController.bsMenu.tipoMenuAgrupador}">
 											<f:selectItem itemLabel="Seleccione un tipo de Agrupador"
 												itemValue="#{null}" noSelectionOption="true" />

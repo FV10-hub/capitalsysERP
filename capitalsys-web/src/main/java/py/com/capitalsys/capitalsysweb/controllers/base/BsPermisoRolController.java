@@ -12,6 +12,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
@@ -34,12 +36,18 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 //@Component
 public class BsPermisoRolController {
 
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(BsPermisoRolController.class);
+
 	private BsPermisoRol bsPermisoRol, bsPermisoRolSelected;
 	private LazyDataModel<BsPermisoRol> lazyModel;
 	private LazyDataModel<BsMenu> lazyMenuList;
 	private LazyDataModel<BsRol> lazyRolList;
 	private boolean esNuegoRegistro;
-	
+
 	private static final String DT_NAME = "dt-permiso";
 	private static final String DT_DIALOG_NAME = "managePermisoDialog";
 
@@ -49,7 +57,7 @@ public class BsPermisoRolController {
 
 	@ManagedProperty("#{bsMenuServiceImpl}")
 	private BsMenuService bsMenuServiceImpl;
-	
+
 	@ManagedProperty("#{bsRolServiceImpl}")
 	private BsRolService bsRolServiceImpl;
 
@@ -70,7 +78,7 @@ public class BsPermisoRolController {
 
 	// GETTERS & SETTERS
 	public BsPermisoRol getBsPermisoRol() {
-		if(Objects.isNull(bsPermisoRol)) {
+		if (Objects.isNull(bsPermisoRol)) {
 			bsPermisoRol = new BsPermisoRol();
 			bsPermisoRol.setDescripcion("PERMISOS");
 			bsPermisoRol.setBsMenu(new BsMenu());
@@ -84,7 +92,7 @@ public class BsPermisoRolController {
 	}
 
 	public BsPermisoRol getBsPermisoRolSelected() {
-		if(Objects.isNull(bsPermisoRolSelected)) {
+		if (Objects.isNull(bsPermisoRolSelected)) {
 			bsPermisoRolSelected = new BsPermisoRol();
 			bsPermisoRolSelected.setBsMenu(new BsMenu());
 			bsPermisoRolSelected.setRol(new BsRol());
@@ -156,7 +164,7 @@ public class BsPermisoRolController {
 	public void setBsRolServiceImpl(BsRolService bsRolServiceImpl) {
 		this.bsRolServiceImpl = bsRolServiceImpl;
 	}
-	
+
 	public boolean isEsNuegoRegistro() {
 		return esNuegoRegistro;
 	}
@@ -175,16 +183,16 @@ public class BsPermisoRolController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
-		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 
 	}
-
-	
 
 	public void delete() {
 		try {
@@ -198,8 +206,10 @@ public class BsPermisoRolController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
 	}
@@ -212,7 +222,7 @@ public class BsPermisoRolController {
 
 		}
 	}
-	
+
 	public void onRowSelectRol(SelectEvent<BsRol> event) {
 		if (!Objects.isNull(event.getObject())) {
 			this.bsPermisoRol.setRol(event.getObject());

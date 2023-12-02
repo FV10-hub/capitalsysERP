@@ -9,5 +9,6 @@ public final class ApplicationConstant {
 	public static final String MENU_ITEM_ICON_DEFAULT = "pi pi-fw pi-angle-right";
 	
 	public static final String SEPARADOR_WINDOWS = "\\";
+	public static final String PATH_BASE_MENU_CLIENTE = "/pages/cliente";
 
 }

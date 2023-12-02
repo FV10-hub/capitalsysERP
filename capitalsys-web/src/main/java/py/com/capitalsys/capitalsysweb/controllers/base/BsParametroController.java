@@ -9,6 +9,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -16,12 +18,9 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysentities.entities.base.BsParametro;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
-import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
-import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 import py.com.capitalsys.capitalsysservices.services.base.BsEmpresaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
-import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -33,6 +32,12 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ViewScoped
 public class BsParametroController {
 
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(BsParametroController.class);
+
 	private BsParametro bsParametro, bsParametroSelected;
 	private LazyDataModel<BsParametro> lazyModel;
 	private LazyDataModel<BsEmpresa> lazyEmpresaList;
@@ -40,27 +45,27 @@ public class BsParametroController {
 	private BsEmpresa bsEmpresaSelected;
 	private BsModulo bsModuloSelected;
 	private boolean esNuegoRegistro;
-	
+
 	private List<String> estadoList;
 
 	private static final String DT_NAME = "dt-parametro";
 	private static final String DT_DIALOG_NAME = "manageParametroDialog";
-	
+
 	@ManagedProperty("#{bsEmpresaServiceImpl}")
 	private BsEmpresaService bsEmpresaServiceImpl;
-	
+
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
 
 	@ManagedProperty("#{bsParametroServiceImpl}")
 	private BsParametroService bsParametroServiceImpl;
-	
+
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
 
 	}
-	
+
 	public void cleanFields() {
 		this.bsParametro = null;
 		this.bsParametroSelected = null;
@@ -75,7 +80,7 @@ public class BsParametroController {
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
-	//GETTERS Y SETTERS
+	// GETTERS Y SETTERS
 	public BsParametro getBsParametro() {
 		if (Objects.isNull(bsParametro)) {
 			this.bsParametro = new BsParametro();
@@ -124,7 +129,7 @@ public class BsParametroController {
 	}
 
 	public BsModulo getBsModuloSelected() {
-		if(Objects.isNull(bsModuloSelected)) {
+		if (Objects.isNull(bsModuloSelected)) {
 			bsModuloSelected = new BsModulo();
 		}
 		return bsModuloSelected;
@@ -178,7 +183,7 @@ public class BsParametroController {
 		this.bsParametroServiceImpl = bsParametroServiceImpl;
 	}
 
-	//lazy
+	// lazy
 	public LazyDataModel<BsParametro> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsParametro>((List<BsParametro>) bsParametroServiceImpl.findAll());
@@ -189,7 +194,7 @@ public class BsParametroController {
 	public void setLazyModel(LazyDataModel<BsParametro> lazyModel) {
 		this.lazyModel = lazyModel;
 	}
-	
+
 	public LazyDataModel<BsEmpresa> getLazyEmpresaList() {
 		if (Objects.isNull(lazyEmpresaList)) {
 			lazyEmpresaList = new GenericLazyDataModel<BsEmpresa>((List<BsEmpresa>) bsEmpresaServiceImpl.findAll());
@@ -203,7 +208,8 @@ public class BsParametroController {
 
 	public LazyDataModel<BsModulo> getLazyModuloList() {
 		if (Objects.isNull(lazyModuloList)) {
-			lazyModuloList = new GenericLazyDataModel<BsModulo>((List<BsModulo>) bsModuloServiceImpl.buscarTodosLista());
+			lazyModuloList = new GenericLazyDataModel<BsModulo>(
+					(List<BsModulo>) bsModuloServiceImpl.buscarTodosLista());
 		}
 		return lazyModuloList;
 	}
@@ -212,13 +218,13 @@ public class BsParametroController {
 		this.lazyModuloList = lazyModuloList;
 	}
 
-	//METODOS
+	// METODOS
 	public void guardar() {
-		if(Objects.isNull(bsParametro.getBsEmpresa()) && Objects.isNull(bsParametro.getBsEmpresa().getId())) {
+		if (Objects.isNull(bsParametro.getBsEmpresa()) || Objects.isNull(bsParametro.getBsEmpresa().getId())) {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Empresa.");
 			return;
 		}
-		if(Objects.isNull(bsParametro.getBsModulo()) && Objects.isNull(bsParametro.getBsModulo().getId())) {
+		if (Objects.isNull(bsParametro.getBsModulo()) || Objects.isNull(bsParametro.getBsModulo().getId())) {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Modulo.");
 			return;
 		}
@@ -230,15 +236,17 @@ public class BsParametroController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
-		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 
 	}
-	
+
 	public void delete() {
 		try {
 			if (!Objects.isNull(this.bsParametro)) {
@@ -251,11 +259,12 @@ public class BsParametroController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
 	}
-	
-	
+
 }

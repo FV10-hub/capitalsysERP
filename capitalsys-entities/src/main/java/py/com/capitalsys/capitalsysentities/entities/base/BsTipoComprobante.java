@@ -51,6 +51,7 @@ public class BsTipoComprobante extends Common implements Serializable {
 
 	@Transient
 	private boolean indStockAux;
+	
 	@Transient
 	private boolean indSaldoAux;
 

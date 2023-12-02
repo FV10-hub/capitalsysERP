@@ -9,6 +9,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -28,6 +30,11 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ManagedBean
 @ViewScoped
 public class CobClienteController {
+	
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(CobClienteController.class);
 
 	private CobCliente cobCliente, cobClienteSelected;
 	private LazyDataModel<CobCliente> lazyModel;
@@ -186,7 +193,7 @@ public class CobClienteController {
 
 	// METODOS
 	public void guardar() {
-		if (Objects.isNull(cobCliente.getBsPersona()) && Objects.isNull(cobCliente.getBsPersona().getId())) {
+		if (Objects.isNull(cobCliente.getBsPersona()) || Objects.isNull(cobCliente.getBsPersona().getId())) {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Persona.");
 			return;
 		}
@@ -200,7 +207,8 @@ public class CobClienteController {
 			}
 			this.cleanFields();
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			//e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
 					e.getCause().getMessage().substring(0, 50) + "...");
 		}
@@ -221,7 +229,8 @@ public class CobClienteController {
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
+			//e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
 					e.getCause().getMessage().substring(0, 50) + "...");
 		}
