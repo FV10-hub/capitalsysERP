@@ -31,5 +31,10 @@ public interface BsPersonaRepository extends PagingAndSortingRepository<BsPerson
 			+ "WHERE c.id_bs_persona IS NULL", nativeQuery = true)
 	List<BsPersona> personasSinFichaCobradorPorEmpresaNativo(Long idEmpresa);
 	
+	@Query(value = "SELECT p.* FROM bs_persona p "
+			+ "LEFT JOIN ven_vendedores c ON p.id = c.id_bs_persona AND c.bs_empresa_id = ?1 "
+			+ "WHERE c.id_bs_persona IS NULL", nativeQuery = true)
+	List<BsPersona> personasSinFichaVendedorPorEmpresaNativo(Long idEmpresa);
+	
 	
 }

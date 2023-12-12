@@ -24,6 +24,8 @@ public interface BsPersonaService {
 	
 	List<BsPersona> personasSinFichaCobradorPorEmpresaNativo(Long idEmpresa);
 	
+	List<BsPersona> personasSinFichaVendedorPorEmpresaNativo(Long idEmpresa);	
+	
 	BsPersona guardar(BsPersona obj);
 	
 	void eliminar(Long id);

@@ -32,15 +32,16 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ManagedBean
 @ViewScoped
 public class StoArticuloController {
-	
+
 	/**
-	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(StoArticuloController.class);
 
 	private StoArticulo stoArticulo, stoArticuloSelected;
 	private LazyDataModel<StoArticulo> lazyModel;
-	private LazyDataModel<BsIva> lazyIvaList;
+	private List<BsIva> lazyIvaList;
 
 	private BsIva bsIvaSelected;
 	private boolean esNuegoRegistro;
@@ -49,10 +50,10 @@ public class StoArticuloController {
 
 	private static final String DT_NAME = "dt-articulo";
 	private static final String DT_DIALOG_NAME = "manageArticuloDialog";
-	
+
 	@ManagedProperty("#{stoArticuloServiceImpl}")
 	private StoArticuloService stoArticuloServiceImpl;
-	
+
 	@ManagedProperty("#{bsIvaServiceImpl}")
 	private BsIvaService bsIvaServiceImpl;
 
@@ -61,7 +62,7 @@ public class StoArticuloController {
 	 */
 	@ManagedProperty("#{sessionBean}")
 	private SessionBean sessionBean;
-	
+
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
@@ -79,12 +80,14 @@ public class StoArticuloController {
 
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
-	
+
 	// GETTERS Y SETTERS
 	public StoArticulo getStoArticulo() {
 		if (Objects.isNull(stoArticulo)) {
 			this.stoArticulo = new StoArticulo();
-			this.stoArticulo.setEstado(Estado.ACTIVO.getEstado());;
+			this.stoArticulo.setEstado(Estado.ACTIVO.getEstado());
+			;
+			this.stoArticulo.setIndInventariableAux(false);
 			this.stoArticulo.setBsEmpresa(new BsEmpresa());
 			this.stoArticulo.setBsIva(new BsIva());
 		}
@@ -125,14 +128,14 @@ public class StoArticuloController {
 		this.lazyModel = lazyModel;
 	}
 
-	public LazyDataModel<BsIva> getLazyIvaList() {
-		if (Objects.isNull(lazyModel)) {
-			lazyIvaList = new GenericLazyDataModel<BsIva>((List<BsIva>) bsIvaServiceImpl.findAll());
+	public List<BsIva> getLazyIvaList() {
+		if (Objects.isNull(lazyIvaList)) {
+			lazyIvaList = bsIvaServiceImpl.buscarIvaActivosLista();
 		}
 		return lazyIvaList;
 	}
 
-	public void setLazyIvaList(LazyDataModel<BsIva> lazyIvaList) {
+	public void setLazyIvaList(List<BsIva> lazyIvaList) {
 		this.lazyIvaList = lazyIvaList;
 	}
 
@@ -182,53 +185,59 @@ public class StoArticuloController {
 	public void setSessionBean(SessionBean sessionBean) {
 		this.sessionBean = sessionBean;
 	}
-	
+
+	public StoArticuloService getStoArticuloServiceImpl() {
+		return stoArticuloServiceImpl;
+	}
+
+	public void setStoArticuloServiceImpl(StoArticuloService stoArticuloServiceImpl) {
+		this.stoArticuloServiceImpl = stoArticuloServiceImpl;
+	}
+
 	// METODOS
-		public void guardar() {
-			if (Objects.isNull(stoArticulo.getBsIva()) || Objects.isNull(stoArticulo.getBsIva().getId())) {
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Tipo de Impuesto.");
-				return;
+	public void guardar() {
+		if (Objects.isNull(stoArticulo.getBsIva()) || Objects.isNull(stoArticulo.getBsIva().getId())) {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Tipo de Impuesto.");
+			return;
+		}
+		try {
+			this.stoArticulo.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			if (!Objects.isNull(stoArticuloServiceImpl.save(this.stoArticulo))) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se guardo correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
-			try {
-				this.stoArticulo.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
-				if (!Objects.isNull(stoArticuloServiceImpl.save(this.stoArticulo))) {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se guardo correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
-				}
-				this.cleanFields();
-			} catch (Exception e) {
-				LOGGER.error("Ocurrio un error al Guardar", System.err);
-				//e.printStackTrace(System.err);
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						e.getCause().getMessage().substring(0, 50) + "...");
+			this.cleanFields();
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
+		}
+		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+
+	}
+
+	public void delete() {
+		try {
+			if (!Objects.isNull(this.stoArticulo)) {
+				this.stoArticuloServiceImpl.deleteById(this.stoArticulo.getId());
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se elimino correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
 			}
-			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
-		public void delete() {
-			try {
-				if (!Objects.isNull(this.stoArticulo)) {
-					this.stoArticuloServiceImpl.deleteById(this.stoArticulo.getId());
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se elimino correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
-				}
-				this.cleanFields();
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-			} catch (Exception e) {
-				LOGGER.error("Ocurrio un error al eliminar", System.err);
-				//e.printStackTrace(System.err);
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						e.getCause().getMessage().substring(0, 50) + "...");
-			}
-
-		}
-	
-	
+	}
 
 }

@@ -58,6 +58,11 @@ public class BsPersonaServiceImpl implements BsPersonaService {
 		return this.bsPersonaRepositoryImpl.personasSinFichaCobradorPorEmpresaNativo(idEmpresa);
 	}
 
+	@Override
+	public List<BsPersona> personasSinFichaVendedorPorEmpresaNativo(Long idEmpresa) {
+		return this.bsPersonaRepositoryImpl.personasSinFichaVendedorPorEmpresaNativo(idEmpresa);
+	}
+
 
 
 }

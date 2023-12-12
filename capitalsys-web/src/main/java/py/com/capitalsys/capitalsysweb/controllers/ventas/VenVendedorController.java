@@ -126,7 +126,7 @@ public class VenVendedorController {
 	public LazyDataModel<BsPersona> getLazyPersonaList() {
 		if (Objects.isNull(lazyPersonaList)) {
 			lazyPersonaList = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl
-					.personasSinFichaClientePorEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
+					.personasSinFichaVendedorPorEmpresaNativo(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyPersonaList;
 	}

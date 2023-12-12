@@ -236,6 +236,8 @@ public class BsMenuController {
 				String pathAbsoluto = construirPathAbsoluto(bsMenu);
 				bsMenu.setUrl(pathAbsoluto);
 			} catch (NullPointerException e) {
+				LOGGER.error("Ocurrio un error al Guardar", System.err);
+				e.printStackTrace(System.err);
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El path no se puede construir.");
 				return;
 			}
@@ -299,11 +301,15 @@ public class BsMenuController {
 		String pathModulo = this.bsModuloServiceImpl.buscarTodosLista().stream()
 				.filter(modulo -> modulo.getId() == menu.getBsModulo().getId()).map(mod -> mod.getPath()).findFirst()
 				.orElse(null);
-		if (pathModulo == null) {
+		String codModulo = this.bsModuloServiceImpl.buscarTodosLista().stream()
+				.filter(modulo -> modulo.getId() == menu.getBsModulo().getId())
+				.map(mod -> mod.getCodigo()).findFirst()
+				.orElse(null);
+		if (pathModulo == null || codModulo == null) {
 			throw new NullPointerException("El campo pathModulo no puede ser nulo");
 		}
 		String path = String.join("/", ApplicationConstant.PATH_BASE_MENU_CLIENTE, pathModulo, pathAgrupador,
-				construirNombrePanralla(menu.getNombre()));
+				construirNombrePanralla(codModulo.concat(" " + menu.getNombre()) ));
 		return path;
 	}
 
