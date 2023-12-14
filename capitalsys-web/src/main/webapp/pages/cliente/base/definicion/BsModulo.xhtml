@@ -17,6 +17,11 @@
 									actionListener="#{bsModuloController.cleanFields}"
 									update=":form:manage-modulo :form:headerLb" onclick="PF('manageModuloDialog').show()"
 									styleClass="ui-button-success" style="margin-right: .5rem" />
+									<p:commandButton value="Descargar" icon="pi pi-trash"
+									ajax="false"
+									action="#{bsModuloController.descargar}"
+									immediate="true"
+									styleClass="ui-button-secondary" style="margin-right: .5rem" />
 							</p:toolbarGroup>
 						</p:toolbar>
 						<p:dataTable id="dt-modulo" widgetVar="dtModulo" var="modulo"
