@@ -19,6 +19,7 @@ import org.primefaces.model.LazyDataModel;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
 import py.com.capitalsys.capitalsysservices.services.base.BsRolService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -47,6 +48,12 @@ public class BsRolController {
 
 	@ManagedProperty("#{bsRolServiceImpl}")
 	private BsRolService bsRolServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -124,10 +131,19 @@ public class BsRolController {
 	public void setEsModificar(boolean esModificar) {
 		this.esModificar = esModificar;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsRol.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsRolServiceImpl.save(this.bsRol))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

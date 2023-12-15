@@ -199,6 +199,7 @@ public class BsTipoValorController {
 		}
 		try {
 			this.bsTipoValor.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			this.bsTipoValor.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsTipoValorServiceImpl.save(this.bsTipoValor))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

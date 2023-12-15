@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -35,6 +36,11 @@ public class BsMoneda extends Common {
 	private void preInsert() {
 		this.setEstado("ACTIVO");
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+	
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 

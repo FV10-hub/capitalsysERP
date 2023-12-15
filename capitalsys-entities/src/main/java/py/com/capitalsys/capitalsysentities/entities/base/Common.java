@@ -20,6 +20,9 @@ public class Common {
 
 	@Column(name = "estado")
 	private String estado;
+	
+	@Column(name= "usuario_modificacion")
+	private String usuarioModificacion;
 
 	/**
 	 * @return the fechaCreacion
@@ -55,6 +58,14 @@ public class Common {
 
 	public void setEstado(String estado) {
 		this.estado = estado;
+	}
+
+	public String getUsuarioModificacion() {
+		return usuarioModificacion;
+	}
+
+	public void setUsuarioModificacion(String usuarioModificacion) {
+		this.usuarioModificacion = usuarioModificacion;
 	}
 
 

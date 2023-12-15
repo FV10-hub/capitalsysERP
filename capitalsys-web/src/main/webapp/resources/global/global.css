@@ -18,3 +18,8 @@
   transition: background-color 0.2s;
   width: 180px !important;
 }
+
+.ui-menuitem-text {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}

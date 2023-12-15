@@ -20,6 +20,7 @@ import org.primefaces.model.LazyDataModel;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsMoneda;
 import py.com.capitalsys.capitalsysservices.services.base.BsMonedaService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -32,9 +33,10 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ViewScoped
 //@Component
 public class BsMonedaController implements Serializable {
-	
+
 	/**
-	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(BsMonedaController.class);
 
@@ -59,6 +61,12 @@ public class BsMonedaController implements Serializable {
 	@ManagedProperty("#{bsMonedaServiceImpl}")
 	private BsMonedaService bsMonedaServiceImpl;
 
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
+
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
@@ -82,18 +90,18 @@ public class BsMonedaController implements Serializable {
 		}
 		return bsMoneda;
 	}
-	
+
 	public void setBsMoneda(BsMoneda bsMoneda) {
 		this.bsMoneda = bsMoneda;
 	}
-	
+
 	public BsMoneda getBsMonedaSelected() {
 		if (Objects.isNull(bsMonedaSelected)) {
 			this.bsMonedaSelected = new BsMoneda();
 		}
 		return bsMonedaSelected;
 	}
-	
+
 	public void setBsMonedaSelected(BsMoneda bsMonedaSelected) {
 		if (!Objects.isNull(bsMonedaSelected)) {
 			this.bsMoneda = bsMonedaSelected;
@@ -109,7 +117,6 @@ public class BsMonedaController implements Serializable {
 	public void setBsMonedaServiceImpl(BsMonedaService bsMonedaServiceImpl) {
 		this.bsMonedaServiceImpl = bsMonedaServiceImpl;
 	}
-
 
 	public List<String> getEstadoList() {
 		return estadoList;
@@ -127,6 +134,14 @@ public class BsMonedaController implements Serializable {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
 
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
+
 	// LAZY
 	public LazyDataModel<BsMoneda> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
@@ -140,10 +155,10 @@ public class BsMonedaController implements Serializable {
 		this.lazyModel = lazyModel;
 	}
 
-
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsMoneda.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsMonedaServiceImpl.save(this.bsMoneda))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
@@ -155,10 +170,10 @@ public class BsMonedaController implements Serializable {
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
-			//e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
-		
 
 	}
 
@@ -175,10 +190,11 @@ public class BsMonedaController implements Serializable {
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al eliminar", System.err);
-			//e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
 	}
-	
+
 }

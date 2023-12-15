@@ -21,6 +21,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysservices.services.base.BsEmpresaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -60,6 +61,12 @@ public class BsParametroController {
 	@ManagedProperty("#{bsParametroServiceImpl}")
 	private BsParametroService bsParametroServiceImpl;
 
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
+	
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
@@ -182,6 +189,14 @@ public class BsParametroController {
 	public void setBsParametroServiceImpl(BsParametroService bsParametroServiceImpl) {
 		this.bsParametroServiceImpl = bsParametroServiceImpl;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// lazy
 	public LazyDataModel<BsParametro> getLazyModel() {
@@ -229,6 +244,7 @@ public class BsParametroController {
 			return;
 		}
 		try {
+			this.bsParametro.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsParametroServiceImpl.save(this.bsParametro))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

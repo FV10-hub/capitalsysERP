@@ -20,6 +20,7 @@ import org.primefaces.model.LazyDataModel;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -53,6 +54,12 @@ public class BsPersonaController {
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -141,10 +148,19 @@ public class BsPersonaController {
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsPersona.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsPersonaServiceImpl.guardar(bsPersona))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

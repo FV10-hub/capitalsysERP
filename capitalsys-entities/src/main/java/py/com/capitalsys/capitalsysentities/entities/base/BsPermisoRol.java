@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 
@@ -40,6 +41,11 @@ public class BsPermisoRol extends Common {
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+	
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 

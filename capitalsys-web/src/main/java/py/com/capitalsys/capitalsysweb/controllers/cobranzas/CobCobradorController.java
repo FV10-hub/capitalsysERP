@@ -202,6 +202,7 @@ public class CobCobradorController {
 				return;
 			}
 			try {
+				this.cobCobrador.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 				this.cobCobrador.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 				if (!Objects.isNull(cobCobradorServiceImpl.save(this.cobCobrador))) {
 					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",

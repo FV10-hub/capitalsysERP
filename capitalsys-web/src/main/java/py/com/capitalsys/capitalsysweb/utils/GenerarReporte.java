@@ -36,11 +36,12 @@ public class GenerarReporte {
 	private ReportesServiceClient reportesServiceClientImpl;
 
 	public void descargarReporte(ParametrosReporte params) {
-		params.setCodModulo("BASE");
+		/*params.setCodModulo("BASE");
 		params.setFormato("PDF");
 		params.setReporte("StoArticulos");
 		params.setParametros(new ArrayList<String>());
-		params.setValor(new ArrayList<Object>());
+		params.setValores(new ArrayList<Object>());
+		*/
 
 		// Llama al servicio y obtén la respuesta
 		Response response = this.reportesServiceClientImpl.generarReporte(params);
@@ -93,58 +94,6 @@ public class GenerarReporte {
 			FacesContext.getCurrentInstance().responseComplete();
 		} else {
 			System.out.println("Error en la solicitud: " + response.getStatus());
-			LOGGER.error("Error en la solicitud: " + response.getStatus());
-		}
-	}
-
-	public void descargarReporte2(ParametrosReporte params) throws IOException {
-		params.setCodModulo("BASE");
-		params.setFormato("XLS");
-		params.setReporte("StoArticulos");
-		params.setParametros(new ArrayList<String>());
-		params.setValor(new ArrayList<Object>());
-
-		// Llama al servicio y obtén la respuesta
-		Response response = this.reportesServiceClientImpl.generarReporte(params);
-
-		if (response.getStatus() == 200) {
-
-			configureResponseForDownload(response);
-
-			// Obtiene el contexto externo de JSF
-			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-
-			// Obtiene el flujo de entrada del cuerpo de la respuesta
-			InputStream inputStream = (InputStream) response.getEntity();
-
-			// Obtener el valor del encabezado Content-Type
-			String contentType = response.getHeaderString("Content-Type");
-
-			// Obtener el valor del encabezado Content-Disposition
-			String contentDisposition = response.getHeaderString("Content-Disposition");
-
-			// Configura las cabeceras de la respuesta JSF para la descarga
-			externalContext.responseReset();
-			externalContext.setResponseContentType(contentType);
-			externalContext.setResponseContentLength(response.getLength());
-			externalContext.setResponseHeader("Content-Disposition", contentDisposition);
-
-			// Obtén el flujo de salida de la respuesta
-			OutputStream outputStream = externalContext.getResponseOutputStream();
-
-			// Copia los bytes del flujo de entrada al flujo de salida
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = inputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, length);
-			}
-
-			inputStream.close();
-			outputStream.flush();
-			outputStream.close();
-
-			FacesContext.getCurrentInstance().responseComplete();
-		} else {
 			LOGGER.error("Error en la solicitud: " + response.getStatus());
 		}
 	}

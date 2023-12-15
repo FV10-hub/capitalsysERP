@@ -24,6 +24,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsMenu;
 import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysservices.services.base.BsMenuService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.ApplicationConstant;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -62,7 +63,7 @@ public class BsMenuController {
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
-
+	
 	@PostConstruct
 	public void init() {
 		this.cleanFields();

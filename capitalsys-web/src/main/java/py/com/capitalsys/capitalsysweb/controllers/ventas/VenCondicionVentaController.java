@@ -148,6 +148,7 @@ public class VenCondicionVentaController {
 	public void guardar() {
 		try {
 			this.venCondicionVenta.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			this.venCondicionVenta.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(venCondicionVentaServiceImpl.save(this.venCondicionVenta))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

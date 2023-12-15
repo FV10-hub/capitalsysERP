@@ -29,6 +29,7 @@ import py.com.capitalsys.capitalsysservices.services.base.BsEmpresaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
 import py.com.capitalsys.capitalsysservices.services.base.BsRolService;
 import py.com.capitalsys.capitalsysservices.services.base.BsUsuarioService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -83,6 +84,12 @@ public class BsUsuarioController implements Serializable {
 	
 	@ManagedProperty("#{bsEmpresaServiceImpl}")
 	private BsEmpresaService bsEmpresaServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -233,6 +240,14 @@ public class BsUsuarioController implements Serializable {
 	public void setBsEmpresaServiceImpl(BsEmpresaService bsEmpresaServiceImpl) {
 		this.bsEmpresaServiceImpl = bsEmpresaServiceImpl;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// LAZY
 	public LazyDataModel<BsUsuario> getLazyModel() {
@@ -292,6 +307,7 @@ public class BsUsuarioController implements Serializable {
 		}
 		try {
 			this.bsUsuario.encryptPassword();
+			this.bsUsuario.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsUsuarioServiceImpl.save(this.bsUsuario))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

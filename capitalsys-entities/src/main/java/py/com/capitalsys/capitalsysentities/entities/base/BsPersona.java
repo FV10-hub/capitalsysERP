@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -34,7 +35,7 @@ public class BsPersona extends Common {
 
 	@Column(name = "segundo_apellido", length = 45)
 	private String segundoApellido;
-	
+
 	@Column(name = "nombre_completo", length = 100)
 	private String nombreCompleto;
 
@@ -46,18 +47,22 @@ public class BsPersona extends Common {
 
 	@Column(name = "fec_nacimiento")
 	private LocalDate fecNacimiento;
-	
+
 	@Column(name = "documento", length = 50)
 	private String documento;
-	
 
 	public BsPersona() {
-		
+
 	}
-	
+
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
@@ -117,8 +122,6 @@ public class BsPersona extends Common {
 	public void setFecNacimiento(LocalDate fecNacimiento) {
 		this.fecNacimiento = fecNacimiento;
 	}
-	
-	
 
 	public String getDocumento() {
 		return documento;
@@ -152,6 +155,5 @@ public class BsPersona extends Common {
 		BsPersona other = (BsPersona) obj;
 		return Objects.equals(email, other.email) && Objects.equals(id, other.id);
 	}
-
 
 }

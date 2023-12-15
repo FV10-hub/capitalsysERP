@@ -198,6 +198,7 @@ public class CobClienteController {
 			return;
 		}
 		try {
+			this.cobCliente.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.cobCliente.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 			if (!Objects.isNull(cobClienteServiceImpl.save(this.cobCliente))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",

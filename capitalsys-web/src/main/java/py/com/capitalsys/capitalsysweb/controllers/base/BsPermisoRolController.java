@@ -24,6 +24,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
 import py.com.capitalsys.capitalsysservices.services.base.BsMenuService;
 import py.com.capitalsys.capitalsysservices.services.base.BsPermisoRolService;
 import py.com.capitalsys.capitalsysservices.services.base.BsRolService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
@@ -60,6 +61,12 @@ public class BsPermisoRolController {
 
 	@ManagedProperty("#{bsRolServiceImpl}")
 	private BsRolService bsRolServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -172,10 +179,19 @@ public class BsPermisoRolController {
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsPermisoRol.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsPermisoRolServiceImpl.save(bsPermisoRol))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

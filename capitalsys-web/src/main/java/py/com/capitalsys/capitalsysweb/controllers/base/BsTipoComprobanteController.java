@@ -205,6 +205,7 @@ public class BsTipoComprobanteController {
 		}
 		try {
 			this.bsTipoComprobante.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			this.bsTipoComprobante.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsTipoComprobanteServiceImpl.save(this.bsTipoComprobante))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

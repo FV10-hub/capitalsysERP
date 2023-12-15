@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
@@ -23,35 +24,40 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 */
 @Entity
 @Table(name = "ven_condicion_ventas")
-public class VenCondicionVenta  extends Common implements Serializable {
-	
+public class VenCondicionVenta extends Common implements Serializable {
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "cod_condicion")
-    private String codCondicion;
-	
+	private String codCondicion;
+
 	@Column(name = "descripcion")
-    private String descripcion;
-	
+	private String descripcion;
+
 	@Column(name = "plazo")
 	private BigDecimal plazo;
-	
-    @Column(name = "intervalo")
-    private BigDecimal intervalo;
-	
-    @ManyToOne
+
+	@Column(name = "intervalo")
+	private BigDecimal intervalo;
+
+	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
-	
+
 	@PrePersist
 	private void preInsert() {
-		//this.setEstado("ACTIVO");
+		// this.setEstado("ACTIVO");
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
@@ -120,7 +126,5 @@ public class VenCondicionVenta  extends Common implements Serializable {
 		return Objects.equals(bsEmpresa, other.bsEmpresa) && Objects.equals(codCondicion, other.codCondicion)
 				&& Objects.equals(id, other.id);
 	}
-	
-	
-}
 
+}

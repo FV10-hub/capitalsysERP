@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysentities.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -11,11 +12,11 @@ public class ParametrosReporte {
 	private String reporte;
 	private String formato;
 	private List<String> parametros;
-	private List<Object> valor;
+	private List<Object> valores;
 	
 	public ParametrosReporte() {
-		super();
-		// TODO Auto-generated constructor stub
+		parametros = new ArrayList<String>();
+		valores = new ArrayList<Object>();
 	}
 
 	public List<String> getParametros() {
@@ -26,12 +27,12 @@ public class ParametrosReporte {
 		this.parametros = parametros;
 	}
 
-	public List<Object> getValor() {
-		return valor;
+	public List<Object> getValores() {
+		return valores;
 	}
 
-	public void setValor(List<Object> valor) {
-		this.valor = valor;
+	public void setValores(List<Object> valores) {
+		this.valores = valores;
 	}
 
 	public String getCodModulo() {

@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
@@ -49,6 +50,11 @@ public class CobCobrador extends Common implements Serializable {
 	private void preInsert() {
 		this.setEstado("ACTIVO");
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+	
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 

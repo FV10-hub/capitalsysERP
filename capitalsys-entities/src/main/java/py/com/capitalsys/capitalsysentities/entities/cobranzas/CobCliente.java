@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
@@ -25,29 +26,34 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 @Entity
 @Table(name = "cob_clientes")
 public class CobCliente extends Common implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "cod_cliente")
-    private String codCliente;
-	
+	private String codCliente;
+
 	@OneToOne()
 	@JoinColumn(name = "id_bs_persona")
 	private BsPersona bsPersona;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
-	
+
 	@PrePersist
 	private void preInsert() {
 		this.setEstado("ACTIVO");
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
@@ -104,7 +110,5 @@ public class CobCliente extends Common implements Serializable {
 		return Objects.equals(bsEmpresa, other.bsEmpresa) && Objects.equals(bsPersona, other.bsPersona)
 				&& Objects.equals(id, other.id);
 	}
-	
-	
-}
 
+}

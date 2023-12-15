@@ -3,12 +3,7 @@
  */
 package py.com.capitalsys.capitalsysweb.controllers.base;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.PostConstruct;
@@ -16,26 +11,17 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import py.com.capitalsys.capitalsysentities.dto.ParametrosReporte;
 import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
-import py.com.capitalsys.capitalsysservices.services.client.ReportesServiceClient;
-import py.com.capitalsys.capitalsysservices.services.client.ReportesServiceClientImpl;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
-import py.com.capitalsys.capitalsysweb.utils.GenerarReporte;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
 /**
@@ -61,8 +47,11 @@ public class BsModuloController {
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
 	
-	@ManagedProperty("#{generarReporte}")
-	private GenerarReporte generarReporte;
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -141,18 +130,19 @@ public class BsModuloController {
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
-
-	public GenerarReporte getGenerarReporte() {
-		return generarReporte;
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
 	}
 
-	public void setGenerarReporte(GenerarReporte generarReporte) {
-		this.generarReporte = generarReporte;
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
 	}
 
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsModulo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsModuloServiceImpl.guardar(this.bsModulo))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
@@ -189,21 +179,6 @@ public class BsModuloController {
 					e.getCause().getMessage().substring(0, 50) + "...");
 		}
 
-	}
-
-	public void descargar() {
-		ParametrosReporte parametrosReporte = new ParametrosReporte();
-		this.generarReporte.descargarReporte(parametrosReporte);
-	}
-	
-	public void descargar2() {
-		ParametrosReporte parametrosReporte = new ParametrosReporte();
-		try {
-			this.generarReporte.descargarReporte2(parametrosReporte);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 }

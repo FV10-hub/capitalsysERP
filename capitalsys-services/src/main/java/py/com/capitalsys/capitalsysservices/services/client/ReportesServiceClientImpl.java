@@ -12,6 +12,9 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import py.com.capitalsys.capitalsysentities.dto.ParametrosReporte;
 
 /*
@@ -28,6 +31,14 @@ public class ReportesServiceClientImpl implements ReportesServiceClient {
 	 */
 	@Override
 	public Response generarReporte(ParametrosReporte params) {
+		ObjectMapper obj = new ObjectMapper();
+		try {
+			
+			System.out.println("OBJECTO JSON:::::: " + obj.writeValueAsString(params));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(urlReportesWS);
 		Form form = new Form();//eso se usa si quiero enviar un form

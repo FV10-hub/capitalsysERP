@@ -20,6 +20,7 @@ import org.primefaces.model.LazyDataModel;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsIva;
 import py.com.capitalsys.capitalsysservices.services.base.BsIvaService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
@@ -58,6 +59,12 @@ public class BsIvaController implements Serializable {
 	// servicios
 	@ManagedProperty("#{bsIvaServiceImpl}")
 	private BsIvaService bsIvaServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
 
 	@PostConstruct
 	public void init() {
@@ -125,6 +132,14 @@ public class BsIvaController implements Serializable {
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
+	
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
 
 	// LAZY
 	public LazyDataModel<BsIva> getLazyModel() {
@@ -143,6 +158,7 @@ public class BsIvaController implements Serializable {
 	// METODOS
 	public void guardar() {
 		try {
+			this.bsIva.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsIvaServiceImpl.save(this.bsIva))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");

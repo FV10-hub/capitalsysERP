@@ -201,6 +201,7 @@ public class StoArticuloController {
 			return;
 		}
 		try {
+			this.stoArticulo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.stoArticulo.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 			if (!Objects.isNull(stoArticuloServiceImpl.save(this.stoArticulo))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",

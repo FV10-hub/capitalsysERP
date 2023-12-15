@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -41,6 +42,11 @@ public class BsRol extends Common {
 		this.setFechaActualizacion(LocalDateTime.now());
 		this.bsUsuariosSet = new HashSet<BsUsuario>();
 		this.bsPermisoRol = new HashSet<BsPermisoRol>();
+	}
+	
+	@PreUpdate
+	private void preUpdate() {
+		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
 	public Long getId() {

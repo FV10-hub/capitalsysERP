@@ -197,6 +197,7 @@ public class VenVendedorController {
 				return;
 			}
 			try {
+				this.venVendedor.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 				this.venVendedor.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 				if (!Objects.isNull(venVendedorServiceImpl.save(this.venVendedor))) {
 					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",

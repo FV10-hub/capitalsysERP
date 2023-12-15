@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -21,40 +22,45 @@ import javax.persistence.Transient;
 @Entity
 @Table(name = "bs_tipo_valor")
 public class BsTipoValor extends Common implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "cod_tipo")
-    private String codTipo;
-	
+	private String codTipo;
+
 	@Column(name = "descripcion")
-    private String descripcion;
-	
-	//solo para ejemplo
+	private String descripcion;
+
+	// solo para ejemplo
 	@Column(name = "usa_efectivo")
-    private String usaEfectivo;
-	
+	private String usaEfectivo;
+
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "id_bs_modulo")
 	private BsModulo bsModulo;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
-	
-	//solo para ejemplo de uso buleano
+
+	// solo para ejemplo de uso buleano
 	@Transient
-    private boolean usaDineroAux;
-	
+	private boolean usaDineroAux;
+
 	@PrePersist
 	private void preInsert() {
 		this.setEstado("ACTIVO");
 		this.setFechaCreacion(LocalDateTime.now());
+		this.setFechaActualizacion(LocalDateTime.now());
+	}
+
+	@PreUpdate
+	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
 
@@ -99,17 +105,17 @@ public class BsTipoValor extends Common implements Serializable {
 	}
 
 	public boolean isUsaDineroAux() {
-		//esto solo es para usar elementos chekbox en el html
-        if (usaEfectivo != null) {
-            usaDineroAux = usaEfectivo.equals("S");
-        }
-        return usaDineroAux;
-    }
+		// esto solo es para usar elementos chekbox en el html
+		if (usaEfectivo != null) {
+			usaDineroAux = usaEfectivo.equals("S");
+		}
+		return usaDineroAux;
+	}
 
-    public void setUsaDineroAux(boolean usaDineroAux) {
-        usaEfectivo = usaDineroAux ? "S" : "N";
-        this.usaDineroAux = usaDineroAux;
-    }
+	public void setUsaDineroAux(boolean usaDineroAux) {
+		usaEfectivo = usaDineroAux ? "S" : "N";
+		this.usaDineroAux = usaDineroAux;
+	}
 
 	public BsEmpresa getBsEmpresa() {
 		return bsEmpresa;
@@ -119,6 +125,4 @@ public class BsTipoValor extends Common implements Serializable {
 		this.bsEmpresa = bsEmpresa;
 	}
 
-	
 }
-

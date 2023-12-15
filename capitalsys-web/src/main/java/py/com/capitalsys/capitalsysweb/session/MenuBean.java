@@ -134,6 +134,7 @@ public class MenuBean {
 															.value(itemDelAgrupador.getTitulo())
 															.icon(itemDelAgrupador.getIcon())
 															.outcome(itemDelAgrupador.getBsMenu().getUrl())
+															.style("white-space: normal;")
 															// .command("#{menuView.update}")
 															// .update("messages")
 															.build();
