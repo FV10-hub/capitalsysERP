@@ -119,11 +119,11 @@ public class RptBsPermisoRolController {
 
 		DateTimeFormatter formatterDiaHora = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		String formattedDateTimeDiaHora = now.format(formatterDiaHora);
-		this.parametrosReporte.getParametros().add("imagenPath");
-		this.parametrosReporte.getParametros().add("nombreImagen");
-		this.parametrosReporte.getParametros().add("impresoPor");
-		this.parametrosReporte.getParametros().add("DiaHora");
-		this.parametrosReporte.getParametros().add("empresaDesc");
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMAGEN_PATH);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_NOMBRE_IMAGEN);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMPRESO_POR);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DIA_HORA);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DESC_EMPRESA);
 
 		this.parametrosReporte.getValores().add(ApplicationConstant.PATH_IMAGEN_EMPRESA);
 		this.parametrosReporte.getValores().add(ApplicationConstant.IMAGEN_EMPRESA_NAME);

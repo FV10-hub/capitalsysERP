@@ -83,6 +83,7 @@ public class GenerarReporte {
 				inputStream.close();
 				outputStream.flush();
 				outputStream.close();
+				FacesContext.getCurrentInstance().responseComplete();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

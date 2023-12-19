@@ -87,7 +87,9 @@
 								</p:selectOneMenu>
 							</div>
 							<div class="field col-4 md:col-4">
-								<p:commandButton value="Generar" 
+								<p:commandButton 
+								ajax="false"
+								value="Generar" 
 								icon="pi pi-cloud-download"
 									actionListener="#{rptBsPermisoRolController.downloadReport}"
 									styleClass="ui-button-info" />
