@@ -31,18 +31,17 @@ public class ReportesServiceClientImpl implements ReportesServiceClient {
 	 */
 	@Override
 	public Response generarReporte(ParametrosReporte params) {
-		ObjectMapper obj = new ObjectMapper();
+		/*ObjectMapper obj = new ObjectMapper();
 		try {
 			
 			System.out.println("OBJECTO JSON:::::: " + obj.writeValueAsString(params));
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(urlReportesWS);
 		Form form = new Form();//eso se usa si quiero enviar un form
-		String tipoRetorno = "";
 		
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_OCTET_STREAM);
 		Response response = invocationBuilder.post(Entity.entity(params, MediaType.APPLICATION_JSON));
