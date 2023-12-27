@@ -1,7 +1,4 @@
-/**
- * 
- */
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.creditos.definicion;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,44 +14,37 @@ import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
-import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
-import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
-import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
+import py.com.capitalsys.capitalsysentities.entities.creditos.CreMotivoPrestamo;
+import py.com.capitalsys.capitalsysservices.services.creditos.CreMotivoPrestamoService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
-/**
- * descomentar si por algun motivo se necesita trabajar directo con spring
- * //@Component y // @Autowired
- */
+/*
+* 27 dic. 2023 - Elitebook
+*/
 @ManagedBean
 @ViewScoped
-//@Component
-public class BsPersonaController {
+public class CreMotivoPrestamoController {
 
 	/**
 	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
 	 * en un archivo externo.
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(BsPersonaController.class);
+	private static final Logger LOGGER = LogManager.getLogger(CreMotivoPrestamoController.class);
 
-	private BsPersona bsPersona, bsPersonaSelected;
-	private LazyDataModel<BsPersona> lazyModel;
+	private CreMotivoPrestamo creMotivoPrestamo, creMotivoPrestamoSelected;
+	private LazyDataModel<CreMotivoPrestamo> lazyModel;
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
-
-	/**
-	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
-	 */
-	@ManagedProperty("#{bsPersonaServiceImpl}")
-	// @Autowired
-	private BsPersonaService bsPersonaServiceImpl;
-
-	@ManagedProperty("#{bsModuloServiceImpl}")
-	private BsModuloService bsModuloServiceImpl;
 	
+	private static final String DT_NAME = "dt-motivo";
+	private static final String DT_DIALOG_NAME = "manageMotidoPrestamoDialog";
+
+	@ManagedProperty("#{creMotivoPrestamoServiceImpl}")
+	private CreMotivoPrestamoService creMotivoPrestamoServiceImpl;
+
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
 	 */
@@ -68,69 +58,52 @@ public class BsPersonaController {
 	}
 
 	public void cleanFields() {
-		this.bsPersona = null;
-		this.bsPersonaSelected = null;
+		this.creMotivoPrestamo = null;
+		this.creMotivoPrestamoSelected = null;
 		this.lazyModel = null;
 		this.esNuegoRegistro = true;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
 	// GETTERS & SETTERS
-	public BsPersona getBsPersona() {
-
-		if (Objects.isNull(bsPersona)) {
-			this.bsPersona = new BsPersona();
+	public CreMotivoPrestamo getCreMotivoPrestamo() {
+		if (Objects.isNull(creMotivoPrestamo)) {
+			this.creMotivoPrestamo = new CreMotivoPrestamo();
+			this.creMotivoPrestamo.setEstado(Estado.ACTIVO.getEstado());
 		}
-		return bsPersona;
+		return creMotivoPrestamo;
 	}
 
-	public void setBsPersona(BsPersona bsPersona) {
-		this.bsPersona = bsPersona;
+	public void setCreMotivoPrestamo(CreMotivoPrestamo creMotivoPrestamo) {
+		this.creMotivoPrestamo = creMotivoPrestamo;
 	}
 
-	public BsPersona getBsPersonaSelected() {
-
-		if (Objects.isNull(bsPersonaSelected)) {
-			this.bsPersonaSelected = new BsPersona();
+	public CreMotivoPrestamo getCreMotivoPrestamoSelected() {
+		if (Objects.isNull(creMotivoPrestamoSelected)) {
+			this.creMotivoPrestamoSelected = new CreMotivoPrestamo();
+			this.creMotivoPrestamoSelected.setEstado(Estado.ACTIVO.getEstado());
 		}
-
-		return bsPersonaSelected;
+		return creMotivoPrestamoSelected;
 	}
 
-	public void setBsPersonaSelected(BsPersona bsPersonaSelected) {
-		if (!Objects.isNull(bsPersonaSelected)) {
-			this.bsPersona = bsPersonaSelected;
+	public void setCreMotivoPrestamoSelected(CreMotivoPrestamo creMotivoPrestamoSelected) {
+		if (!Objects.isNull(creMotivoPrestamoSelected)) {
+			this.creMotivoPrestamo = creMotivoPrestamoSelected;
 			this.esNuegoRegistro = false;
 		}
-		this.bsPersonaSelected = bsPersonaSelected;
+		this.creMotivoPrestamoSelected = creMotivoPrestamoSelected;
 	}
 
-	public BsPersonaService getBsPersonaServiceImpl() {
-		return bsPersonaServiceImpl;
-	}
-
-	public void setBsPersonaServiceImpl(BsPersonaService bsPersonaServiceImpl) {
-		this.bsPersonaServiceImpl = bsPersonaServiceImpl;
-	}
-
-	public LazyDataModel<BsPersona> getLazyModel() {
+	public LazyDataModel<CreMotivoPrestamo> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl.buscarTodosLista());
+			lazyModel = new GenericLazyDataModel<CreMotivoPrestamo>(
+					creMotivoPrestamoServiceImpl.buscarCreMotivoPrestamoActivosLista());
 		}
-
 		return lazyModel;
 	}
 
-	public void setLazyModel(LazyDataModel<BsPersona> lazyModel) {
+	public void setLazyModel(LazyDataModel<CreMotivoPrestamo> lazyModel) {
 		this.lazyModel = lazyModel;
-	}
-
-	public BsModuloService getBsModuloServiceImpl() {
-		return bsModuloServiceImpl;
-	}
-
-	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
-		this.bsModuloServiceImpl = bsModuloServiceImpl;
 	}
 
 	public List<String> getEstadoList() {
@@ -148,7 +121,15 @@ public class BsPersonaController {
 	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
 		this.esNuegoRegistro = esNuegoRegistro;
 	}
-	
+
+	public CreMotivoPrestamoService getCreMotivoPrestamoServiceImpl() {
+		return creMotivoPrestamoServiceImpl;
+	}
+
+	public void setCreMotivoPrestamoServiceImpl(CreMotivoPrestamoService creMotivoPrestamoServiceImpl) {
+		this.creMotivoPrestamoServiceImpl = creMotivoPrestamoServiceImpl;
+	}
+
 	public SessionBean getSessionBean() {
 		return sessionBean;
 	}
@@ -160,16 +141,16 @@ public class BsPersonaController {
 	// METODOS
 	public void guardar() {
 		try {
-			this.bsPersona.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-			if (!Objects.isNull(bsPersonaServiceImpl.guardar(bsPersona))) {
+			this.creMotivoPrestamo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+			if (!Objects.isNull(creMotivoPrestamoServiceImpl.save(this.creMotivoPrestamo))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
-			PrimeFaces.current().executeScript("PF('managePersonaDialog').hide()");
-			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
+			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
@@ -181,15 +162,15 @@ public class BsPersonaController {
 
 	public void delete() {
 		try {
-			if (!Objects.isNull(this.bsPersonaSelected)) {
-				this.bsPersonaServiceImpl.eliminar(this.bsPersonaSelected.getId());
+			if (!Objects.isNull(this.creMotivoPrestamoSelected)) {
+				this.creMotivoPrestamoServiceImpl.deleteById(this.creMotivoPrestamoSelected.getId());
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se elimino correctamente.");
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
 			}
 			this.cleanFields();
-			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);

@@ -1,8 +1,9 @@
 /**
  * 
  */
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.base.definicion;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,8 +18,8 @@ import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
-import py.com.capitalsys.capitalsysentities.entities.base.BsRol;
-import py.com.capitalsys.capitalsysservices.services.base.BsRolService;
+import py.com.capitalsys.capitalsysentities.entities.base.BsMoneda;
+import py.com.capitalsys.capitalsysservices.services.base.BsMonedaService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
@@ -31,24 +32,35 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ManagedBean
 @ViewScoped
 //@Component
-public class BsRolController {
+public class BsMonedaController implements Serializable {
 
 	/**
 	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
 	 * en un archivo externo.
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(BsRolController.class);
+	private static final Logger LOGGER = LogManager.getLogger(BsMonedaController.class);
 
-	private BsRol bsRol, bsRolSelected;
-	private LazyDataModel<BsRol> lazyModel;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// lazy
+	private LazyDataModel<BsMoneda> lazyModel;
+
+	// objetos
+	private BsMoneda bsMoneda, bsMonedaSelected;
+	private boolean esNuegoRegistro;
+
+	// listas
 	private List<String> estadoList;
-	private static final String DT_NAME = "dt-rol";
-	private static final String DT_DIALOG_NAME = "manageRolDialog";
-	private boolean esModificar;
 
-	@ManagedProperty("#{bsRolServiceImpl}")
-	private BsRolService bsRolServiceImpl;
-	
+	private static final String DT_NAME = "dt-moneda";
+	private static final String DT_DIALOG_NAME = "manageMonedaDialog";
+
+	// servicios
+	@ManagedProperty("#{bsMonedaServiceImpl}")
+	private BsMonedaService bsMonedaServiceImpl;
+
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
 	 */
@@ -62,38 +74,48 @@ public class BsRolController {
 	}
 
 	public void cleanFields() {
-		this.bsRol = null;
-		this.bsRolSelected = null;
+		this.bsMoneda = null;
+		this.bsMonedaSelected = null;
+		this.esNuegoRegistro = true;
+
 		this.lazyModel = null;
-		this.esModificar = false;
+
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
 	// GETTERS & SETTERS
-	public BsRol getBsRol() {
-		if (Objects.isNull(bsRol)) {
-			this.bsRol = new BsRol();
+	public BsMoneda getBsMoneda() {
+		if (Objects.isNull(bsMoneda)) {
+			this.bsMoneda = new BsMoneda();
 		}
-		return bsRol;
+		return bsMoneda;
 	}
 
-	public void setBsRol(BsRol bsRol) {
-		this.bsRol = bsRol;
+	public void setBsMoneda(BsMoneda bsMoneda) {
+		this.bsMoneda = bsMoneda;
 	}
 
-	public BsRol getBsRolSelected() {
-		if (Objects.isNull(bsRolSelected)) {
-			this.bsRolSelected = new BsRol();
+	public BsMoneda getBsMonedaSelected() {
+		if (Objects.isNull(bsMonedaSelected)) {
+			this.bsMonedaSelected = new BsMoneda();
 		}
-		return bsRolSelected;
+		return bsMonedaSelected;
 	}
 
-	public void setBsRolSelected(BsRol bsRolSelected) {
-		if (!Objects.isNull(bsRolSelected)) {
-			this.bsRol = bsRolSelected;
-			this.esModificar = true;
+	public void setBsMonedaSelected(BsMoneda bsMonedaSelected) {
+		if (!Objects.isNull(bsMonedaSelected)) {
+			this.bsMoneda = bsMonedaSelected;
+			this.esNuegoRegistro = false;
 		}
-		this.bsRolSelected = bsRolSelected;
+		this.bsMonedaSelected = bsMonedaSelected;
+	}
+
+	public BsMonedaService getBsMonedaServiceImpl() {
+		return bsMonedaServiceImpl;
+	}
+
+	public void setBsMonedaServiceImpl(BsMonedaService bsMonedaServiceImpl) {
+		this.bsMonedaServiceImpl = bsMonedaServiceImpl;
 	}
 
 	public List<String> getEstadoList() {
@@ -104,34 +126,14 @@ public class BsRolController {
 		this.estadoList = estadoList;
 	}
 
-	public LazyDataModel<BsRol> getLazyModel() {
-		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<BsRol>((List<BsRol>) bsRolServiceImpl.findAll());
-		}
-
-		return lazyModel;
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
 	}
 
-	public void setLazyModel(LazyDataModel<BsRol> lazyModel) {
-		this.lazyModel = lazyModel;
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
 	}
 
-	public BsRolService getBsRolServiceImpl() {
-		return bsRolServiceImpl;
-	}
-
-	public void setBsRolServiceImpl(BsRolService bsRolServiceImpl) {
-		this.bsRolServiceImpl = bsRolServiceImpl;
-	}
-
-	public boolean isEsModificar() {
-		return esModificar;
-	}
-
-	public void setEsModificar(boolean esModificar) {
-		this.esModificar = esModificar;
-	}
-	
 	public SessionBean getSessionBean() {
 		return sessionBean;
 	}
@@ -140,11 +142,24 @@ public class BsRolController {
 		this.sessionBean = sessionBean;
 	}
 
+	// LAZY
+	public LazyDataModel<BsMoneda> getLazyModel() {
+		if (Objects.isNull(lazyModel)) {
+			lazyModel = new GenericLazyDataModel<BsMoneda>((List<BsMoneda>) bsMonedaServiceImpl.findAll());
+		}
+
+		return lazyModel;
+	}
+
+	public void setLazyModel(LazyDataModel<BsMoneda> lazyModel) {
+		this.lazyModel = lazyModel;
+	}
+
 	// METODOS
 	public void guardar() {
 		try {
-			this.bsRol.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-			if (!Objects.isNull(bsRolServiceImpl.save(this.bsRol))) {
+			this.bsMoneda.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+			if (!Objects.isNull(bsMonedaServiceImpl.save(this.bsMoneda))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
 			} else {
@@ -164,8 +179,8 @@ public class BsRolController {
 
 	public void delete() {
 		try {
-			if (!Objects.isNull(this.bsRolSelected)) {
-				this.bsRolServiceImpl.deleteById(this.bsRolSelected.getId());
+			if (!Objects.isNull(this.bsMonedaSelected)) {
+				this.bsMonedaServiceImpl.deleteById(this.bsMonedaSelected.getId());
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se elimino correctamente.");
 			} else {

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.base.definicion;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,8 +17,9 @@ import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
-import py.com.capitalsys.capitalsysentities.entities.base.BsModulo;
+import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
+import py.com.capitalsys.capitalsysservices.services.base.BsPersonaService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
@@ -31,18 +32,25 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ManagedBean
 @ViewScoped
 //@Component
-public class BsModuloController {
+public class BsPersonaController {
 
 	/**
 	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
 	 * en un archivo externo.
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(BsModuloController.class);
+	private static final Logger LOGGER = LogManager.getLogger(BsPersonaController.class);
 
-	private BsModulo bsModulo, bsModuloSelected;
-	private LazyDataModel<BsModulo> lazyModel;
+	private BsPersona bsPersona, bsPersonaSelected;
+	private LazyDataModel<BsPersona> lazyModel;
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
+
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{bsPersonaServiceImpl}")
+	// @Autowired
+	private BsPersonaService bsPersonaServiceImpl;
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
@@ -60,58 +68,60 @@ public class BsModuloController {
 	}
 
 	public void cleanFields() {
-		this.bsModulo = null;
-		this.bsModuloSelected = null;
+		this.bsPersona = null;
+		this.bsPersonaSelected = null;
 		this.lazyModel = null;
 		this.esNuegoRegistro = true;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
 	// GETTERS & SETTERS
-	public BsModulo getBsModulo() {
-		if (Objects.isNull(bsModulo)) {
-			this.bsModulo = new BsModulo();
+	public BsPersona getBsPersona() {
+
+		if (Objects.isNull(bsPersona)) {
+			this.bsPersona = new BsPersona();
 		}
-		return bsModulo;
+		return bsPersona;
 	}
 
-	public void setBsModulo(BsModulo bsModulo) {
-		this.bsModulo = bsModulo;
+	public void setBsPersona(BsPersona bsPersona) {
+		this.bsPersona = bsPersona;
 	}
 
-	public BsModulo getBsModuloSelected() {
-		if (Objects.isNull(bsModuloSelected)) {
-			this.bsModuloSelected = new BsModulo();
+	public BsPersona getBsPersonaSelected() {
 
+		if (Objects.isNull(bsPersonaSelected)) {
+			this.bsPersonaSelected = new BsPersona();
 		}
-		return bsModuloSelected;
+
+		return bsPersonaSelected;
 	}
 
-	public void setBsModuloSelected(BsModulo bsModuloSelected) {
-		if (!Objects.isNull(bsModuloSelected)) {
-			this.bsModulo = bsModuloSelected;
+	public void setBsPersonaSelected(BsPersona bsPersonaSelected) {
+		if (!Objects.isNull(bsPersonaSelected)) {
+			this.bsPersona = bsPersonaSelected;
 			this.esNuegoRegistro = false;
 		}
-		this.bsModuloSelected = bsModuloSelected;
+		this.bsPersonaSelected = bsPersonaSelected;
 	}
 
-	public List<String> getEstadoList() {
-		return estadoList;
+	public BsPersonaService getBsPersonaServiceImpl() {
+		return bsPersonaServiceImpl;
 	}
 
-	public void setEstadoList(List<String> estadoList) {
-		this.estadoList = estadoList;
+	public void setBsPersonaServiceImpl(BsPersonaService bsPersonaServiceImpl) {
+		this.bsPersonaServiceImpl = bsPersonaServiceImpl;
 	}
 
-	public LazyDataModel<BsModulo> getLazyModel() {
+	public LazyDataModel<BsPersona> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<BsModulo>(bsModuloServiceImpl.buscarTodosLista());
+			lazyModel = new GenericLazyDataModel<BsPersona>(bsPersonaServiceImpl.buscarTodosLista());
 		}
 
 		return lazyModel;
 	}
 
-	public void setLazyModel(LazyDataModel<BsModulo> lazyModel) {
+	public void setLazyModel(LazyDataModel<BsPersona> lazyModel) {
 		this.lazyModel = lazyModel;
 	}
 
@@ -121,6 +131,14 @@ public class BsModuloController {
 
 	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
 		this.bsModuloServiceImpl = bsModuloServiceImpl;
+	}
+
+	public List<String> getEstadoList() {
+		return estadoList;
+	}
+
+	public void setEstadoList(List<String> estadoList) {
+		this.estadoList = estadoList;
 	}
 
 	public boolean isEsNuegoRegistro() {
@@ -142,16 +160,16 @@ public class BsModuloController {
 	// METODOS
 	public void guardar() {
 		try {
-			this.bsModulo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-			if (!Objects.isNull(bsModuloServiceImpl.guardar(this.bsModulo))) {
+			this.bsPersona.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+			if (!Objects.isNull(bsPersonaServiceImpl.guardar(bsPersona))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
-			PrimeFaces.current().executeScript("PF('manageModuloDialog').hide()");
-			PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
+			PrimeFaces.current().executeScript("PF('managePersonaDialog').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
@@ -163,15 +181,15 @@ public class BsModuloController {
 
 	public void delete() {
 		try {
-			if (!Objects.isNull(this.bsModuloSelected)) {
-				this.bsModuloServiceImpl.eliminar(this.bsModuloSelected.getId());
+			if (!Objects.isNull(this.bsPersonaSelected)) {
+				this.bsPersonaServiceImpl.eliminar(this.bsPersonaSelected.getId());
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se elimino correctamente.");
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
 			}
 			this.cleanFields();
-			PrimeFaces.current().ajax().update("form:messages", "form:dt-modulo");
+			PrimeFaces.current().ajax().update("form:messages", "form:dt-persona");
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
@@ -180,5 +198,5 @@ public class BsModuloController {
 		}
 
 	}
-	
+
 }

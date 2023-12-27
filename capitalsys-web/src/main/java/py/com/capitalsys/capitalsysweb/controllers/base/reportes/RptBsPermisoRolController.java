@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.base.reportes;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;

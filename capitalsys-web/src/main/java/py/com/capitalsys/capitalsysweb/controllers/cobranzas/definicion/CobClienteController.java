@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.cobranzas;
+package py.com.capitalsys.capitalsysweb.controllers.cobranzas.definicion;
 
 import java.util.List;
 import java.util.Objects;

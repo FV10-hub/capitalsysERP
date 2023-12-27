@@ -1,7 +1,7 @@
 /**
  * 
  */
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.base.definicion;
 
 import java.io.Serializable;
 import java.util.List;

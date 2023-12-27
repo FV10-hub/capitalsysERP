@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.stock;
+package py.com.capitalsys.capitalsysweb.controllers.stock.definicion;
 
 import java.util.List;
 import java.util.Objects;

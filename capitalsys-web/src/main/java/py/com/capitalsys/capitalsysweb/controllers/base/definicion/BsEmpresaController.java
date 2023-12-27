@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.base;
+package py.com.capitalsys.capitalsysweb.controllers.base.definicion;
 
 import java.util.List;
 import java.util.Objects;

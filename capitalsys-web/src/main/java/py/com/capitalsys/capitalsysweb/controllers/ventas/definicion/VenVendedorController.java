@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.ventas;
+package py.com.capitalsys.capitalsysweb.controllers.ventas.definicion;
 
 import java.util.List;
 import java.util.Objects;
