@@ -1,0 +1,242 @@
+package py.com.capitalsys.capitalsysweb.controllers.cobranzas.definicion;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.ViewScoped;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.primefaces.PrimeFaces;
+import org.primefaces.model.LazyDataModel;
+
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCaja;
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCaja;
+import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCajaService;
+import py.com.capitalsys.capitalsysservices.services.cobranzas.CobHabilitacionCajaService;
+import py.com.capitalsys.capitalsysweb.session.SessionBean;
+import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
+import py.com.capitalsys.capitalsysweb.utils.Estado;
+import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
+
+/*
+* 28 dic. 2023 - Elitebook
+*/
+@ManagedBean
+@ViewScoped
+public class CobHabilitacionCajaController {
+	/**
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(CobHabilitacionCajaController.class);
+	
+	private CobHabilitacionCaja cobHabilitacionCaja, cobHabilitacionCajaSelected;
+	private CobCaja cobCajaSelected;
+	private LazyDataModel<CobHabilitacionCaja> lazyModel;
+	private List<String> estadoList;
+	private static final String DT_NAME = "dt-habilitacion";
+	private static final String DT_DIALOG_NAME = "manageHabilitacionDialog";
+	private boolean esNuegoRegistro;
+	DateTimeFormatter horaFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+	
+	@ManagedProperty("#{cobHabilitacionCajaServiceImpl}")
+	private CobHabilitacionCajaService cobHabilitacionCajaServiceImpl;
+	
+	@ManagedProperty("#{cobCajaServiceImpl}")
+	private CobCajaService cobCajaServiceImpl;
+	
+	/**
+	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
+	 */
+	@ManagedProperty("#{sessionBean}")
+	private SessionBean sessionBean;
+	
+	@PostConstruct
+	public void init() {
+		this.cleanFields();
+
+	}
+	
+	public void cleanFields() {
+		this.cobCajaSelected =  this.cobCajaServiceImpl.usuarioTieneCaja(this.sessionBean.getUsuarioLogueado().getId());
+		this.validarCajaDelUsuario(this.cobCajaSelected);
+		this.cobHabilitacionCaja = null;
+		this.cobHabilitacionCajaSelected = null;
+		this.lazyModel = null;
+		this.esNuegoRegistro = true;
+		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
+	}
+
+	// GETTERS & SETTERS
+	public CobHabilitacionCaja getCobHabilitacionCaja() {
+		
+		if (Objects.isNull(cobHabilitacionCaja)) {
+			this.cobHabilitacionCaja = new CobHabilitacionCaja();
+			this.cobHabilitacionCaja.setFechaApertura(LocalDateTime.now());
+			this.cobHabilitacionCaja.setFechaCierre(LocalDateTime.now());
+			this.cobHabilitacionCaja.setHoraApertura(LocalDateTime.now().format(horaFormatter));
+			this.cobHabilitacionCaja.setHoraCierre(null);
+			this.cobHabilitacionCaja.setCobCaja(this.cobCajaSelected);
+			this.cobHabilitacionCaja.setIndCerradoBoolean(false);
+			this.cobHabilitacionCaja.setEstado(Estado.ACTIVO.getEstado());
+			this.cobHabilitacionCaja.setBsUsuario(sessionBean.getUsuarioLogueado());
+		}
+		return cobHabilitacionCaja;
+	}
+
+	public void setCobHabilitacionCaja(CobHabilitacionCaja cobHabilitacionCaja) {
+		this.cobHabilitacionCaja = cobHabilitacionCaja;
+	}
+
+	public CobHabilitacionCaja getCobHabilitacionCajaSelected() {
+		if (Objects.isNull(cobHabilitacionCajaSelected)) {
+			this.cobHabilitacionCajaSelected = new CobHabilitacionCaja();
+			this.cobHabilitacionCajaSelected.setFechaApertura(LocalDateTime.now());
+			this.cobHabilitacionCajaSelected.setFechaCierre(LocalDateTime.now());
+			this.cobHabilitacionCajaSelected.setHoraApertura(LocalDateTime.now().format(horaFormatter));
+			this.cobHabilitacionCajaSelected.setHoraCierre(LocalDateTime.now().format(horaFormatter));
+			this.cobHabilitacionCajaSelected.setCobCaja(new CobCaja());
+			this.cobHabilitacionCajaSelected.setIndCerradoBoolean(false);
+			this.cobHabilitacionCajaSelected.setEstado(Estado.ACTIVO.getEstado());
+			this.cobHabilitacionCajaSelected.setBsUsuario(sessionBean.getUsuarioLogueado());
+		}
+		return cobHabilitacionCajaSelected;
+	}
+
+	public void setCobHabilitacionCajaSelected(CobHabilitacionCaja cobHabilitacionCajaSelected) {
+		if (!Objects.isNull(cobHabilitacionCajaSelected)) {
+			this.cobHabilitacionCajaSelected = cobHabilitacionCajaSelected;
+			cobHabilitacionCajaSelected = null;
+			this.esNuegoRegistro = false;
+		}
+		this.cobHabilitacionCajaSelected = cobHabilitacionCajaSelected;
+	}
+
+	public LazyDataModel<CobHabilitacionCaja> getLazyModel() {
+		if (Objects.isNull(lazyModel)) {
+			lazyModel = new GenericLazyDataModel<CobHabilitacionCaja>(this.cobHabilitacionCajaServiceImpl.buscarCobHabilitacionCajaActivosLista(sessionBean.getUsuarioLogueado().getId()));
+		}
+		return lazyModel;
+	}
+
+	public void setLazyModel(LazyDataModel<CobHabilitacionCaja> lazyModel) {
+		this.lazyModel = lazyModel;
+	}
+
+	public List<String> getEstadoList() {
+		return estadoList;
+	}
+
+	public void setEstadoList(List<String> estadoList) {
+		this.estadoList = estadoList;
+	}
+
+	public boolean isEsNuegoRegistro() {
+		return esNuegoRegistro;
+	}
+
+	public void setEsNuegoRegistro(boolean esNuegoRegistro) {
+		this.esNuegoRegistro = esNuegoRegistro;
+	}
+
+	public CobHabilitacionCajaService getCobHabilitacionCajaServiceImpl() {
+		return cobHabilitacionCajaServiceImpl;
+	}
+
+	public void setCobHabilitacionCajaServiceImpl(CobHabilitacionCajaService cobHabilitacionCajaServiceImpl) {
+		this.cobHabilitacionCajaServiceImpl = cobHabilitacionCajaServiceImpl;
+	}
+
+	public CobCajaService getCobCajaServiceImpl() {
+		return cobCajaServiceImpl;
+	}
+
+	public void setCobCajaServiceImpl(CobCajaService cobCajaServiceImpl) {
+		this.cobCajaServiceImpl = cobCajaServiceImpl;
+	}
+
+	public SessionBean getSessionBean() {
+		return sessionBean;
+	}
+
+	public void setSessionBean(SessionBean sessionBean) {
+		this.sessionBean = sessionBean;
+	}
+	
+	// METODOS
+	
+		public void validarCajaDelUsuario(CobCaja caja) {
+			if (Objects.isNull(caja)) {
+				PrimeFaces.current().executeScript("PF('dlgNoTieneCaja').show()");
+				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+				return;
+			}
+		}
+		
+		public void redireccionarACajas() {
+			try {
+				PrimeFaces.current().executeScript("PF('dlgNoTieneCaja').hide()");
+				CommonUtils.redireccionar("/pages/cliente/cobranzas/definicion/CobCaja.xhtml");
+			} catch (IOException e) {
+				e.printStackTrace();
+				LOGGER.error("Ocurrio un error al Guardar", System.err);
+			}
+		}
+		
+		public void setFechaYHoraCierre() {
+			this.cobHabilitacionCaja.setFechaCierre(LocalDateTime.now());
+			this.cobHabilitacionCaja.setHoraCierre(LocalDateTime.now().format(horaFormatter));
+		}
+		
+		public void guardar() {
+			try {
+				this.cobHabilitacionCaja.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+				if (!Objects.isNull(cobHabilitacionCajaServiceImpl.save(this.cobHabilitacionCaja))) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+							"El registro se guardo correctamente.");
+				} else {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+				}
+				this.cleanFields();
+				PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+			} catch (Exception e) {
+				LOGGER.error("Ocurrio un error al Guardar", System.err);
+				//e.printStackTrace(System.err);
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						e.getCause().getMessage().substring(0, 50) + "...");
+			}
+
+		}
+
+		public void delete() {
+			try {
+				if (!Objects.isNull(this.cobHabilitacionCaja)) {
+					this.cobHabilitacionCajaServiceImpl.deleteById(this.cobHabilitacionCaja.getId());
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+							"El registro se elimino correctamente.");
+				} else {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
+				}
+				this.cleanFields();
+				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+			} catch (Exception e) {
+				LOGGER.error("Ocurrio un error al eliminar", System.err);
+				//e.printStackTrace(System.err);
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						e.getCause().getMessage().substring(0, 50) + "...");
+			}
+
+		}
+	
+	
+	
+}

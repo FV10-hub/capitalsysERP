@@ -310,7 +310,7 @@ public class BsMenuController {
 			throw new NullPointerException("El campo pathModulo no puede ser nulo");
 		}
 		String path = String.join("/", ApplicationConstant.PATH_BASE_MENU_CLIENTE, pathModulo, pathAgrupador,
-				construirNombrePanralla(codModulo.concat(" " + menu.getNombre()) ));
+				construirNombrePanralla(codModulo.concat(" " + menu.getLabel()) ));
 		return path;
 	}
 

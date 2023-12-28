@@ -43,11 +43,11 @@
                             <p:ajax event="rowUnselectCheckbox" update=":form:delete-products-button" />
                             <p:ajax event="toggleSelect" update=":form:delete-products-button" />
                              -->
-							<p:column headerText="Codigo" sortBy="#{menu.label}"
+							<p:column headerText="Nombre Pantalla" sortBy="#{menu.label}"
 								filterBy="#{menu.label}">
 								<h:outputText value="#{menu.label}" />
 							</p:column>
-							<p:column headerText="Nombre" sortBy="#{menu.nombre}"
+							<p:column headerText="Titulo" sortBy="#{menu.nombre}"
 								filterBy="#{menu.nombre}">
 								<h:outputText value="#{menu.nombre}" />
 							</p:column>
@@ -82,12 +82,12 @@
 							<p:outputPanel id="manage-menu" class="ui-fluid">
 								<p:outputPanel>
 									<div class="field">
-										<p:outputLabel for="label">Codigo</p:outputLabel>
+										<p:outputLabel for="label">Nombre Pantalla</p:outputLabel>
 										<p:inputText id="label"
 											value="#{bsMenuController.bsMenu.label}"/>
 									</div>
 									<div class="field">
-										<p:outputLabel for="nombre">Nombre</p:outputLabel>
+										<p:outputLabel for="nombre">Titulo en Menu</p:outputLabel>
 										<p:inputText id="nombre"
 											value="#{bsMenuController.bsMenu.nombre}" />
 									</div>

@@ -1,4 +1,4 @@
-package py.com.capitalsys.capitalsysweb.controllers.creditos.definicion;
+package py.com.capitalsys.capitalsysweb.controllers.creditos.movimientos;
 
 import java.time.LocalDate;
 import java.util.List;

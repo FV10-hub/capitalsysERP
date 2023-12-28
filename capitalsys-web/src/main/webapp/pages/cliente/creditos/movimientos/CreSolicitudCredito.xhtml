@@ -99,7 +99,8 @@
 							</p:column>
 							<p:column>
 								<f:facet name="header">Desembolsado?</f:facet>
-								<p:toggleSwitch value="#{solicitud.indDesembolsadoBoolean}" disabled="true"/>
+								<p:toggleSwitch value="#{solicitud.indDesembolsadoBoolean}"
+									disabled="true" />
 							</p:column>
 
 							<p:column headerText="Estado" sortBy="#{solicitud.estado}"
@@ -175,6 +176,7 @@
 													</div>
 												</div>
 											</div>
+											<p:divider />
 											<div
 												class="col-12 md:col-12 flex justify-content-between flex-wrap">
 												<div class="field grid">
@@ -199,7 +201,7 @@
 												</div>
 
 											</div>
-
+											<p:divider />
 											<div
 												class="col-12 md:col-12 flex justify-content-between flex-wrap">
 												<div class="field grid">
@@ -220,36 +222,38 @@
 												</div>
 												<div class="field grid">
 													<p:outputLabel for="aprobadoLb"
-														styleClass="col-12 mb-2 md:col-6 mb-md-0">Aprobado?</p:outputLabel>
+														styleClass="col-12 mb-2 md:col-6 pr-6">Aprobado?</p:outputLabel>
 													<div class="col-12 md:col-6">
-														<p:toggleSwitch id="aprobadoLb"
+														<p:toggleSwitch id="aprobadoLb" onIcon="pi pi-check" offIcon="pi pi-times"
 															value="#{creSolicitudCreditoController.creSolicitudCredito.indDesembolsadoBoolean}" />
 													</div>
 												</div>
 											</div>
-										</div>
-										<div class="col-6 md:col-6">
-											<div class="field grid">
-												<p:outputLabel for="plazoLb"
-													styleClass="col-12 mb-2 md:col-4 mb-md-0">Plazo</p:outputLabel>
-												<div class="col-12 md:col-8">
-													<p:spinner id="plazoLb"
-														value="#{creSolicitudCreditoController.creSolicitudCredito.plazo}" />
+											<p:divider />
+
+											<div class="col-6 md:col-6">
+												<div class="field grid">
+													<p:outputLabel for="plazoLb"
+														styleClass="col-12 mb-2 md:col-4 mb-md-0">Plazo</p:outputLabel>
+													<div class="col-12 md:col-3">
+														<p:spinner id="plazoLb"
+															value="#{creSolicitudCreditoController.creSolicitudCredito.plazo}" />
+													</div>
 												</div>
 											</div>
-										</div>
-										<div class="col-6 md:col-6">
-											<div class="field grid">
-												<p:outputLabel for="estadoLb"
-													styleClass="col-12 mb-2 md:col-4 mb-md-0">Estado</p:outputLabel>
-												<div class="col-12 md:col-8">
-													<p:selectOneMenu id="estadoLb"
-														value="#{creSolicitudCreditoController.creSolicitudCredito.estado}">
-														<f:selectItem itemLabel="Seleccione un estado"
-															itemValue="#{null}" noSelectionOption="true" />
-														<f:selectItems
-															value="#{creSolicitudCreditoController.estadoList}" />
-													</p:selectOneMenu>
+											<div class="col-6 md:col-6">
+												<div class="field grid">
+													<p:outputLabel for="estadoLb"
+														styleClass="col-12 mb-2 md:col-4 mb-md-0">Estado</p:outputLabel>
+													<div class="col-12 md:col-2">
+														<p:selectOneMenu id="estadoLb"
+															value="#{creSolicitudCreditoController.creSolicitudCredito.estado}">
+															<f:selectItem itemLabel="Seleccione un estado"
+																itemValue="#{null}" noSelectionOption="true" />
+															<f:selectItems
+																value="#{creSolicitudCreditoController.estadoList}" />
+														</p:selectOneMenu>
+													</div>
 												</div>
 											</div>
 										</div>
