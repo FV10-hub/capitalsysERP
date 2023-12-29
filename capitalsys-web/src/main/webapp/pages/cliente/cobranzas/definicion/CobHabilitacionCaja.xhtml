@@ -50,7 +50,8 @@
 						<p:growl id="messages" showDetail="true" />
 						<p:toolbar styleClass="mb-4">
 							<p:toolbarGroup>
-								<p:commandButton value="Nuevo" icon="pi pi-plus"
+								<p:commandButton id="btnNuevo" value="Nuevo" icon="pi pi-plus"
+									disabled="#{cobHabilitacionCajaController.tieneHabilitacionAbiertaRendered}"
 									actionListener="#{cobHabilitacionCajaController.cleanFields}"
 									update=":form:manage-habilitacion :form:headerLb"
 									onclick="PF('manageHabilitacionDialog').show()"
@@ -79,16 +80,23 @@
 								filterBy="#{habilitacion.bsUsuario.codUsuario}">
 								<h:outputText value="#{habilitacion.bsUsuario.codUsuario}" />
 							</p:column>
+							<p:column headerText="Nro. Habilitacion"
+								sortBy="#{habilitacion.nroHabilitacion}"
+								filterBy="#{habilitacion.nroHabilitacion}">
+								<h:outputText value="#{habilitacion.nroHabilitacion}">
+									<f:convertNumber type="number" />
+								</h:outputText>
+							</p:column>
 							<p:column>
 								<f:facet name="header">Fecha Apertura</f:facet>
 								<h:outputText value="#{habilitacion.fechaApertura}"
-									converter="localDateConverter">
+									converter="localDateTimeConverter">
 								</h:outputText>
 							</p:column>
 							<p:column>
 								<f:facet name="header">Fecha Cierre</f:facet>
 								<h:outputText value="#{habilitacion.fechaCierre}"
-									converter="localDateConverter">
+									converter="localDateTimeConverter">
 								</h:outputText>
 							</p:column>
 							<p:column>
@@ -163,7 +171,7 @@
 												<p:selectBooleanCheckbox id="cerradoLb"
 													value="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean}">
 													<p:ajax
-														update=":form:panelCierre form:fechaCierreLb form:fechaCierreLb"
+														update=":form:panelCierre form:fechaCierreLb form:fechaCierreLb :form:btnGuardar"
 														listener="#{cobHabilitacionCajaController.setFechaYHoraCierre}" />
 												</p:selectBooleanCheckbox>
 											</div>
@@ -174,11 +182,11 @@
 													rendered="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean}"
 													styleClass="col-12 md:col-4">Fecha Cierre</p:outputLabel>
 												<div class="col-12 md:col-6">
-													<p:datePicker id="fechaCierreLb" disabled="true"
+													<p:clock id="fechaCierreLb" disabled="true"
 														rendered="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean}"
 														value="#{cobHabilitacionCajaController.cobHabilitacionCaja.fechaCierre}"
 														pattern="dd/MM/yyyy">
-													</p:datePicker>
+													</p:clock>
 												</div>
 											</div>
 											<div class="field grid ">
@@ -186,9 +194,11 @@
 													rendered="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean}"
 													styleClass="col-12 md:col-4">Hora Cierre</p:outputLabel>
 												<div class="col-12 md:col-6">
-													<p:inputText id="horaCierreLb" disabled="true"
+													<p:clock id="horaCierreLb" disabled="true"
 														rendered="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean}"
-														value="#{cobHabilitacionCajaController.cobHabilitacionCaja.horaCierre}" />
+														value="#{cobHabilitacionCajaController.cobHabilitacionCaja.fechaCierre}"
+														pattern="HH:mm:ss">
+													</p:clock>
 												</div>
 											</div>
 										</p:outputPanel>
@@ -197,8 +207,8 @@
 							</p:outputPanel>
 
 							<f:facet name="footer">
-								<p:commandButton
-									value="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean ? 'Abrir' : 'Cerrar'}"
+								<p:commandButton id="btnGuardar"
+									value="#{cobHabilitacionCajaController.cobHabilitacionCaja.indCerradoBoolean ? 'Cerrar' : 'Abrir'}"
 									icon="pi pi-check"
 									actionListener="#{cobHabilitacionCajaController.guardar}"
 									update=":form:manage-habilitacion" />

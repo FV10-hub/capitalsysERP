@@ -87,7 +87,7 @@ public class GenerarReporte {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				LOGGER.error("Ocurrio un error al procesar el flujo de bytes", e.getCause().getMessage());
+				LOGGER.error("Ocurrio un error al procesar el flujo de bytes", e.getMessage());
 			}
 
 			// Copia los bytes del flujo de entrada al flujo de salida

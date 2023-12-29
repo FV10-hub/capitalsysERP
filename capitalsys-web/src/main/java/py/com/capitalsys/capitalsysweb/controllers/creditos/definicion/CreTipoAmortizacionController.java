@@ -152,7 +152,7 @@ public class CreTipoAmortizacionController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getCause().getMessage().substring(0, 50) + "...");
+					e.getMessage().length() + "...");
 		}
 
 	}
@@ -172,7 +172,7 @@ public class CreTipoAmortizacionController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getCause().getMessage().substring(0, 50) + "...");
+					e.getMessage().length() + "...");
 		}
 
 	}

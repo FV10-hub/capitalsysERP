@@ -14,5 +14,7 @@ public interface CobHabilitacionCajaService extends CommonService<CobHabilitacio
 	 * */
 	BigDecimal calcularNroHabilitacionDisponible();
 	
+	String validaHabilitacionAbierta(Long idUsuario, Long idCaja);
+	
 	List<CobHabilitacionCaja> buscarCobHabilitacionCajaActivosLista(Long idEmpresa);
 }

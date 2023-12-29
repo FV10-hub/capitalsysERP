@@ -160,7 +160,8 @@ public class CobCajaController {
 				LOGGER.error("Ocurrio un error al Guardar", System.err);
 				// e.printStackTrace(System.err);
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						e.getCause().getMessage().substring(0, 50) + "...");
+						e.getMessage().substring(0, e.getMessage().length()) + "...");
+				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 			}
 
 		}
@@ -180,7 +181,8 @@ public class CobCajaController {
 				LOGGER.error("Ocurrio un error al eliminar", System.err);
 				// e.printStackTrace(System.err);
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						e.getCause().getMessage().substring(0, 50) + "...");
+						e.getMessage().substring(0, e.getMessage().length()) + "...");
+				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 			}
 
 		}

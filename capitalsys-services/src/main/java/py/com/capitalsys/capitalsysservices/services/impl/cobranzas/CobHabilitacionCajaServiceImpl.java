@@ -26,4 +26,9 @@ public class CobHabilitacionCajaServiceImpl extends CommonServiceImpl<CobHabilit
 		return this.repository.buscarCobHabilitacionCajaActivosLista(idEmpresa);
 	}
 
+	@Override
+	public String validaHabilitacionAbierta(Long idUsuario, Long idCaja) {
+		return this.repository.validaHabilitacionAbierta(idUsuario, idCaja);
+	}
+
 }

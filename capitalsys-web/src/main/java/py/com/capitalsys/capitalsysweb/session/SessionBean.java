@@ -67,14 +67,14 @@ public class SessionBean {
 			CommonUtils.redireccionar("/login.xhtml");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getCause().getMessage().substring(0, 50)+"...");
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length()+"...");
 		}
 		
 	}
 	
 	public void goToBsUsuario() {
 		try {
-			CommonUtils.redireccionar("/pages/cliente/base/BsUsuario.xhtml");
+			CommonUtils.redireccionar("/pages/cliente/base/definicion/BsUsuario.xhtml");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

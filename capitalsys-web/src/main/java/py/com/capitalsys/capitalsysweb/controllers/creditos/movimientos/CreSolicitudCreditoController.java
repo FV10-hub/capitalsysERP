@@ -293,6 +293,10 @@ public class CreSolicitudCreditoController {
 	}
 
 	// METODOS
+	public void seteaMismoValor() {
+		this.creSolicitudCredito.setMontoAprobado(this.creSolicitudCredito.getMontoSolicitado());
+	}
+	
 	public void guardar() {
 		try {
 			if (Objects.isNull(this.creSolicitudCredito.getCobCliente()) || Objects.isNull(this.creSolicitudCredito.getCobCliente().getId())) {
@@ -318,7 +322,7 @@ public class CreSolicitudCreditoController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getCause().getMessage().substring(0, 50) + "...");
+					e.getMessage().length() + "...");
 		}
 
 	}
@@ -338,7 +342,7 @@ public class CreSolicitudCreditoController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getCause().getMessage().substring(0, 50) + "...");
+					e.getMessage().length() + "...");
 		}
 
 	}

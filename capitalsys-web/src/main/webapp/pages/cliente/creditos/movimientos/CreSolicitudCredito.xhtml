@@ -97,6 +97,12 @@
 									converter="localDateConverter">
 								</h:outputText>
 							</p:column>
+							<p:column headerText="Monto Solicitado"
+								sortBy="#{solicitud.montoSolicitado}">
+								<h:outputText value="#{solicitud.montoSolicitado}">
+									<f:convertNumber currencySymbol="Gs." pattern="###,###,###" />
+								</h:outputText>
+							</p:column>
 							<p:column>
 								<f:facet name="header">Desembolsado?</f:facet>
 								<p:toggleSwitch value="#{solicitud.indDesembolsadoBoolean}"
@@ -209,12 +215,15 @@
 														styleClass="col-12 mb-2 md:col-6 mb-md-0">Monto Solicitado</p:outputLabel>
 													<div class="col-12 md:col-6">
 														<p:inputNumber id="montoSolLb"
-															value="#{creSolicitudCreditoController.creSolicitudCredito.montoSolicitado}" />
+															value="#{creSolicitudCreditoController.creSolicitudCredito.montoSolicitado}">
+															<!-- Agrega un p:ajax para escuchar el evento keyup y actualizar el campo Monto Aprobado -->
+															<p:ajax listener="#{creSolicitudCreditoController.seteaMismoValor}" event="keyup" update=":form:montoAproLb" />
+														</p:inputNumber>
 													</div>
 												</div>
 												<div class="field grid">
 													<p:outputLabel for="montoAproLb"
-														styleClass="col-12 mb-2 md:col-6 mb-md-0">Monto Solicitado</p:outputLabel>
+														styleClass="col-12 mb-2 md:col-6 mb-md-0">Monto Aprobado</p:outputLabel>
 													<div class="col-12 md:col-6">
 														<p:inputNumber id="montoAproLb"
 															value="#{creSolicitudCreditoController.creSolicitudCredito.montoAprobado}" />
@@ -224,7 +233,8 @@
 													<p:outputLabel for="aprobadoLb"
 														styleClass="col-12 mb-2 md:col-6 pr-6">Aprobado?</p:outputLabel>
 													<div class="col-12 md:col-6">
-														<p:toggleSwitch id="aprobadoLb" onIcon="pi pi-check" offIcon="pi pi-times"
+														<p:toggleSwitch id="aprobadoLb" onIcon="pi pi-check"
+															offIcon="pi pi-times"
 															value="#{creSolicitudCreditoController.creSolicitudCredito.indDesembolsadoBoolean}" />
 													</div>
 												</div>
