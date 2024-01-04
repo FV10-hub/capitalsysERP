@@ -126,33 +126,290 @@
 							</p:column>
 						</p:dataTable>
 
-						<p:panelGrid
-							rendered="#{creDesembolsoController.esVisibleFormulario}">
-							<div class="grid">
-								<div class="col-12 md:col-6">
-									<div class="card ui-fluid">
-										<div class="card ui-fluid">
-											<h5>Vertical Grid</h5>
-											<div class="formgrid grid">
-												<div class="field col">
-													<p:outputLabel for="name2">Name</p:outputLabel>
-													<p:inputText id="name2" type="text" />
+						<p:panel rendered="#{creDesembolsoController.esVisibleFormulario}">
+							<p:toolbar styleClass="mb-4">
+								<p:toolbarGroup>
+									<p:commandButton value="Guardar" icon="pi pi-save"
+										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										update=":form" styleClass="ui-button-success"
+										style="margin-right: .5rem" />
+									<p:commandButton value="Cancelar"
+										icon="pi pi-arrow-circle-left"
+										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										update=":form" styleClass="ui-button-info"
+										style="margin-right: .5rem" />
+									<p:commandButton value="Eliminar" icon="pi pi-trash"
+										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										update=":form" styleClass="ui-button-danger"
+										style="margin-right: .5rem" />
+
+								</p:toolbarGroup>
+							</p:toolbar>
+							<div class="col-12">
+								<div class="card ui-fluid">
+									<h5>Desembolso de Credito</h5>
+									<div class="ui-fluid formgrid grid">
+										<div class="field grid md:col-4">
+											<p:outputLabel for="nroSolicitudLb"
+												styleClass="col-12 mb-2 md:col-4 mb-md-0">Nro. Solicitud</p:outputLabel>
+											<div class="col-12 md:col-8">
+												<p:inputText id="nroSolicitudLb"
+													placeholder="Pulse F9 para buscar"
+													value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.id}"
+													onkeydown="if (event.keyCode == 120) {
+						                                             PF('dlgSolicitud').show()
+						                                         }" />
+											</div>
+										</div>
+										<div class="field grid md:col-4">
+											<p:outputLabel for="clienteLb"
+												styleClass="col-12 mb-2 md:col-4 mb-md-0">Cliente</p:outputLabel>
+											<div class="col-12 md:col-8">
+												<p:inputText id="clienteLb" disabled="true"
+													value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.cobCliente.bsPersona.nombreCompleto}" />
+											</div>
+										</div>
+										<div class="field grid md:col-4">
+											<p:outputLabel for="vendedorLb"
+												styleClass="col-12 mb-2 md:col-4 mb-md-0">Vendedor</p:outputLabel>
+											<div class="col-12 md:col-8">
+												<p:inputText id="vendedorLb" disabled="true"
+													value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.cobCliente.bsPersona.nombreCompleto}" />
+											</div>
+										</div>
+										<p:divider align="left" type="dashed">
+											<b>Datos de Solicitud</b>
+										</p:divider>
+										<div
+											class="col-12 md:col-12 flex justify-content-between flex-wrap">
+											<div class="field grid">
+												<p:outputLabel for="fechaSolLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Fecha Solicitud</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:datePicker id="fechaSolLb" disabled="true"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.fechaSolicitud}"
+														pattern="dd/MM/yyyy">
+													</p:datePicker>
 												</div>
-												<div class="field col">
-													<p:outputLabel for="email2">Email</p:outputLabel>
-													<p:inputText id="email2" type="text" />
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="fechaPrimLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Primer Vencimiento</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:datePicker id="fechaPrimLb" disabled="true"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.primerVencimiento}"
+														pattern="dd/MM/yyyy">
+													</p:datePicker>
 												</div>
-												<p:commandButton value="Nuevo" icon="pi pi-plus"
-													actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
-													update=":form" styleClass="ui-button-success"
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="montoAproLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Monto Aprobado</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:inputNumber id="montoAproLb" disabled="true"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.montoAprobado}" />
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="plazoLb"
+													styleClass="col-12 mb-2 md:col-3 mb-md-0">Plazo</p:outputLabel>
+												<div class="col-12 md:col-4">
+													<p:spinner id="plazoLb" disabled="true"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creSolicitudCredito.plazo}" />
+												</div>
+											</div>
+										</div>
+										<p:divider align="left" type="dashed">
+											<b>Datos del Desembolso</b>
+										</p:divider>
+										<div
+											class="col-12 md:col-12 flex justify-content-between flex-wrap">
+											<div class="field grid">
+												<p:outputLabel for="fechaDesembolsoLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Fecha Desembolso</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:datePicker id="fechaDesembolsoLb"
+														value="#{creDesembolsoController.creDesembolsoCabecera.fechaDesembolso}"
+														pattern="dd/MM/yyyy">
+													</p:datePicker>
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="tipoAmortLb"
+													styleClass="col-12 mb-2 md:col-4 mb-md-0">Tipo Amortizacion</p:outputLabel>
+												<div class="col-12 md:col-8">
+													<p:inputText id="tipoAmortLb"
+														placeholder="Pulse F9 para buscar"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creTipoAmortizacion.descripcion}"
+														onkeydown="if (event.keyCode == 120) {
+						                                             PF('dlgTipoAmort').show()
+						                                         }" />
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="moraLb"
+													styleClass="col-12 mb-2 md:col-4 mb-md-0">Taza Mora</p:outputLabel>
+												<div class="col-12 md:col-4">
+													<p:spinner id="moraLb"
+														value="#{creDesembolsoController.creDesembolsoCabecera.tazaMora}" />
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="anualLb"
+													styleClass="col-12 mb-2 md:col-4 mb-md-0">Taza Anual</p:outputLabel>
+												<div class="col-12 md:col-4">
+													<p:spinner id="anualLb"
+														value="#{creDesembolsoController.creDesembolsoCabecera.tazaAnual}" />
+												</div>
+											</div>
+										</div>
+										<div class="col-12 md:col-6 flex flex-column">
+											<div class="field grid">
+												<p:outputLabel for="nroDesembolsoLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Nro Desembolso</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:inputNumber id="nroDesembolsoLb" disabled="true"
+														placeholder="se genera automaticamente"
+														value="#{creDesembolsoController.creDesembolsoCabecera.nroDesembolso}" />
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="aprobadoLb"
+													styleClass="col-12 mb-2 md:col-6 pr-6">Desembolsado?</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:toggleSwitch id="aprobadoLb" onIcon="pi pi-check"
+														offIcon="pi pi-times"
+														value="#{creDesembolsoController.creDesembolsoCabecera.indDesembolsadoBoolean}" />
+												</div>
+											</div>
+										</div>
+										<div class="col-12 md:col-12">
+											<div class="col-4 md:col-2">
+												<p:commandButton value="Generar Cuota" icon="pi pi-sync"
+													actionListener="#{creDesembolsoController.generarCuotas}"
+													update=":form:dt-detalle" styleClass="ui-button-info"
 													style="margin-right: .5rem" />
 											</div>
+
+										</div>
+										<h5 class="col-12 md:col-12">Detalle de Cuotas</h5>
+										<div class="col-12 md:col-12">
+											<p:dataTable
+												id="dt-detalle" widgetVar="dtDetalle" var="detalle"
+												value="#{creDesembolsoController.detalleList}" reflow="true"
+												paginator="true" rows="10" paginatorPosition="bottom"
+												emptyMessage="No hay Registros">
+
+												<p:column headerText="Nro Cuota">
+													<h:outputText value="#{detalle.nroCuota}" />
+												</p:column>
+												<p:column>
+													<f:facet name="header">Primer Vencimiento</f:facet>
+													<h:outputText value="#{detalle.fechaVencimiento}"
+														converter="localDateConverter">
+													</h:outputText>
+												</p:column>
+												<p:column headerText="Capital">
+													<h:outputText value="#{detalle.montoCapital}" />
+												</p:column>
+												<p:column headerText="Monto Interes">
+													<h:outputText value="#{detalle.montoInteres}">
+														<f:convertNumber pattern="###,###,###" />
+													</h:outputText>
+												</p:column>
+												<p:column headerText="IVA" style="width: 10%;">
+													<h:outputText value="#{detalle.montoIva}">
+														<f:convertNumber pattern="###,###,###" />
+													</h:outputText>
+												</p:column>
+												<p:column headerText="Cuota" style="width: 10%;">
+													<h:outputText value="#{detalle.montoCuota}">
+														<f:convertNumber pattern="###,###,###" />
+													</h:outputText>
+												</p:column>
+											</p:dataTable>
 										</div>
 									</div>
 								</div>
 							</div>
-						</p:panelGrid>
+						</p:panel>
 
+						<!-- DIALOGOS -->
+						<p:dialog widgetVar="dlgSolicitud" header="Buscar Solicitud"
+							width="650" showEffect="fade" modal="true">
+							<p:dataTable widgetVar="wdlgSolicitud" var="solicitud"
+								value="#{creDesembolsoController.lazyModelSolicitudes}"
+								id="dt-solicitud" paginator="true" rows="10"
+								paginatorPosition="bottom" emptyMessage="No hay Registros">
+								<p:column style="width: 3rem; text-align: center">
+									<p:commandButton oncomplete="PF('dlgSolicitud').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:nroSolicitudLb :form:clienteLb :form:vendedorLb :form:fechaSolLb :form:fechaPrimLb :form:montoAproLb :form:plazoLb">
+										<f:setPropertyActionListener value="#{solicitud}"
+											target="#{creDesembolsoController.creSolicitudCreditoSelected}" />
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="Cliente"
+									sortBy="#{solicitud.cobCliente.bsPersona.nombreCompleto}"
+									filterBy="#{solicitud.cobCliente.bsPersona.nombreCompleto}">
+									<h:outputText
+										value="#{solicitud.cobCliente.bsPersona.nombreCompleto}" />
+								</p:column>
+								<p:column headerText="Vendedor"
+									sortBy="#{solicitud.venVendedor.bsPersona.nombreCompleto}"
+									filterBy="#{solicitud.venVendedor.bsPersona.nombreCompleto}">
+									<h:outputText
+										value="#{solicitud.venVendedor.bsPersona.nombreCompleto}" />
+								</p:column>
+								<p:column>
+									<f:facet name="header">Fecha Solicitud</f:facet>
+									<h:outputText value="#{solicitud.fechaSolicitud}"
+										converter="localDateConverter">
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">Primer Vencimiento</f:facet>
+									<h:outputText value="#{solicitud.primerVencimiento}"
+										converter="localDateConverter">
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Monto Solicitado"
+									sortBy="#{solicitud.montoSolicitado}">
+									<h:outputText value="#{solicitud.montoSolicitado}">
+										<f:convertNumber currencySymbol="Gs." pattern="###,###,###" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
+
+						<p:dialog widgetVar="dlgTipoAmort"
+							header="Buscar Tipo Amortizacion" width="650" showEffect="fade"
+							modal="true">
+							<p:dataTable widgetVar="wdlgTipoAmort" var="tipoAmort"
+								value="#{creDesembolsoController.lazyModelTipoAmortizacion}"
+								id="dt-tipoAmort" paginator="true" rows="10"
+								paginatorPosition="bottom" emptyMessage="No hay Registros">
+								<p:column style="width:3rem;text-align: center">
+									<p:commandButton oncomplete="PF('dlgTipoAmort').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:tipoAmortLb">
+										<f:setPropertyActionListener value="#{tipoAmort}"
+											target="#{creDesembolsoController.creTipoAmortizacionSelected}" />
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="Codigo" sortBy="#{tipoAmort.codTipo}"
+									filterBy="#{tipoAmort.codTipo}">
+									<h:outputText value="#{tipoAmort.codTipo}" />
+								</p:column>
+								<p:column headerText="Descripcion"
+									sortBy="#{tipoAmort.descripcion}"
+									filterBy="#{tipoAmort.descripcion}">
+									<h:outputText value="#{tipoAmort.descripcion}" />
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
+
+						<!-- DIALOGOS -->
 
 						<!-- confirms -->
 						<p:confirmDialog widgetVar="deleteModuloDialog" showEffect="fade"

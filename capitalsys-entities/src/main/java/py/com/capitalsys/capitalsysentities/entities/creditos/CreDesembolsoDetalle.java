@@ -2,6 +2,7 @@ package py.com.capitalsys.capitalsysentities.entities.creditos;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -38,6 +39,9 @@ public class CreDesembolsoDetalle extends Common implements Serializable {
 	
 	@Column(name = "nro_cuota")
 	private Integer nroCuota;
+	
+	@Column(name = "fecha_vencimiento")
+	private LocalDate fechaVencimiento;
 	
 	@Column(name = "monto_capital")
     private BigDecimal montoCapital;
@@ -140,6 +144,14 @@ public class CreDesembolsoDetalle extends Common implements Serializable {
 
 	public void setCreDesembolsoCabecera(CreDesembolsoCabecera creDesembolsoCabecera) {
 		this.creDesembolsoCabecera = creDesembolsoCabecera;
+	}
+
+	public LocalDate getFechaVencimiento() {
+		return fechaVencimiento;
+	}
+
+	public void setFechaVencimiento(LocalDate fechaVencimiento) {
+		this.fechaVencimiento = fechaVencimiento;
 	}
 
 	@Override

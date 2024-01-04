@@ -1,10 +1,17 @@
 package py.com.capitalsys.capitalsysweb.controllers.creditos.movimientos;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
@@ -33,6 +40,7 @@ import py.com.capitalsys.capitalsysservices.services.creditos.CreSolicitudCredit
 import py.com.capitalsys.capitalsysservices.services.creditos.CreTipoAmortizacionService;
 import py.com.capitalsys.capitalsysservices.services.stock.StoArticuloService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
+import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
@@ -55,6 +63,7 @@ public class CreDesembolsoController {
 	private BsTalonario bsTalonarioSelected;
 	private StoArticulo stoArticuloSelected;
 	private CreDesembolsoDetalle detalle;
+	private Set<CreDesembolsoDetalle> detalleList;
 	private LazyDataModel<CreDesembolsoCabecera> lazyModel;
 	private LazyDataModel<CreSolicitudCredito> lazyModelSolicitudes;
 	private LazyDataModel<CreTipoAmortizacion> lazyModelTipoAmortizacion;
@@ -79,7 +88,7 @@ public class CreDesembolsoController {
 
 	@ManagedProperty("#{bsTalonarioServiceImpl}")
 	private BsTalonarioService bsTalonarioServiceImpl;
-	
+
 	@ManagedProperty("#{stoArticuloServiceImpl}")
 	private StoArticuloService stoArticuloServiceImpl;
 
@@ -108,6 +117,7 @@ public class CreDesembolsoController {
 		this.lazyModelSolicitudes = null;
 		this.lazyModelTipoAmortizacion = null;
 		this.lazyModelTalonario = null;
+		this.detalleList = new HashSet<CreDesembolsoDetalle>();
 
 		this.esNuegoRegistro = true;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
@@ -117,6 +127,7 @@ public class CreDesembolsoController {
 	public CreDesembolsoCabecera getCreDesembolsoCabecera() {
 		if (Objects.isNull(creDesembolsoCabecera)) {
 			creDesembolsoCabecera = new CreDesembolsoCabecera();
+			creDesembolsoCabecera.setFechaDesembolso(LocalDate.now());
 			creDesembolsoCabecera.setBsEmpresa(new BsEmpresa());
 			creDesembolsoCabecera.setBsTalonario(new BsTalonario());
 			creDesembolsoCabecera.setCreTipoAmortizacion(new CreTipoAmortizacion());
@@ -365,6 +376,66 @@ public class CreDesembolsoController {
 
 	public void setLazyModelTipoAmortizacion(LazyDataModel<CreTipoAmortizacion> lazyModelTipoAmortizacion) {
 		this.lazyModelTipoAmortizacion = lazyModelTipoAmortizacion;
+	}
+
+	public Set<CreDesembolsoDetalle> getDetalleList() {
+		return detalleList;
+	}
+
+	public void setDetalleList(Set<CreDesembolsoDetalle> detalleList) {
+		this.detalleList = detalleList;
+	}
+
+	public void generarCuotas() {
+		try {
+		    if (detalleList == null || detalleList.isEmpty()) {
+		        BigDecimal porcAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100));
+		        BigDecimal montoSolicitado = creDesembolsoCabecera.getCreSolicitudCredito().getMontoSolicitado();
+		        BigDecimal interes = montoSolicitado.multiply(porcAnual);
+		        BigDecimal montoConInteres = montoSolicitado.add(interes);
+		        
+		        int plazo = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+
+		        BigDecimal montoXcuota = montoSolicitado.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+		        BigDecimal cuota = montoConInteres.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+		        BigDecimal interesXcuota = interes.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+		        BigDecimal ivaInteresXcuota = interesXcuota.divide(BigDecimal.valueOf(11), 2, RoundingMode.UP);
+
+		        BigDecimal totalCapital = BigDecimal.ZERO;
+		        BigDecimal totalInteres = BigDecimal.ZERO;
+		        BigDecimal totalIVA = BigDecimal.ZERO;
+		        BigDecimal totalCuota = BigDecimal.ZERO;
+
+		        this.detalleList = new HashSet<>();
+
+		        LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+
+		        for (int i = 1; i <= creDesembolsoCabecera.getCreSolicitudCredito().getPlazo(); i++) {
+		            detalle = new CreDesembolsoDetalle();
+		            detalle.setCreDesembolsoCabecera(creDesembolsoCabecera);
+		            detalle.setMontoCapital(montoXcuota);
+		            detalle.setMontoCuota(cuota);
+		            detalle.setMontoInteres(interesXcuota.subtract(ivaInteresXcuota));
+		            detalle.setMontoIva(ivaInteresXcuota);
+		            detalle.setNroCuota(i);
+		            detalle.setFechaVencimiento(fechaVencimiento);
+		            fechaVencimiento = fechaVencimiento.plusMonths(1);
+
+		            totalCapital = totalCapital.add(montoXcuota);
+		            totalInteres = totalInteres.add(interesXcuota);
+		            totalIVA = totalIVA.add(ivaInteresXcuota);
+		            totalCuota = totalCuota.add(cuota);
+
+		            detalleList.add(detalle);
+		        }
+		    }
+		    var a = 0;
+		} catch (Exception e) {
+		    LOGGER.error("Ocurrio un error al generar cuotas", e);
+		    CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length() + "...");
+		}
+
+
 	}
 
 }
