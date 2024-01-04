@@ -1,0 +1,174 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template.xhtml">
+	<h:head>
+		<script>
+			PrimeFaces.locales['es'] = {
+				closeText : 'Cerrar',
+				prevText : 'Anterior',
+				nextText : 'Siguiente',
+				monthNames : [ 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo',
+						'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre',
+						'Noviembre', 'Diciembre' ],
+				monthNamesShort : [ 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+						'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic' ],
+				dayNames : [ 'Domingo', 'Lunes', 'Martes', 'Miércoles',
+						'Jueves', 'Viernes', 'Sábado' ],
+				dayNamesShort : [ 'Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie',
+						'Sab' ],
+				dayNamesMin : [ 'D', 'L', 'M', 'X', 'J', 'V', 'S' ],
+				weekHeader : 'Semana',
+				firstDay : 1,
+				isRTL : false,
+				showMonthAfterYear : false,
+				yearSuffix : '',
+				timeOnlyTitle : 'Sólo hora',
+				timeText : 'Tiempo',
+				hourText : 'Hora',
+				minuteText : 'Minuto',
+				secondText : 'Segundo',
+				millisecondText : 'Milisegundo',
+				currentText : 'Fecha actual',
+				ampm : false,
+				month : 'Mes',
+				week : 'Semana',
+				day : 'Día',
+				allDayText : 'Todo el día',
+				today : 'Hoy',
+				clear : 'Claro'
+			};
+		</script>
+	</h:head>
+	<ui:define name="title">Desembolsos de Creditos</ui:define>
+	<ui:define name="content">
+		<h:form id="form">
+			<div class="grid crud-demo">
+				<div class="col-12">
+					<div class="card">
+						<p:growl id="messages" showDetail="true" />
+						<p:toolbar styleClass="mb-4"
+							rendered="#{not creDesembolsoController.esVisibleFormulario}">
+							<p:toolbarGroup>
+								<p:commandButton value="Nuevo" icon="pi pi-plus"
+									actionListener="#{creDesembolsoController.setEsVisibleFormulario(true)}"
+									update=":form" styleClass="ui-button-success"
+									style="margin-right: .5rem" />
+							</p:toolbarGroup>
+						</p:toolbar>
+						<p:dataTable
+							rendered="#{not creDesembolsoController.esVisibleFormulario}"
+							id="dt-desembolso" widgetVar="dtDesembolso" var="desembolso"
+							value="#{creDesembolsoController.lazyModel}" reflow="true"
+							selection="#{creDesembolsoController.creSolicitudCreditoSelected}"
+							rowKey="#{desembolso.id}" paginator="true" rows="10"
+							rowSelectMode="add" paginatorPosition="bottom"
+							emptyMessage="No hay Registros">
+							<f:facet name="header">
+								<div class="products-table-header">
+									<span style="font-weight: bold">Administrar Desembolsos
+										de Creditos</span> <span class="filter-container ui-input-icon-left">
+										<i class="pi pi-search"></i> <p:inputText id="globalFilter"
+											onkeyup="PF('dtDesembolso').filter()" placeholder="Buscar..." />
+									</span>
+								</div>
+							</f:facet>
+							<p:column headerText="Cliente"
+								sortBy="#{desembolso.creSolicitudCredito.cobCliente.bsPersona.nombreCompleto}"
+								filterBy="#{desembolso.creSolicitudCredito.cobCliente.bsPersona.nombreCompleto}">
+								<h:outputText
+									value="#{desembolso.creSolicitudCredito.cobCliente.bsPersona.nombreCompleto}" />
+							</p:column>
+							<p:column headerText="Vendedor"
+								sortBy="#{desembolso.creSolicitudCredito.venVendedor.bsPersona.nombreCompleto}"
+								filterBy="#{desembolso.creSolicitudCredito.venVendedor.bsPersona.nombreCompleto}">
+								<h:outputText
+									value="#{desembolso.creSolicitudCredito.venVendedor.bsPersona.nombreCompleto}" />
+							</p:column>
+							<p:column>
+								<f:facet name="header">Fecha Desembolso</f:facet>
+								<h:outputText value="#{desembolso.fechaDesembolso}"
+									converter="localDateConverter">
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Monto Solicitado"
+								sortBy="#{desembolso.creSolicitudCredito.montoSolicitado}">
+								<h:outputText
+									value="#{desembolso.creSolicitudCredito.montoSolicitado}">
+									<f:convertNumber currencySymbol="Gs." pattern="###,###,###" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">Desembolsado?</f:facet>
+								<p:toggleSwitch value="#{desembolso.indDesembolsadoBoolean}"
+									disabled="true" />
+							</p:column>
+
+							<p:column headerText="Estado" sortBy="#{desembolso.estado}"
+								filterBy="#{desembolso.estado}">
+								<h:outputText value="#{desembolso.estado}" />
+							</p:column>
+							<p:column exportable="false" headerText="Acciones">
+								<p:commandButton icon="pi pi-pencil"
+									update=":form:manage-desembolso :form:headerLb" process="@this"
+									oncomplete="PF('manageSolicitudDialog').show()"
+									styleClass="edit-button rounded-button ui-button-warning">
+									<f:setPropertyActionListener value="#{desembolso}"
+										target="#{creDesembolsoController.creSolicitudCreditoSelected}" />
+								</p:commandButton>
+								<p:commandButton class="ui-button-danger rounded-button"
+									icon="pi pi-trash" process="@this"
+									oncomplete="PF('deleteModuloDialog').show()">
+									<f:setPropertyActionListener value="#{desembolso}"
+										target="#{creDesembolsoController.creSolicitudCreditoSelected}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+
+						<p:panelGrid
+							rendered="#{creDesembolsoController.esVisibleFormulario}">
+							<div class="grid">
+								<div class="col-12 md:col-6">
+									<div class="card ui-fluid">
+										<div class="card ui-fluid">
+											<h5>Vertical Grid</h5>
+											<div class="formgrid grid">
+												<div class="field col">
+													<p:outputLabel for="name2">Name</p:outputLabel>
+													<p:inputText id="name2" type="text" />
+												</div>
+												<div class="field col">
+													<p:outputLabel for="email2">Email</p:outputLabel>
+													<p:inputText id="email2" type="text" />
+												</div>
+												<p:commandButton value="Nuevo" icon="pi pi-plus"
+													actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+													update=":form" styleClass="ui-button-success"
+													style="margin-right: .5rem" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</p:panelGrid>
+
+
+						<!-- confirms -->
+						<p:confirmDialog widgetVar="deleteModuloDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea eliminar el registro?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check"
+								actionListener="#{creDesembolsoController.delete}"
+								process="@this" oncomplete="PF('deleteModuloDialog').hide()" />
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('deleteModuloDialog').hide()" />
+						</p:confirmDialog>
+					</div>
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
+
+</ui:composition>

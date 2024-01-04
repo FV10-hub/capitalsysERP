@@ -51,11 +51,11 @@ public class CreSolicitudCredito  extends Common implements Serializable {
 	@Column(name = "monto_aprobado")
     private BigDecimal montoAprobado;
 	
-	@Column(name = "ind_desembolsado")
-    private String indDesembolsado;
+	@Column(name = "ind_autorizado")
+    private String indAutorizado;
 	
 	@Transient
-	private boolean indDesembolsadoBoolean;
+	private boolean indAutorizadoBoolean;
 
 	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
@@ -133,24 +133,24 @@ public class CreSolicitudCredito  extends Common implements Serializable {
 	}
 
 	public String getIndDesembolsado() {
-		return indDesembolsado;
+		return indAutorizado;
 	}
 
 	public void setIndDesembolsado(String indDesembolsado) {
-		this.indDesembolsado = indDesembolsado;
+		this.indAutorizado = indDesembolsado;
 	}
 
-	public boolean isIndDesembolsadoBoolean() {
-		if (indDesembolsado != null) {
-			indDesembolsadoBoolean = indDesembolsado.equals("S");
+	public boolean isIndAutorizadoBoolean() {
+		if (indAutorizado != null) {
+			indAutorizadoBoolean = indAutorizado.equals("S");
 		}
 		
-		return indDesembolsadoBoolean;
+		return indAutorizadoBoolean;
 	}
 
-	public void setIndDesembolsadoBoolean(boolean indDesembolsadoBoolean) {
-		indDesembolsado = indDesembolsadoBoolean ? "S" : "N";
-		this.indDesembolsadoBoolean = indDesembolsadoBoolean;
+	public void setIndAutorizadoBoolean(boolean indAutorizadoBoolean) {
+		indAutorizado = indAutorizadoBoolean ? "S" : "N";
+		this.indAutorizadoBoolean = indAutorizadoBoolean;
 	}
 
 	public BsEmpresa getBsEmpresa() {

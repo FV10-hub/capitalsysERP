@@ -9,4 +9,5 @@ public interface BsParametroService extends CommonService<BsParametro> {
 	 * agregar aca los metodos personalizados
 	 * public Curso findCursoByAlumnoId(Long id);
 	 * */
+	BsParametro buscarParametro(Long paramId, Long empresaId, Long moduloId);
 }

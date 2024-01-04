@@ -11,4 +11,9 @@ import py.com.capitalsys.capitalsysservices.services.impl.CommonServiceImpl;
 public class BsParametroServiceImpl 
 extends CommonServiceImpl<BsParametro, BsParametroRepository> implements BsParametroService   {
 
+	@Override
+	public BsParametro buscarParametro(Long paramId, Long empresaId, Long moduloId) {
+		return this.repository.buscarParametro(paramId, empresaId, moduloId);
+	}
+
 }
