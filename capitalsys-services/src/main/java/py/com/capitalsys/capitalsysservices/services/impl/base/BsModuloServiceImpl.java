@@ -53,4 +53,11 @@ public class BsModuloServiceImpl implements BsModuloService {
 		return this.bsModuloRepositoryImpl.buscarModulosActivosLista();
 	}
 
+	@Override
+	public BsModulo findByCodigo(String codigo) {
+		return this.bsModuloRepositoryImpl.findByCodigo(codigo);
+	}
+
+
+
 }

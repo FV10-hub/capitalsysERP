@@ -9,5 +9,6 @@ import py.com.capitalsys.capitalsysservices.services.CommonService;
 * 26 dic. 2023 - Elitebook
 */
 public interface CreSolicitudCreditoService  extends CommonService<CreSolicitudCredito>{
-	List<CreSolicitudCredito> buscarCobradorActivosLista(Long idEmpresa);
+	List<CreSolicitudCredito> buscarSolicitudActivosLista(Long idEmpresa);
+	List<CreSolicitudCredito> buscarSolicitudAutorizadosLista(Long idEmpresa);
 }

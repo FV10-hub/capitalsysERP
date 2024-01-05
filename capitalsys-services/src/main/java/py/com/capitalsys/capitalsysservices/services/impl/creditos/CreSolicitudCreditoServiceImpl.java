@@ -17,8 +17,13 @@ public class CreSolicitudCreditoServiceImpl
 extends CommonServiceImpl<CreSolicitudCredito, CreSolicitudCreditoRepository> implements CreSolicitudCreditoService {
 
 	@Override
-	public List<CreSolicitudCredito> buscarCobradorActivosLista(Long idEmpresa) {
-		return this.repository.buscarCobradorActivosLista(idEmpresa);
+	public List<CreSolicitudCredito> buscarSolicitudActivosLista(Long idEmpresa) {
+		return this.repository.buscarSolicitudActivosLista(idEmpresa);
+	}
+
+	@Override
+	public List<CreSolicitudCredito> buscarSolicitudAutorizadosLista(Long idEmpresa) {
+		return this.repository.buscarSolicitudAutorizadosLista(idEmpresa);
 	}
 
 }

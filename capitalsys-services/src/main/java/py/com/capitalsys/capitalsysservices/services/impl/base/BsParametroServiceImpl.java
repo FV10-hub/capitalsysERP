@@ -12,8 +12,8 @@ public class BsParametroServiceImpl
 extends CommonServiceImpl<BsParametro, BsParametroRepository> implements BsParametroService   {
 
 	@Override
-	public BsParametro buscarParametro(Long paramId, Long empresaId, Long moduloId) {
-		return this.repository.buscarParametro(paramId, empresaId, moduloId);
+	public String buscarParametro(String param, Long empresaId, Long moduloId) {
+		return this.repository.buscarParametro(param, empresaId, moduloId);
 	}
 
 }

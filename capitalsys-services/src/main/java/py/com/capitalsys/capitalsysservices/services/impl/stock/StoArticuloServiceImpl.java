@@ -18,6 +18,11 @@ extends CommonServiceImpl<StoArticulo, StoArticuloRepository> implements StoArti
 		return repository.buscarStoArticuloActivosLista(idEmpresa);
 	}
 
+	@Override
+	public StoArticulo buscarArticuloPorCodigo(String param, Long empresaId) {
+		return this.repository.buscarArticuloPorCodigo(param, empresaId);
+	}
+
 	
 
 }

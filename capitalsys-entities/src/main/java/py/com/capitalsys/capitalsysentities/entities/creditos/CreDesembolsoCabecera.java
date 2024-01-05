@@ -4,9 +4,14 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -89,7 +94,7 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
     private BsTalonario bsTalonario;
     
     @OneToMany(mappedBy = "creDesembolsoCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<CreDesembolsoDetalle> creDesembolsoDetalleList;
+    private List<CreDesembolsoDetalle> creDesembolsoDetalleList;
     
     @PrePersist
 	private void preInsert() {
@@ -103,14 +108,18 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 	}
 
 	public CreDesembolsoCabecera() {
-		this.creDesembolsoDetalleList = new HashSet<CreDesembolsoDetalle>();
+		this.creDesembolsoDetalleList = new ArrayList<CreDesembolsoDetalle>();
+		this.montoTotalCapital = BigDecimal.ZERO;
+		this.montoTotalInteres = BigDecimal.ZERO;
+		this.montoTotalIva = BigDecimal.ZERO;
+		this.montoTotalCredito = BigDecimal.ZERO;
 	}
 
-	public Set<CreDesembolsoDetalle> getCreDesembolsoDetalleList() {
+	public List<CreDesembolsoDetalle> getCreDesembolsoDetalleList() {
 		return creDesembolsoDetalleList;
 	}
 
-	public void setCreDesembolsoDetalleList(Set<CreDesembolsoDetalle> creDesembolsoDetalleList) {
+	public void setCreDesembolsoDetalleList(List<CreDesembolsoDetalle> creDesembolsoDetalleList) {
 		this.creDesembolsoDetalleList = creDesembolsoDetalleList;
 	}
 
@@ -243,15 +252,16 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 			this.creDesembolsoDetalleList.add(detalle);
 		}
 	}
-	
+		
 	public void calcularTotales() {
 		if (!Objects.isNull(this.creDesembolsoDetalleList)) {
 			this.creDesembolsoDetalleList.forEach(detalle -> {
-				this.montoTotalCapital.add(detalle.getMontoCapital());
-				this.montoTotalInteres.add(detalle.getMontoInteres());
-				this.montoTotalIva.add(detalle.getMontoIva());
+				this.montoTotalCapital = this.montoTotalCapital.add(detalle.getMontoCapital());
+				this.montoTotalInteres = this.montoTotalInteres.add(detalle.getMontoInteres());
+				this.montoTotalIva = this.montoTotalIva.add(detalle.getMontoIva());
 			});
-			this.montoTotalCredito.add(this.montoTotalCapital).add(this.montoTotalInteres).add(this.montoTotalIva);
+			this.montoTotalCredito = this.montoTotalCredito.add(this.montoTotalCapital).add(this.montoTotalInteres).add(this.montoTotalIva);
+			
 		}
 	}
 	

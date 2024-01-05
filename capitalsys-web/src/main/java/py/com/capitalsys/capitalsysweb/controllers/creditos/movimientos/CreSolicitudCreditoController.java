@@ -247,7 +247,7 @@ public class CreSolicitudCreditoController {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CreSolicitudCredito>(
 					(List<CreSolicitudCredito>) creSolicitudCreditoServiceImpl
-							.buscarCobradorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+							.buscarSolicitudActivosLista(sessionBean.getUsuarioLogueado().getId()));
 		}
 		return lazyModel;
 	}

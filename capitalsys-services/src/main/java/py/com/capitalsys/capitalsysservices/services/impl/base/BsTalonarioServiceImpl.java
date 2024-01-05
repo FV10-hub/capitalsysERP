@@ -21,4 +21,9 @@ extends CommonServiceImpl<BsTalonario, BsTalonarioRepository> implements BsTalon
 		return this.repository.buscarBsTalonarioActivosLista(idEmpresa);
 	}
 
+	@Override
+	public List<BsTalonario> buscarBsTalonarioPorModuloLista(Long idEmpresa, Long idModulo) {
+		return this.repository.buscarBsTalonarioPorModuloLista(idEmpresa, idModulo);
+	}
+
 }

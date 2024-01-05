@@ -169,6 +169,11 @@
 											target="#{bsTalonarioController.bsTalonario.bsTimbrado}" />
 									</p:commandButton>
 								</p:column>
+								<p:column headerText="Tipo Comprobante"
+									sortBy="#{timbrado.nroTimbrado}"
+									filterBy="#{timbrado.nroTimbrado}">
+									<h:outputText value="#{timbrado.nroTimbrado}" />
+								</p:column>
 								<p:column headerText="Establec.-Exped."
 									sortBy="#{timbrado.codEstablecimiento} - #{timbrado.codExpedicion}"
 									filterBy="#{timbrado.codEstablecimiento} - #{timbrado.codExpedicion}">

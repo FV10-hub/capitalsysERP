@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -15,13 +16,17 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsIva;
+import py.com.capitalsys.capitalsysentities.entities.base.BsParametro;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
@@ -34,6 +39,8 @@ import py.com.capitalsys.capitalsysentities.entities.creditos.CreSolicitudCredit
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreTipoAmortizacion;
 import py.com.capitalsys.capitalsysentities.entities.stock.StoArticulo;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
+import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
+import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.base.BsTalonarioService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreSolicitudCreditoService;
@@ -41,8 +48,10 @@ import py.com.capitalsys.capitalsysservices.services.creditos.CreTipoAmortizacio
 import py.com.capitalsys.capitalsysservices.services.stock.StoArticuloService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
+import py.com.capitalsys.capitalsysweb.utils.CommonsUtilitiesController;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
+import py.com.capitalsys.capitalsysweb.utils.Modulos;
 
 /*
 * 4 ene. 2024 - Elitebook
@@ -71,7 +80,7 @@ public class CreDesembolsoController {
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
-	private boolean esVisibleFormulario;
+	private boolean esVisibleFormulario = true;
 
 	private static final String DT_NAME = "dt-desembolso";
 	private static final String DT_DIALOG_NAME = "manageDesembolsoDialog";
@@ -86,17 +95,23 @@ public class CreDesembolsoController {
 	@ManagedProperty("#{creTipoAmortizacionServiceImpl}")
 	private CreTipoAmortizacionService creTipoAmortizacionServiceImpl;
 
-	@ManagedProperty("#{bsTalonarioServiceImpl}")
-	private BsTalonarioService bsTalonarioServiceImpl;
-
 	@ManagedProperty("#{stoArticuloServiceImpl}")
 	private StoArticuloService stoArticuloServiceImpl;
+
+	@ManagedProperty("#{bsParametroServiceImpl}")
+	private BsParametroService bsParametroServiceImpl;
+
+	@ManagedProperty("#{bsModuloServiceImpl}")
+	private BsModuloService bsModuloServiceImpl;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
 	 */
 	@ManagedProperty("#{sessionBean}")
 	private SessionBean sessionBean;
+
+	@ManagedProperty("#{commonsUtilitiesController}")
+	private CommonsUtilitiesController commonsUtilitiesController;
 
 	@PostConstruct
 	public void init() {
@@ -120,23 +135,37 @@ public class CreDesembolsoController {
 		this.detalleList = new HashSet<CreDesembolsoDetalle>();
 
 		this.esNuegoRegistro = true;
+		this.esVisibleFormulario = !esVisibleFormulario;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado());
 	}
 
 	// GETTERS Y SETTERS
 	public CreDesembolsoCabecera getCreDesembolsoCabecera() {
 		if (Objects.isNull(creDesembolsoCabecera)) {
-			creDesembolsoCabecera = new CreDesembolsoCabecera();
-			creDesembolsoCabecera.setFechaDesembolso(LocalDate.now());
-			creDesembolsoCabecera.setBsEmpresa(new BsEmpresa());
-			creDesembolsoCabecera.setBsTalonario(new BsTalonario());
-			creDesembolsoCabecera.setCreTipoAmortizacion(new CreTipoAmortizacion());
-			creDesembolsoCabecera.setCreSolicitudCredito(new CreSolicitudCredito());
-			creDesembolsoCabecera.getCreSolicitudCredito().setCobCliente(new CobCliente());
-			creDesembolsoCabecera.getCreSolicitudCredito().getCobCliente().setBsPersona(new BsPersona());
-			creDesembolsoCabecera.getCreSolicitudCredito().setVenVendedor(new VenVendedor());
-			creDesembolsoCabecera.getCreSolicitudCredito().getVenVendedor().setBsPersona(new BsPersona());
-			creDesembolsoCabecera.getCreSolicitudCredito().setCreMotivoPrestamo(new CreMotivoPrestamo());
+			try {
+				var moduloCredito = this.bsModuloServiceImpl.findByCodigo(Modulos.CREDITOS.getModulo());
+				var tazaAnualValorParametrizado = this.commonsUtilitiesController.getValorParametro("TAZANUAL",
+						moduloCredito.getId());
+				var tazaMoraValorParametrizado = this.commonsUtilitiesController.getValorParametro("TAZAMORA",
+						moduloCredito.getId());
+				creDesembolsoCabecera = new CreDesembolsoCabecera();
+				creDesembolsoCabecera.setFechaDesembolso(LocalDate.now());
+				creDesembolsoCabecera.setEstado(Estado.ACTIVO.getEstado());
+				creDesembolsoCabecera.setTazaAnual(new BigDecimal(tazaAnualValorParametrizado));
+				creDesembolsoCabecera.setTazaMora(new BigDecimal(tazaMoraValorParametrizado));
+				creDesembolsoCabecera.setBsEmpresa(new BsEmpresa());
+				creDesembolsoCabecera.setBsTalonario(new BsTalonario());
+				creDesembolsoCabecera.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());;
+				creDesembolsoCabecera.setCreTipoAmortizacion(new CreTipoAmortizacion());
+				creDesembolsoCabecera.setCreSolicitudCredito(new CreSolicitudCredito());
+				creDesembolsoCabecera.getCreSolicitudCredito().setCobCliente(new CobCliente());
+				creDesembolsoCabecera.getCreSolicitudCredito().getCobCliente().setBsPersona(new BsPersona());
+				creDesembolsoCabecera.getCreSolicitudCredito().setVenVendedor(new VenVendedor());
+				creDesembolsoCabecera.getCreSolicitudCredito().getVenVendedor().setBsPersona(new BsPersona());
+			} catch (Exception e) {
+				LOGGER.error("Ocurrio un error con los parametros", e.getMessage());
+				e.printStackTrace(System.err);
+			}
 
 		}
 		return creDesembolsoCabecera;
@@ -168,6 +197,7 @@ public class CreDesembolsoController {
 			creDesembolsoCabecera = creDesembolsoCabeceraSelected;
 			creDesembolsoCabeceraSelected = null;
 			this.esNuegoRegistro = false;
+			this.esVisibleFormulario = true;
 		}
 		this.creDesembolsoCabeceraSelected = creDesembolsoCabeceraSelected;
 	}
@@ -279,12 +309,28 @@ public class CreDesembolsoController {
 		this.creTipoAmortizacionServiceImpl = creTipoAmortizacionServiceImpl;
 	}
 
-	public BsTalonarioService getBsTalonarioServiceImpl() {
-		return bsTalonarioServiceImpl;
+	public BsParametroService getBsParametroServiceImpl() {
+		return bsParametroServiceImpl;
 	}
 
-	public void setBsTalonarioServiceImpl(BsTalonarioService bsTalonarioServiceImpl) {
-		this.bsTalonarioServiceImpl = bsTalonarioServiceImpl;
+	public void setBsParametroServiceImpl(BsParametroService bsParametroServiceImpl) {
+		this.bsParametroServiceImpl = bsParametroServiceImpl;
+	}
+
+	public BsModuloService getBsModuloServiceImpl() {
+		return bsModuloServiceImpl;
+	}
+
+	public void setBsModuloServiceImpl(BsModuloService bsModuloServiceImpl) {
+		this.bsModuloServiceImpl = bsModuloServiceImpl;
+	}
+
+	public CommonsUtilitiesController getCommonsUtilitiesController() {
+		return commonsUtilitiesController;
+	}
+
+	public void setCommonsUtilitiesController(CommonsUtilitiesController commonsUtilitiesController) {
+		this.commonsUtilitiesController = commonsUtilitiesController;
 	}
 
 	public SessionBean getSessionBean() {
@@ -331,8 +377,8 @@ public class CreDesembolsoController {
 	public LazyDataModel<CreDesembolsoCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CreDesembolsoCabecera>(
-					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl
-							.buscarCreDesembolsoCabeceraActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl.buscarCreDesembolsoCabeceraActivosLista(
+							this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModel;
 	}
@@ -345,7 +391,7 @@ public class CreDesembolsoController {
 		if (Objects.isNull(lazyModelSolicitudes)) {
 			lazyModelSolicitudes = new GenericLazyDataModel<CreSolicitudCredito>(
 					(List<CreSolicitudCredito>) creSolicitudCreditoServiceImpl
-							.buscarCobradorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+							.buscarSolicitudAutorizadosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelSolicitudes;
 	}
@@ -356,8 +402,11 @@ public class CreDesembolsoController {
 
 	public LazyDataModel<BsTalonario> getLazyModelTalonario() {
 		if (Objects.isNull(lazyModelTalonario)) {
-			lazyModelTalonario = new GenericLazyDataModel<BsTalonario>((List<BsTalonario>) bsTalonarioServiceImpl
-					.buscarBsTalonarioActivosLista(sessionBean.getUsuarioLogueado().getId()));
+			var moduloCredito = this.bsModuloServiceImpl.findByCodigo(Modulos.CREDITOS.getModulo());
+			lazyModelTalonario = new GenericLazyDataModel<BsTalonario>(
+					this.commonsUtilitiesController.bsTalonarioPorModuloLista(
+							this.commonsUtilitiesController.getIdEmpresaLogueada(), moduloCredito.getId()));
+
 		}
 		return lazyModelTalonario;
 	}
@@ -388,53 +437,142 @@ public class CreDesembolsoController {
 
 	public void generarCuotas() {
 		try {
-		    if (detalleList == null || detalleList.isEmpty()) {
-		        BigDecimal porcAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100));
-		        BigDecimal montoSolicitado = creDesembolsoCabecera.getCreSolicitudCredito().getMontoSolicitado();
-		        BigDecimal interes = montoSolicitado.multiply(porcAnual);
-		        BigDecimal montoConInteres = montoSolicitado.add(interes);
-		        
-		        int plazo = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+			try {
+				this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
+						this.commonsUtilitiesController.getIdEmpresaLogueada());
+			} catch (Exception e) {
+				LOGGER.error("Ocurrio un error al generar cuotas", e);
+				e.printStackTrace(System.err);
+			}
+			if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
+				BigDecimal porcAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100));
+				BigDecimal montoSolicitado = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado();
+				BigDecimal interes = montoSolicitado.multiply(porcAnual);
+				BigDecimal montoConInteres = montoSolicitado.add(interes);
+				creDesembolsoCabecera.setCreDesembolsoDetalleList(new ArrayList<CreDesembolsoDetalle>());
 
-		        BigDecimal montoXcuota = montoSolicitado.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
-		        BigDecimal cuota = montoConInteres.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
-		        BigDecimal interesXcuota = interes.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
-		        BigDecimal ivaInteresXcuota = interesXcuota.divide(BigDecimal.valueOf(11), 2, RoundingMode.UP);
+				int plazo = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
 
-		        BigDecimal totalCapital = BigDecimal.ZERO;
-		        BigDecimal totalInteres = BigDecimal.ZERO;
-		        BigDecimal totalIVA = BigDecimal.ZERO;
-		        BigDecimal totalCuota = BigDecimal.ZERO;
+				BigDecimal montoXcuota = montoSolicitado.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+				BigDecimal cuota = montoConInteres.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+				BigDecimal interesXcuota = interes.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.UP);
+				BigDecimal ivaInteresXcuota = interesXcuota.divide(BigDecimal.valueOf(11), 2, RoundingMode.UP);
 
-		        this.detalleList = new HashSet<>();
+				BigDecimal totalCapital = BigDecimal.ZERO;
+				BigDecimal totalInteres = BigDecimal.ZERO;
+				BigDecimal totalIVA = BigDecimal.ZERO;
+				BigDecimal totalCuota = BigDecimal.ZERO;
 
-		        LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
 
-		        for (int i = 1; i <= creDesembolsoCabecera.getCreSolicitudCredito().getPlazo(); i++) {
-		            detalle = new CreDesembolsoDetalle();
-		            detalle.setCreDesembolsoCabecera(creDesembolsoCabecera);
-		            detalle.setMontoCapital(montoXcuota);
-		            detalle.setMontoCuota(cuota);
-		            detalle.setMontoInteres(interesXcuota.subtract(ivaInteresXcuota));
-		            detalle.setMontoIva(ivaInteresXcuota);
-		            detalle.setNroCuota(i);
-		            detalle.setFechaVencimiento(fechaVencimiento);
-		            fechaVencimiento = fechaVencimiento.plusMonths(1);
+				for (int i = 1; i <= creDesembolsoCabecera.getCreSolicitudCredito().getPlazo(); i++) {
+					detalle = new CreDesembolsoDetalle();
+					// detalle.setCreDesembolsoCabecera(creDesembolsoCabecera);
+					detalle.setMontoCapital(montoXcuota);
+					detalle.setMontoCuota(cuota);
+					detalle.setMontoInteres(interesXcuota.subtract(ivaInteresXcuota));
+					detalle.setMontoIva(ivaInteresXcuota);
+					detalle.setNroCuota(i);
+					detalle.setCantidad(1);
+					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+					detalle.setEstado(Estado.ACTIVO.getEstado()); 
+					detalle.setFechaVencimiento(fechaVencimiento);
+					fechaVencimiento = fechaVencimiento.plusMonths(1);
+					detalle.setStoArticulo(this.stoArticuloSelected);
 
-		            totalCapital = totalCapital.add(montoXcuota);
-		            totalInteres = totalInteres.add(interesXcuota);
-		            totalIVA = totalIVA.add(ivaInteresXcuota);
-		            totalCuota = totalCuota.add(cuota);
+					totalCapital = totalCapital.add(montoXcuota);
+					totalInteres = totalInteres.add(interesXcuota);
+					totalIVA = totalIVA.add(ivaInteresXcuota);
+					totalCuota = totalCuota.add(cuota);
 
-		            detalleList.add(detalle);
-		        }
-		    }
-		    var a = 0;
+					creDesembolsoCabecera.addDetalle(detalle);
+				}
+				creDesembolsoCabecera.setCabeceraADetalle();
+				creDesembolsoCabecera.calcularTotales();
+				PrimeFaces.current().ajax().update(":form:dt-detalle");
+			}
+			var a = 0;
 		} catch (Exception e) {
-		    LOGGER.error("Ocurrio un error al generar cuotas", e);
-		    CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length() + "...");
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(e.getMessage().length()) + "...");
+			PrimeFaces.current().ajax().update(":form:messages");
 		}
 
+	}
+
+	public void limpiarCuotas() {
+		creDesembolsoCabecera.setCreDesembolsoDetalleList(new ArrayList<CreDesembolsoDetalle>());
+		creDesembolsoCabecera.setMontoTotalCapital(BigDecimal.ZERO);
+		creDesembolsoCabecera.setMontoTotalInteres(BigDecimal.ZERO);
+		creDesembolsoCabecera.setMontoTotalIva(BigDecimal.ZERO);
+		creDesembolsoCabecera.setMontoTotalCredito(BigDecimal.ZERO);
+		PrimeFaces.current().ajax().update(":form:btnLimpiar");
+	}
+
+	public void guardar() {
+		try {
+			if (Objects.isNull(this.creDesembolsoCabecera.getCreSolicitudCredito())
+					|| Objects.isNull(this.creDesembolsoCabecera.getCreSolicitudCredito().getId())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar una Solicitud.");
+				return;
+			}
+			if (Objects.isNull(this.creDesembolsoCabecera.getCreTipoAmortizacion())
+					|| Objects.isNull(this.creDesembolsoCabecera.getCreTipoAmortizacion().getId())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"Debe seleccionar un tipo de Amortizacion.");
+				return;
+			}
+			if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())
+					|| creDesembolsoCabecera.getCreDesembolsoDetalleList().size() == 0) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"Debe generar las Cuotas para guardar.");
+				return;
+			}
+			this.creDesembolsoCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+			this.creDesembolsoCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			this.creDesembolsoCabecera.setNroDesembolso(this.creDesembolsoServiceImpl
+					.calcularNroDesembolsoDisponible(commonsUtilitiesController.getIdEmpresaLogueada()));
+			if (!Objects.isNull(this.creDesembolsoServiceImpl.save(creDesembolsoCabecera))) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se guardo correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(e.getMessage().length()) + "...");
+		}
+
+	}
+	
+	public void delete() {
+		try {
+			if (Objects.isNull(this.creDesembolsoCabecera.getCreSolicitudCredito())
+					|| this.creDesembolsoCabecera.isIndDesembolsadoBoolean()) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Ya fue desembolsado.");
+				return;
+			}
+			if (!Objects.isNull(this.creDesembolsoCabecera)) {
+				this.creDesembolsoServiceImpl.deleteById(this.creDesembolsoCabecera.getId());
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se elimino correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(e.getMessage().length()) + "...");
+		}
 
 	}
 

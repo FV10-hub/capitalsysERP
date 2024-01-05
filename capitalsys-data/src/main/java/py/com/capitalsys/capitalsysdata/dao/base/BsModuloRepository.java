@@ -27,4 +27,7 @@ public interface BsModuloRepository extends PagingAndSortingRepository<BsModulo,
 	@Query("SELECT m FROM BsModulo m where m.estado = 'ACTIVO' ORDER BY m.nroOrden ASC")
 	List<BsModulo> buscarModulosActivosLista();
 
+	@Query("SELECT m FROM BsModulo m where m.estado = 'ACTIVO' and m.codigo = ?1 ORDER BY m.nroOrden ASC")
+	BsModulo findByCodigo(String codigo);
+
 }

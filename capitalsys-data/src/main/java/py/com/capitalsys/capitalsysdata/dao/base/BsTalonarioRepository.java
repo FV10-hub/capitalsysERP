@@ -22,5 +22,8 @@ public interface BsTalonarioRepository extends PagingAndSortingRepository<BsTalo
 	
 	@Query("SELECT m FROM BsTalonario m where m.estado = 'ACTIVO' and m.bsTimbrado.bsEmpresa.id = ?1")
 	List<BsTalonario> buscarBsTalonarioActivosLista(Long idEmpresa);
+	
+	@Query("SELECT m FROM BsTalonario m where m.estado = 'ACTIVO' and m.bsTimbrado.bsEmpresa.id = ?1 and m.bsTipoComprobante.bsModulo.id = ?2")
+	List<BsTalonario> buscarBsTalonarioPorModuloLista(Long idEmpresa, Long idModulo);
 
 }

@@ -22,6 +22,8 @@ public interface BsModuloService {
 	
 	List<BsModulo> buscarModulosActivosLista();
 	
+	BsModulo findByCodigo(String codigo);
+	
 	BsModulo guardar(BsModulo obj);
 	
 	void eliminar(Long id);

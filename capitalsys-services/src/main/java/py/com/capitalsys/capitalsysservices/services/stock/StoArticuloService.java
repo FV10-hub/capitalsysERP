@@ -12,4 +12,6 @@ public interface StoArticuloService extends CommonService<StoArticulo> {
 	 * public Curso findCursoByAlumnoId(Long id);
 	 * */
 	List<StoArticulo> buscarStoArticuloActivosLista(Long idEmpresa);
+	
+	StoArticulo buscarArticuloPorCodigo(String param, Long empresaId);
 }

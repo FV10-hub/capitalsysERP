@@ -20,5 +20,7 @@ public interface StoArticuloRepository extends PagingAndSortingRepository<StoArt
 	@Query("SELECT m FROM StoArticulo m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1")
 	List<StoArticulo> buscarStoArticuloActivosLista(Long idEmpresa);
 	
+	@Query("SELECT m FROM StoArticulo m where m.estado = 'ACTIVO' and m.codArticulo = ?1 and m.bsEmpresa.id = ?2")
+	StoArticulo buscarArticuloPorCodigo(String param, Long empresaId);
 	
 }

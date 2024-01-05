@@ -110,36 +110,39 @@
 								<h:outputText value="#{desembolso.estado}" />
 							</p:column>
 							<p:column exportable="false" headerText="Acciones">
-								<p:commandButton icon="pi pi-pencil"
-									update=":form:manage-desembolso :form:headerLb" process="@this"
-									oncomplete="PF('manageSolicitudDialog').show()"
-									styleClass="edit-button rounded-button ui-button-warning">
+								<p:commandButton icon="pi pi-eye"
+									update=":form" process="@this" title="Ver Registro"
+									styleClass="edit-button rounded-button ui-button-primary">
 									<f:setPropertyActionListener value="#{desembolso}"
-										target="#{creDesembolsoController.creSolicitudCreditoSelected}" />
+										target="#{creDesembolsoController.creDesembolsoCabeceraSelected}" />
 								</p:commandButton>
 								<p:commandButton class="ui-button-danger rounded-button"
-									icon="pi pi-trash" process="@this"
+									icon="pi pi-trash"
 									oncomplete="PF('deleteModuloDialog').show()">
 									<f:setPropertyActionListener value="#{desembolso}"
-										target="#{creDesembolsoController.creSolicitudCreditoSelected}" />
+										target="#{creDesembolsoController.creDesembolsoCabeceraSelected}" />
 								</p:commandButton>
 							</p:column>
 						</p:dataTable>
 
-						<p:panel rendered="#{creDesembolsoController.esVisibleFormulario}">
-							<p:toolbar styleClass="mb-4">
+						<p:panel id="manage-desembolso"
+							rendered="#{creDesembolsoController.esVisibleFormulario}">
+							<p:toolbar styleClass="mb-4" id="toolbarBotones">
 								<p:toolbarGroup>
 									<p:commandButton value="Guardar" icon="pi pi-save"
-										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										id="btnGuardar"
+										disabled="#{creDesembolsoController.creDesembolsoCabecera.creDesembolsoDetalleList.size() == 0 || creDesembolsoController.creDesembolsoCabecera.creTipoAmortizacion.id == null}"
+										actionListener="#{creDesembolsoController.guardar}"
 										update=":form" styleClass="ui-button-success"
 										style="margin-right: .5rem" />
 									<p:commandButton value="Cancelar"
 										icon="pi pi-arrow-circle-left"
-										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										actionListener="#{creDesembolsoController.cleanFields}"
 										update=":form" styleClass="ui-button-info"
 										style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
-										actionListener="#{creDesembolsoController.setEsVisibleFormulario(false)}"
+										rendered="#{creDesembolsoController.creDesembolsoCabecera.id != null}"
+										actionListener="#{creDesembolsoController.delete}"
 										update=":form" styleClass="ui-button-danger"
 										style="margin-right: .5rem" />
 
@@ -228,22 +231,19 @@
 												<p:outputLabel for="fechaDesembolsoLb"
 													styleClass="col-12 mb-2 md:col-6 mb-md-0">Fecha Desembolso</p:outputLabel>
 												<div class="col-12 md:col-6">
-													<p:datePicker id="fechaDesembolsoLb"
+													<p:datePicker id="fechaDesembolsoLb" showIcon="true"
 														value="#{creDesembolsoController.creDesembolsoCabecera.fechaDesembolso}"
 														pattern="dd/MM/yyyy">
 													</p:datePicker>
 												</div>
 											</div>
 											<div class="field grid">
-												<p:outputLabel for="tipoAmortLb"
-													styleClass="col-12 mb-2 md:col-4 mb-md-0">Tipo Amortizacion</p:outputLabel>
-												<div class="col-12 md:col-8">
-													<p:inputText id="tipoAmortLb"
-														placeholder="Pulse F9 para buscar"
-														value="#{creDesembolsoController.creDesembolsoCabecera.creTipoAmortizacion.descripcion}"
-														onkeydown="if (event.keyCode == 120) {
-						                                             PF('dlgTipoAmort').show()
-						                                         }" />
+												<p:outputLabel for="nroDesembolsoLb"
+													styleClass="col-12 mb-2 md:col-4 mb-md-0">Nro Desembolso</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:inputNumber id="nroDesembolsoLb" disabled="true"
+														placeholder="generacion aut."
+														value="#{creDesembolsoController.creDesembolsoCabecera.nroDesembolso}" />
 												</div>
 											</div>
 											<div class="field grid">
@@ -265,12 +265,31 @@
 										</div>
 										<div class="col-12 md:col-6 flex flex-column">
 											<div class="field grid">
-												<p:outputLabel for="nroDesembolsoLb"
-													styleClass="col-12 mb-2 md:col-6 mb-md-0">Nro Desembolso</p:outputLabel>
+												<p:outputLabel for="tipoAmortLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Tipo Amortizacion</p:outputLabel>
 												<div class="col-12 md:col-6">
-													<p:inputNumber id="nroDesembolsoLb" disabled="true"
-														placeholder="se genera automaticamente"
-														value="#{creDesembolsoController.creDesembolsoCabecera.nroDesembolso}" />
+													<p:inputText id="tipoAmortLb"
+														placeholder="Pulse F9 para buscar"
+														value="#{creDesembolsoController.creDesembolsoCabecera.creTipoAmortizacion.descripcion}"
+														onkeydown="if (event.keyCode == 120) {
+						                                             PF('dlgTipoAmort').show()
+						                                         }">
+														<p:ajax event="change" update=":form:btnGuardar" />
+													</p:inputText>
+												</div>
+											</div>
+											<div class="field grid">
+												<p:outputLabel for="talonarioLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Talonario</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:inputText id="talonarioLb"
+														placeholder="Pulse F9 para buscar"
+														value="#{creDesembolsoController.creDesembolsoCabecera.bsTalonario.bsTipoComprobante.descripcion}"
+														onkeydown="if (event.keyCode == 120) {
+						                                             PF('dlgTalonario').show()
+						                                         }">
+														<p:ajax event="change" update=":form:btnGuardar" />
+													</p:inputText>
 												</div>
 											</div>
 											<div class="field grid">
@@ -282,22 +301,44 @@
 														value="#{creDesembolsoController.creDesembolsoCabecera.indDesembolsadoBoolean}" />
 												</div>
 											</div>
+											<div class="field grid">
+												<p:outputLabel for="estadoLb"
+													styleClass="col-12 mb-2 md:col-6 mb-md-0">Estado</p:outputLabel>
+												<div class="col-12 md:col-6">
+													<p:selectOneMenu id="estadoLb"
+														value="#{creDesembolsoController.creDesembolsoCabecera.estado}">
+														<f:selectItem itemLabel="Seleccione un estado"
+															itemValue="#{null}" noSelectionOption="true" />
+														<f:selectItems
+															value="#{creDesembolsoController.estadoList}" />
+													</p:selectOneMenu>
+												</div>
+											</div>
 										</div>
-										<div class="col-12 md:col-12">
+										<div class="col-12 md:col-12 flex flex-row">
 											<div class="col-4 md:col-2">
 												<p:commandButton value="Generar Cuota" icon="pi pi-sync"
 													actionListener="#{creDesembolsoController.generarCuotas}"
-													update=":form:dt-detalle" styleClass="ui-button-info"
-													style="margin-right: .5rem" />
+													update=":form:dt-detalle :form:btnLimpiar :form:btnGuardar"
+													styleClass="ui-button-info" style="margin-right: .5rem" />
+											</div>
+											<div class="col-4 md:col-2">
+												<p:commandButton value="Limpiar Detalles" icon="pi pi-bolt"
+													id="btnLimpiar"
+													disabled="#{creDesembolsoController.creDesembolsoCabecera.creDesembolsoDetalleList.size() == 0 || creDesembolsoController.creDesembolsoCabecera.indDesembolsadoBoolean}"
+													actionListener="#{creDesembolsoController.limpiarCuotas}"
+													process="@this" update=":form:dt-detalle :form:btnGuardar"
+													styleClass="ui-button-primary" style="margin-right: .5rem" />
 											</div>
 
 										</div>
 										<h5 class="col-12 md:col-12">Detalle de Cuotas</h5>
 										<div class="col-12 md:col-12">
-											<p:dataTable
-												id="dt-detalle" widgetVar="dtDetalle" var="detalle"
-												value="#{creDesembolsoController.detalleList}" reflow="true"
-												paginator="true" rows="10" paginatorPosition="bottom"
+											<p:dataTable id="dt-detalle" widgetVar="dtDetalle"
+												var="detalle"
+												value="#{creDesembolsoController.creDesembolsoCabecera.creDesembolsoDetalleList}"
+												reflow="true" paginator="true" rows="12" scrollable="true"
+												scrollHeight="300" paginatorPosition="bottom"
 												emptyMessage="No hay Registros">
 
 												<p:column headerText="Nro Cuota">
@@ -305,24 +346,53 @@
 												</p:column>
 												<p:column>
 													<f:facet name="header">Primer Vencimiento</f:facet>
+													<f:facet name="footer">
+														<h5>Totales:</h5>
+													</f:facet>
 													<h:outputText value="#{detalle.fechaVencimiento}"
 														converter="localDateConverter">
 													</h:outputText>
 												</p:column>
 												<p:column headerText="Capital">
-													<h:outputText value="#{detalle.montoCapital}" />
+													<f:facet name="footer">
+														<h:outputText
+															value="#{creDesembolsoController.creDesembolsoCabecera.montoTotalCapital}">
+															<f:convertNumber pattern="###,###,###" />
+														</h:outputText>
+													</f:facet>
+													<h:outputText value="#{detalle.montoCapital}">
+														<f:convertNumber pattern="###,###,###" />
+													</h:outputText>
 												</p:column>
 												<p:column headerText="Monto Interes">
+													<f:facet name="footer">
+														<h:outputText
+															value="#{creDesembolsoController.creDesembolsoCabecera.montoTotalInteres}">
+															<f:convertNumber pattern="###,###,###" />
+														</h:outputText>
+													</f:facet>
 													<h:outputText value="#{detalle.montoInteres}">
 														<f:convertNumber pattern="###,###,###" />
 													</h:outputText>
 												</p:column>
 												<p:column headerText="IVA" style="width: 10%;">
+													<f:facet name="footer">
+														<h:outputText
+															value="#{creDesembolsoController.creDesembolsoCabecera.montoTotalIva}">
+															<f:convertNumber pattern="###,###,###" />
+														</h:outputText>
+													</f:facet>
 													<h:outputText value="#{detalle.montoIva}">
 														<f:convertNumber pattern="###,###,###" />
 													</h:outputText>
 												</p:column>
 												<p:column headerText="Cuota" style="width: 10%;">
+													<f:facet name="footer">
+														<h:outputText
+															value="#{creDesembolsoController.creDesembolsoCabecera.montoTotalCredito}">
+															<f:convertNumber pattern="###,###,###" />
+														</h:outputText>
+													</f:facet>
 													<h:outputText value="#{detalle.montoCuota}">
 														<f:convertNumber pattern="###,###,###" />
 													</h:outputText>
@@ -409,6 +479,44 @@
 							</p:dataTable>
 						</p:dialog>
 
+						<p:dialog widgetVar="dlgTalonario" header="Buscar Talonario"
+							width="650" showEffect="fade" modal="true">
+							<p:dataTable widgetVar="wdlgTalonario" var="talonario"
+								value="#{creDesembolsoController.lazyModelTalonario}"
+								id="dt-talonario" paginator="true" rows="10"
+								paginatorPosition="bottom" emptyMessage="No hay Registros">
+								<p:column style="width:3rem;text-align: center">
+									<p:commandButton oncomplete="PF('dlgTalonario').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:talonarioLb">
+										<f:setPropertyActionListener value="#{talonario}"
+											target="#{creDesembolsoController.bsTalonarioSelected}" />
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="Timbrado"
+									sortBy="#{talonario.bsTimbrado.nroTimbrado}"
+									filterBy="#{talonario.bsTimbrado.nroTimbrado}">
+									<h:outputText value="#{talonario.bsTimbrado.nroTimbrado}" />
+								</p:column>
+								<p:column headerText="Establecimiento"
+									sortBy="#{talonario.bsTimbrado.codEstablecimiento}"
+									filterBy="#{talonario.bsTimbrado.codEstablecimiento}">
+									<h:outputText
+										value="#{talonario.bsTimbrado.codEstablecimiento}" />
+								</p:column>
+								<p:column headerText="Expedicion"
+									sortBy="#{talonario.bsTimbrado.codExpedicion}"
+									filterBy="#{talonario.bsTimbrado.codExpedicion}">
+									<h:outputText value="#{talonario.bsTimbrado.codExpedicion}" />
+								</p:column>
+								<p:column headerText="Comprobante"
+									sortBy="#{talonario.bsTipoComprobante.descripcion}"
+									filterBy="#{talonario.bsTipoComprobante.descripcion}">
+									<h:outputText
+										value="#{talonario.bsTipoComprobante.descripcion}" />
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
 						<!-- DIALOGOS -->
 
 						<!-- confirms -->

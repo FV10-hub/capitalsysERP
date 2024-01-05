@@ -12,4 +12,6 @@ public interface BsTalonarioService extends CommonService<BsTalonario> {
 	 * public Curso findCursoByAlumnoId(Long id);
 	 * */
 	List<BsTalonario> buscarBsTalonarioActivosLista(Long idEmpresa);
+	
+	List<BsTalonario> buscarBsTalonarioPorModuloLista(Long idEmpresa, Long idModulo);
 }

@@ -21,6 +21,9 @@ public interface CreSolicitudCreditoRepository extends PagingAndSortingRepositor
 	List<CreSolicitudCredito> buscarTodosLista();
 	
 	@Query("SELECT m FROM CreSolicitudCredito m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1")
-	List<CreSolicitudCredito> buscarCobradorActivosLista(Long idEmpresa);
+	List<CreSolicitudCredito> buscarSolicitudActivosLista(Long idEmpresa);
+	
+	@Query("SELECT m FROM CreSolicitudCredito m where m.estado = 'ACTIVO' and m.indAutorizado = 'S' and m.bsEmpresa.id = ?1")
+	List<CreSolicitudCredito> buscarSolicitudAutorizadosLista(Long idEmpresa);
 
 }
