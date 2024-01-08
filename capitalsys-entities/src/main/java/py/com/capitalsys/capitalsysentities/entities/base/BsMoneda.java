@@ -10,12 +10,13 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
 * Aug 30, 2023-5:26:37 PM-fvazquez
 **/
 @Entity
-@Table(name = "bs_moneda")
+@Table(name = "bs_moneda", uniqueConstraints = @UniqueConstraint(name= "bs_moneda_unique_codigo" ,columnNames = {"cod_moneda"}))
 public class BsMoneda extends Common {
 	
 	@Id

@@ -11,6 +11,7 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -31,20 +32,21 @@ import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 @ViewScoped
 public class CobCajaController {
 	/**
-	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
+	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o
+	 * en un archivo externo.
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(CobCajaController.class);
-	
+
 	private CobCaja cobCaja, cobCajaSelected;
 	private LazyDataModel<CobCaja> lazyModel;
 	private List<String> estadoList;
 	private static final String DT_NAME = "dt-caja";
 	private static final String DT_DIALOG_NAME = "manageCajasDialog";
 	private boolean esNuegoRegistro;
-	
+
 	@ManagedProperty("#{cobCajaServiceImpl}")
 	private CobCajaService cobCajaServiceImpl;
-	
+
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
 	 */
@@ -56,7 +58,7 @@ public class CobCajaController {
 		this.cleanFields();
 
 	}
-	
+
 	public void cleanFields() {
 		this.cobCaja = null;
 		this.cobCajaSelected = null;
@@ -141,50 +143,64 @@ public class CobCajaController {
 	public void setSessionBean(SessionBean sessionBean) {
 		this.sessionBean = sessionBean;
 	}
-	
+
 	// METODOS
-		public void guardar() {
-			try {
-				this.cobCaja.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-				
-				if (!Objects.isNull(cobCajaServiceImpl.save(cobCaja))) {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se guardo correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+	public void guardar() {
+		try {
+			this.cobCaja.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+
+			if (!Objects.isNull(cobCajaServiceImpl.save(cobCaja))) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se guardo correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+
+			Throwable cause = e.getCause();
+			while (cause != null) {
+				if (cause instanceof ConstraintViolationException) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+							"La Caja para este usuario ya existe.");
+					break;
 				}
-				this.cleanFields();
-				PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-			} catch (Exception e) {
-				LOGGER.error("Ocurrio un error al Guardar", System.err);
-				// e.printStackTrace(System.err);
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						e.getMessage().substring(0, e.getMessage().length()) + "...");
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+				cause = cause.getCause();
 			}
 
-		}
-
-		public void delete() {
-			try {
-				if (!Objects.isNull(this.cobCajaSelected)) {
-					this.cobCajaServiceImpl.deleteById(this.cobCajaSelected.getId());
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se elimino correctamente.");
-				} else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
-				}
-				this.cleanFields();
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
-			} catch (Exception e) {
-				LOGGER.error("Ocurrio un error al eliminar", System.err);
-				// e.printStackTrace(System.err);
+			if (cause == null) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
 						e.getMessage().substring(0, e.getMessage().length()) + "...");
-				PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 			}
 
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		}
-	
+
+	}
+
+	public void delete() {
+		try {
+			if (!Objects.isNull(this.cobCajaSelected)) {
+				this.cobCajaServiceImpl.deleteById(this.cobCajaSelected.getId());
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se elimino correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al eliminar", System.err);
+			// e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		}
+
+	}
+
 }

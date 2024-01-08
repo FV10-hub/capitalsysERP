@@ -13,12 +13,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /*
 * 2 ene. 2024 - Elitebook
 */
 @Entity
-@Table(name = "bs_talonarios")
+@Table(name = "bs_talonarios", uniqueConstraints = @UniqueConstraint(name= "bs_talonarios_unique_timbrado_comprobante" ,
+columnNames = {"bs_timbrado_id", "bs_tipo_comprobante_id"}))
 public class BsTalonario extends Common implements Serializable {
 
 	private static final long serialVersionUID = 1L;

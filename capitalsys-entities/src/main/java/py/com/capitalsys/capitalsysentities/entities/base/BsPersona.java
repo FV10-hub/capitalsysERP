@@ -13,13 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * Aug 25, 2023 fvazquez
  * 
  */
 @Entity
-@Table(name = "bs_persona")
+@Table(name = "bs_persona", uniqueConstraints = @UniqueConstraint(name= "bs_persona_unique_documento" ,columnNames = {"documento"}))
 public class BsPersona extends Common {
 
 	@Id

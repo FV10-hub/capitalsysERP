@@ -16,12 +16,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * 
  */
 @Entity
-@Table(name = "bs_parametros")
+@Table(name = "bs_parametros", 
+uniqueConstraints = @UniqueConstraint(name= "bs_parametros_unique_empresa_modulo_parametro" ,
+columnNames = {"parametro", "bs_empresa_id","bs_modulo_id"}))
 public class BsParametro extends Common {
 	
 	@Id

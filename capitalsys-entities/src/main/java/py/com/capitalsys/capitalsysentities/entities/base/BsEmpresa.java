@@ -13,12 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /*
 * 24 nov. 2023 - Elitebook
 */
 @Entity
-@Table(name = "bs_empresas")
+@Table(name = "bs_empresas", uniqueConstraints = @UniqueConstraint(name= "bs_empresas_unique_persona" ,columnNames = {"bs_personas_id"}))
 public class BsEmpresa  extends Common {
 	
 	@Id

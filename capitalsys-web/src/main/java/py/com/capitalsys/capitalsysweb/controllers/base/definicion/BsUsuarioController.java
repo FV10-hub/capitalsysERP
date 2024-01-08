@@ -16,6 +16,7 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
@@ -306,6 +307,7 @@ public class BsUsuarioController implements Serializable {
 			return;
 		}
 		try {
+			this.bsUsuario.setCodUsuario(this.bsUsuario.getCodUsuario().toLowerCase());
 			this.bsUsuario.encryptPassword();
 			this.bsUsuario.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			if (!Objects.isNull(bsUsuarioServiceImpl.save(this.bsUsuario))) {
@@ -319,8 +321,24 @@ public class BsUsuarioController implements Serializable {
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
-			//e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length()+"...");
+			e.printStackTrace(System.err);
+
+			Throwable cause = e.getCause();
+			while (cause != null) {
+				if (cause instanceof ConstraintViolationException) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+							"El Usuario ya existe.");
+					break;
+				}
+				cause = cause.getCause();
+			}
+
+			if (cause == null) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						e.getMessage().substring(0, e.getMessage().length()) + "...");
+			}
+
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		}
 		
 
@@ -340,7 +358,7 @@ public class BsUsuarioController implements Serializable {
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al eliminar", System.err);
 			//e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length()+"...");
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().substring(0, e.getMessage().length())+"...");
 		}
 
 	}

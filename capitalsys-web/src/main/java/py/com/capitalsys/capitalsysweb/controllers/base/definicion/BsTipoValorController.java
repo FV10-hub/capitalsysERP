@@ -213,7 +213,7 @@ public class BsTipoValorController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().length() + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 
 	}
@@ -233,7 +233,7 @@ public class BsTipoValorController {
 			LOGGER.error("Ocurrio un error al eliminar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().length() + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 
 	}

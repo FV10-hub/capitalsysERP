@@ -496,7 +496,7 @@ public class CreDesembolsoController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().substring(e.getMessage().length()) + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 			PrimeFaces.current().ajax().update(":form:messages");
 		}
 
@@ -546,7 +546,7 @@ public class CreDesembolsoController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().substring(e.getMessage().length()) + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 
 	}
@@ -571,7 +571,7 @@ public class CreDesembolsoController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			// e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().substring(e.getMessage().length()) + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 
 	}

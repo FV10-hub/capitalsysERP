@@ -211,7 +211,7 @@ public class CobClienteController {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			//e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().length() + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 		PrimeFaces.current().executeScript("PF('" + DT_DIALOG_NAME + "').hide()");
 		PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
@@ -233,7 +233,7 @@ public class CobClienteController {
 			LOGGER.error("Ocurrio un error al eliminar", System.err);
 			//e.printStackTrace(System.err);
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().length() + "...");
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
 
 	}

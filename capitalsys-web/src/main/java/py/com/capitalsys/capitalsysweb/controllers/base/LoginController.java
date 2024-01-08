@@ -72,27 +72,32 @@ public class LoginController {
 	}
 	
 	public void loginEncrypt() {
-		BsUsuario usuarioConsultado = this.loginServiceImpl.findByUsuario(this.username);
-		boolean passDesencriptado = usuarioConsultado.checkPassword(this.password);
-		if (passDesencriptado) {
-			try {
-				this.sessionBean.setUsuarioLogueado(usuarioConsultado);
-				this.menuBean.setUsuarioLogueado(usuarioConsultado);
-				LOGGER.warn("WARN");
-				LOGGER.info("INFO");
-				LOGGER.error("error");
-				CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
-			} catch (IOException e) {
-				e.printStackTrace();
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!",
-						"Formato incorrecto en cual se ingresa a la pantalla deseada.");
-			}
-		} else {
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡UPS!",
-					"El usuario y/o contraseña son incorrectos");
-		}
+	    try {
+	        BsUsuario usuarioConsultado = this.loginServiceImpl.findByUsuario(this.username.toLowerCase());
 
+	        if (usuarioConsultado != null && usuarioConsultado.checkPassword(this.password)) {
+	            this.sessionBean.setUsuarioLogueado(usuarioConsultado);
+	            this.menuBean.setUsuarioLogueado(usuarioConsultado);
+	            
+	            try {
+	                CommonUtils.redireccionar("/pages/commons/dashboard.xhtml");
+	            } catch (IOException e) {
+	                LOGGER.error("Error al redirigir a la página de inicio", e);
+	                CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!",
+	                        "Formato incorrecto al intentar redirigir a la pantalla deseada.");
+	            }
+	        } else {
+	            LOGGER.warn("Intento de inicio de sesión fallido para el usuario: {}", this.username);
+	            CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡UPS!",
+	                    "El usuario y/o contraseña son incorrectos");
+	        }
+	    } catch (Exception e) {
+	        LOGGER.error("Error al intentar encontrar al usuario", e);
+	        CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!",
+	                "Error al intentar encontrar al usuario. Por favor, inténtelo de nuevo.");
+	    }
 	}
+
 
 	// getters y setters
 	public String getUsername() {

@@ -14,13 +14,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * Aug 25, 2023 fvazquez
  * 
  */
 @Entity
-@Table(name = "bs_rol")
+@Table(name = "bs_rol", uniqueConstraints = @UniqueConstraint(name= "bs_rol_unique_nombre" ,columnNames = {"nombre"}))
 public class BsRol extends Common {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

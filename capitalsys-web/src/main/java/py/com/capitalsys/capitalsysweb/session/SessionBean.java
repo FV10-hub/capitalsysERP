@@ -67,7 +67,7 @@ public class SessionBean {
 			CommonUtils.redireccionar("/login.xhtml");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().length()+"...");
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", e.getMessage().substring(0, e.getMessage().length())+"...");
 		}
 		
 	}
