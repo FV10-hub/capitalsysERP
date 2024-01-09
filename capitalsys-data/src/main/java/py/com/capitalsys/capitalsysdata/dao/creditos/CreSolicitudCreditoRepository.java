@@ -23,7 +23,7 @@ public interface CreSolicitudCreditoRepository extends PagingAndSortingRepositor
 	@Query("SELECT m FROM CreSolicitudCredito m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1")
 	List<CreSolicitudCredito> buscarSolicitudActivosLista(Long idEmpresa);
 	
-	@Query("SELECT m FROM CreSolicitudCredito m where m.estado = 'ACTIVO' and m.indAutorizado = 'S' and m.bsEmpresa.id = ?1")
+	@Query("SELECT m FROM CreSolicitudCredito m where m.estado = 'ACTIVO' and m.indAutorizado = 'S' and m.indDesembolsado = 'N' and m.bsEmpresa.id = ?1")
 	List<CreSolicitudCredito> buscarSolicitudAutorizadosLista(Long idEmpresa);
 
 }

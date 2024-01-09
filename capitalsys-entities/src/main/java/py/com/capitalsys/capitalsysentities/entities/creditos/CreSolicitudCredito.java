@@ -54,6 +54,9 @@ public class CreSolicitudCredito  extends Common implements Serializable {
 	@Column(name = "ind_autorizado")
     private String indAutorizado;
 	
+	@Column(name = "ind_desembolsado")
+    private String indDesembolsado;
+	
 	@Transient
 	private boolean indAutorizadoBoolean;
 
@@ -183,6 +186,14 @@ public class CreSolicitudCredito  extends Common implements Serializable {
 
 	public void setCreMotivoPrestamo(CreMotivoPrestamo creMotivoPrestamo) {
 		this.creMotivoPrestamo = creMotivoPrestamo;
+	}
+
+	public String getIndAutorizado() {
+		return indAutorizado;
+	}
+
+	public void setIndAutorizado(String indAutorizado) {
+		this.indAutorizado = indAutorizado;
 	}
 	
 	

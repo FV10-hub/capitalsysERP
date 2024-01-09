@@ -28,6 +28,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
@@ -37,66 +38,70 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 * 4 ene. 2024 - Elitebook
 */
 @Entity
-@Table(name = "cre_desembolso_cabecera")
+@Table(name = "cre_desembolso_cabecera", uniqueConstraints = @UniqueConstraint(name = "cre_desembolso_cab_unique_nroDesem_sol", columnNames = {
+		"cre_solicitud_credito_id" }))
 public class CreDesembolsoCabecera extends Common implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "fecha_desembolso")
 	private LocalDate fechaDesembolso;
 
 	@Column(name = "taza_mora")
-    private BigDecimal tazaMora;
+	private BigDecimal tazaMora;
+
+	@Column(name = "taza_anual")
+	private BigDecimal tazaAnual;
+
+	@Column(name = "nro_desembolso")
+	private BigDecimal nroDesembolso;
+
+	@Column(name = "ind_desembolsado")
+	private String indDesembolsado;
 	
-    @Column(name = "taza_anual")
-    private BigDecimal tazaAnual;
-    
-    @Column(name = "nro_desembolso")
-    private BigDecimal nroDesembolso;
-    
-    @Column(name = "ind_desembolsado")
-    private String indDesembolsado;
-	
+	@Column(name = "ind_facturado")
+	private String indFacturado;
+
 	@Transient
 	private boolean indDesembolsadoBoolean;
-	
+
 	@Column(name = "monto_total_capital")
-    private BigDecimal montoTotalCapital;
-	
+	private BigDecimal montoTotalCapital;
+
 	@Column(name = "monto_total_interes")
-    private BigDecimal montoTotalInteres;
-	
+	private BigDecimal montoTotalInteres;
+
 	@Column(name = "monto_total_iva")
-    private BigDecimal montoTotalIva;
-	
+	private BigDecimal montoTotalIva;
+
 	@Column(name = "monto_total_credito")
-    private BigDecimal montoTotalCredito;
-    
-    @OneToOne(fetch = FetchType.EAGER)
+	private BigDecimal montoTotalCredito;
+
+	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "cre_solicitud_credito_id", referencedColumnName = "id", nullable = false)
-    private CreSolicitudCredito creSolicitudCredito;
-    
-    @ManyToOne
-    @JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
-    private BsEmpresa bsEmpresa;
-    
-    @OneToOne
-    @JoinColumn(name = "cre_tipo_amortizacion_id", referencedColumnName = "id", nullable = true)
-    private CreTipoAmortizacion creTipoAmortizacion;
-    
-    @OneToOne
-    @JoinColumn(name = "bs_talonario_id", referencedColumnName = "id", nullable = true)
-    private BsTalonario bsTalonario;
-    
-    @OneToMany(mappedBy = "creDesembolsoCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<CreDesembolsoDetalle> creDesembolsoDetalleList;
-    
-    @PrePersist
+	private CreSolicitudCredito creSolicitudCredito;
+
+	@ManyToOne
+	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
+	private BsEmpresa bsEmpresa;
+
+	@OneToOne
+	@JoinColumn(name = "cre_tipo_amortizacion_id", referencedColumnName = "id", nullable = true)
+	private CreTipoAmortizacion creTipoAmortizacion;
+
+	@OneToOne
+	@JoinColumn(name = "bs_talonario_id", referencedColumnName = "id", nullable = true)
+	private BsTalonario bsTalonario;
+
+	@OneToMany(mappedBy = "creDesembolsoCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<CreDesembolsoDetalle> creDesembolsoDetalleList;
+
+	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
 		this.setFechaActualizacion(LocalDateTime.now());
@@ -214,7 +219,7 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 	public void setBsTalonario(BsTalonario bsTalonario) {
 		this.bsTalonario = bsTalonario;
 	}
-	
+
 	public BigDecimal getMontoTotalCapital() {
 		return montoTotalCapital;
 	}
@@ -247,12 +252,20 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 		this.montoTotalCredito = montoTotalCredito;
 	}
 
+	public String getIndFacturado() {
+		return indFacturado;
+	}
+
+	public void setIndFacturado(String indFacturado) {
+		this.indFacturado = indFacturado;
+	}
+
 	public void addDetalle(CreDesembolsoDetalle detalle) {
 		if (!Objects.isNull(detalle)) {
 			this.creDesembolsoDetalleList.add(detalle);
 		}
 	}
-		
+
 	public void calcularTotales() {
 		if (!Objects.isNull(this.creDesembolsoDetalleList)) {
 			this.creDesembolsoDetalleList.forEach(detalle -> {
@@ -260,11 +273,12 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 				this.montoTotalInteres = this.montoTotalInteres.add(detalle.getMontoInteres());
 				this.montoTotalIva = this.montoTotalIva.add(detalle.getMontoIva());
 			});
-			this.montoTotalCredito = this.montoTotalCredito.add(this.montoTotalCapital).add(this.montoTotalInteres).add(this.montoTotalIva);
-			
+			this.montoTotalCredito = this.montoTotalCredito.add(this.montoTotalCapital).add(this.montoTotalInteres)
+					.add(this.montoTotalIva);
+
 		}
 	}
-	
+
 	public void setCabeceraADetalle() {
 		if (!Objects.isNull(this.creDesembolsoDetalleList)) {
 			this.creDesembolsoDetalleList.forEach(detalle -> {
@@ -272,7 +286,5 @@ public class CreDesembolsoCabecera extends Common implements Serializable {
 			});
 		}
 	}
-    
-    
-}
 
+}

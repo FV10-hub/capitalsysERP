@@ -16,6 +16,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsUsuario;
 import py.com.capitalsys.capitalsysentities.entities.base.Common;
@@ -24,51 +25,52 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 * 28 dic. 2023 - Elitebook
 */
 @Entity
-@Table(name = "cob_habilitaciones_cajas")
+@Table(name = "cob_habilitaciones_cajas", uniqueConstraints = @UniqueConstraint(name = "bs_empresas_unique_persona", columnNames = {
+		"nro_habilitacion" }))
 public class CobHabilitacionCaja extends Common implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-	
+
 	@Column(name = "fecha_apertura")
 	private LocalDateTime fechaApertura;
-	
+
 	@Column(name = "fecha_cierre")
 	private LocalDateTime fechaCierre;
-	
+
 	@Column(name = "hora_apertura")
-    private String horaApertura;
-	
+	private String horaApertura;
+
 	@Column(name = "hora_cierre")
-    private String horaCierre;
-	
+	private String horaCierre;
+
 	@Column(name = "nro_habilitacion")
-    private BigDecimal nroHabilitacion;
-	
+	private BigDecimal nroHabilitacion;
+
 	@Column(name = "ind_cerrado")
-    private String indCerrado;
-	
+	private String indCerrado;
+
 	@Transient
 	private boolean indCerradoBoolean;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "bs_usuario_id", referencedColumnName = "id", nullable = false)
 	private BsUsuario bsUsuario;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "bs_cajas_id", referencedColumnName = "id", nullable = false)
 	private CobCaja cobCaja;
-	
+
 	@PrePersist
 	private void preInsert() {
 		this.setFechaCreacion(LocalDateTime.now());
 		this.setFechaActualizacion(LocalDateTime.now());
 	}
-	
+
 	@PreUpdate
 	private void preUpdate() {
 		this.setFechaActualizacion(LocalDateTime.now());
@@ -129,7 +131,7 @@ public class CobHabilitacionCaja extends Common implements Serializable {
 	public void setBsUsuario(BsUsuario bsUsuario) {
 		this.bsUsuario = bsUsuario;
 	}
-	
+
 	public CobCaja getCobCaja() {
 		return cobCaja;
 	}
@@ -175,8 +177,5 @@ public class CobHabilitacionCaja extends Common implements Serializable {
 		return Objects.equals(bsUsuario, other.bsUsuario) && Objects.equals(cobCaja, other.cobCaja)
 				&& Objects.equals(id, other.id);
 	}
-	
-	
 
 }
-

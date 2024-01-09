@@ -272,7 +272,9 @@
 							</p:outputPanel>
 
 							<f:facet name="footer">
-								<p:commandButton value="Guardar" icon="pi pi-check"
+								<p:commandButton 
+								disabled="#{creSolicitudCreditoController.creSolicitudCredito.indAutorizado eq 'S'}"
+								value="Guardar" icon="pi pi-check"
 									actionListener="#{creSolicitudCreditoController.guardar}"
 									update=":form:manage-solicitud" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"

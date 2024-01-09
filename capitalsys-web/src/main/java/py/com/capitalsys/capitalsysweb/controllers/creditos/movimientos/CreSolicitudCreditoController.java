@@ -307,6 +307,7 @@ public class CreSolicitudCreditoController {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Vendedor.");
 				return;
 			}
+			this.creSolicitudCredito.setIndDesembolsado("N");
 			this.creSolicitudCredito.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.creSolicitudCredito.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 			if (!Objects.isNull(this.creSolicitudCreditoServiceImpl.save(creSolicitudCredito))) {

@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
@@ -25,7 +26,8 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 * 1 dic. 2023 - Elitebook
 */
 @Entity
-@Table(name = "cob_cobradores")
+@Table(name = "cob_cobradores", uniqueConstraints = @UniqueConstraint(name= "cob_cobradores_unique_persona_empresa" ,
+columnNames = {"cod_cobrador", "bs_empresa_id", "id_bs_persona"}))
 public class CobCobrador extends Common implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

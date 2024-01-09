@@ -2,6 +2,7 @@ package py.com.capitalsys.capitalsysweb.controllers.creditos.movimientos;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
@@ -155,7 +157,8 @@ public class CreDesembolsoController {
 				creDesembolsoCabecera.setTazaMora(new BigDecimal(tazaMoraValorParametrizado));
 				creDesembolsoCabecera.setBsEmpresa(new BsEmpresa());
 				creDesembolsoCabecera.setBsTalonario(new BsTalonario());
-				creDesembolsoCabecera.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());;
+				creDesembolsoCabecera.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());
+				;
 				creDesembolsoCabecera.setCreTipoAmortizacion(new CreTipoAmortizacion());
 				creDesembolsoCabecera.setCreSolicitudCredito(new CreSolicitudCredito());
 				creDesembolsoCabecera.getCreSolicitudCredito().setCobCliente(new CobCliente());
@@ -435,7 +438,33 @@ public class CreDesembolsoController {
 		this.detalleList = detalleList;
 	}
 
-	public void generarCuotas() {
+	public void procesarCuotas() {
+		if (Objects.isNull(creDesembolsoCabecera.getCreTipoAmortizacion())
+				|| Objects.isNull(creDesembolsoCabecera.getCreTipoAmortizacion().getId())) {
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					"Debe seleccionar un tipo de Amortizacion.");
+			PrimeFaces.current().ajax().update(":form:messages");
+			return;
+		}
+		switch (creDesembolsoCabecera.getCreTipoAmortizacion().getCodTipo()) {
+		case "AME":
+			generarCuotasMetodoAmericano();
+			break;
+		case "FRA":
+			generarCuotasMetodoFrances();
+			break;
+		case "ALE":
+			generarCuotasMetodoAleman();
+			break;
+
+		default:
+			generarCuotasNormal();
+			break;
+		}
+	}
+
+	private void generarCuotasNormal() {
+		limpiarCuotas();
 		try {
 			try {
 				this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
@@ -475,7 +504,7 @@ public class CreDesembolsoController {
 					detalle.setNroCuota(i);
 					detalle.setCantidad(1);
 					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-					detalle.setEstado(Estado.ACTIVO.getEstado()); 
+					detalle.setEstado(Estado.ACTIVO.getEstado());
 					detalle.setFechaVencimiento(fechaVencimiento);
 					fechaVencimiento = fechaVencimiento.plusMonths(1);
 					detalle.setStoArticulo(this.stoArticuloSelected);
@@ -500,6 +529,191 @@ public class CreDesembolsoController {
 			PrimeFaces.current().ajax().update(":form:messages");
 		}
 
+	}
+
+	private void generarCuotasMetodoFrances() {
+	    try {
+	        this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
+	                this.commonsUtilitiesController.getIdEmpresaLogueada());
+
+	        if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
+	            creDesembolsoCabecera.setCreDesembolsoDetalleList(new ArrayList<CreDesembolsoDetalle>());
+	            double monto = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado().doubleValue();
+	            double tasaAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100)).doubleValue();
+	            double plazoMeses = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+	            double iva = this.stoArticuloSelected.getBsIva().getPorcentaje().divide(BigDecimal.valueOf(100)).doubleValue();
+	            
+	            //////
+	            double tasaMensual = tasaAnual / 12;
+	            double cuota = (monto * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -plazoMeses));
+	            double intereses;
+	            double capital;
+	            double saldo = monto;
+	            
+
+	            LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+
+	            for (int i = 1; i <= plazoMeses; i++) {
+	            	
+	            	intereses = saldo * tasaMensual;
+	                capital = cuota - intereses;
+	                saldo -= capital;
+	                double montoIva = cuota * iva;
+	                double cuotaConIva = cuota + montoIva;
+	                
+	                
+	                CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
+
+	                detalle.setMontoCapital(BigDecimal.valueOf(capital));
+	                detalle.setMontoInteres(BigDecimal.valueOf(intereses));
+	                detalle.setMontoIva(BigDecimal.valueOf(montoIva));
+	                detalle.setMontoCuota(BigDecimal.valueOf(cuotaConIva));
+	                detalle.setNroCuota(i);
+	                detalle.setCantidad(1);
+	                detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+	                detalle.setEstado(Estado.ACTIVO.getEstado());
+	                detalle.setFechaVencimiento(fechaVencimiento);
+	                fechaVencimiento = fechaVencimiento.plusMonths(1);
+	                detalle.setStoArticulo(this.stoArticuloSelected);
+
+	                creDesembolsoCabecera.addDetalle(detalle);
+	            }
+
+	            creDesembolsoCabecera.setCabeceraADetalle();
+	            creDesembolsoCabecera.calcularTotales();
+	            PrimeFaces.current().ajax().update(":form:dt-detalle");
+	        }
+	    } catch (Exception e) {
+	        LOGGER.error("Ocurrió un error al generar cuotas METODO FRANCES", e);
+	        e.printStackTrace(System.err);
+	        CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+	                e.getMessage().substring(0, e.getMessage().length()) + "...");
+	        PrimeFaces.current().ajax().update(":form:messages");
+	    }
+	}
+
+
+
+	private void generarCuotasMetodoAleman() {
+		limpiarCuotas();
+		try {
+			this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
+					this.commonsUtilitiesController.getIdEmpresaLogueada());
+
+			if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
+				BigDecimal montoSolicitado = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado();
+				BigDecimal porcAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100));
+				int plazo = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+
+				BigDecimal tasaMensual = porcAnual.divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_UP);
+				BigDecimal cuotaCapital = montoSolicitado.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.HALF_UP);
+
+				BigDecimal totalCapital = BigDecimal.ZERO;
+				BigDecimal totalInteres = BigDecimal.ZERO;
+				BigDecimal totalIVA = BigDecimal.ZERO;
+				BigDecimal totalCuota = BigDecimal.ZERO;
+
+				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+
+				for (int i = 1; i <= plazo; i++) {
+					CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
+
+					BigDecimal interes = montoSolicitado.multiply(tasaMensual);
+					BigDecimal ivaInteres = interes.divide(BigDecimal.valueOf(11), 2, RoundingMode.HALF_UP);
+
+					detalle.setMontoCapital(cuotaCapital);
+					detalle.setMontoInteres(interes.subtract(ivaInteres));
+					detalle.setMontoIva(ivaInteres);
+					detalle.setMontoCuota(cuotaCapital.add(interes));
+
+					detalle.setNroCuota(i);
+					detalle.setCantidad(1);
+					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+					detalle.setEstado(Estado.ACTIVO.getEstado());
+					detalle.setFechaVencimiento(fechaVencimiento);
+					fechaVencimiento = fechaVencimiento.plusMonths(1);
+					detalle.setStoArticulo(this.stoArticuloSelected);
+
+					totalCapital = totalCapital.add(cuotaCapital);
+					totalInteres = totalInteres.add(interes);
+					totalIVA = totalIVA.add(ivaInteres);
+					totalCuota = totalCuota.add(detalle.getMontoCuota());
+
+					creDesembolsoCabecera.addDetalle(detalle);
+
+					montoSolicitado = montoSolicitado.subtract(cuotaCapital);
+				}
+
+				creDesembolsoCabecera.setCabeceraADetalle();
+				creDesembolsoCabecera.calcularTotales();
+				PrimeFaces.current().ajax().update(":form:dt-detalle");
+			}
+		} catch (Exception e) {
+			LOGGER.error("Ocurrió un error al generar cuotas", e);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+			PrimeFaces.current().ajax().update(":form:messages");
+		}
+	}
+
+	private void generarCuotasMetodoAmericano() {
+		limpiarCuotas();
+		try {
+			this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
+					this.commonsUtilitiesController.getIdEmpresaLogueada());
+
+			if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
+				BigDecimal montoSolicitado = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado();
+				BigDecimal porcAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100));
+				int plazo = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+
+				BigDecimal tasaMensual = porcAnual.divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_UP);
+				BigDecimal cuotaInteres = montoSolicitado.multiply(tasaMensual);
+				BigDecimal cuotaPrincipal = montoSolicitado.divide(BigDecimal.valueOf(plazo), 2, RoundingMode.HALF_UP);
+
+				BigDecimal totalCapital = BigDecimal.ZERO;
+				BigDecimal totalInteres = BigDecimal.ZERO;
+				BigDecimal totalIVA = BigDecimal.ZERO;
+				BigDecimal totalCuota = BigDecimal.ZERO;
+
+				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+
+				for (int i = 1; i <= plazo; i++) {
+					CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
+
+					detalle.setMontoCapital(cuotaPrincipal);
+					detalle.setMontoInteres(cuotaInteres);
+					detalle.setMontoIva(cuotaInteres.divide(BigDecimal.valueOf(11), 2, RoundingMode.HALF_UP));
+					detalle.setMontoCuota(cuotaPrincipal.add(cuotaInteres));
+
+					detalle.setNroCuota(i);
+					detalle.setCantidad(1);
+					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+					detalle.setEstado(Estado.ACTIVO.getEstado());
+					detalle.setFechaVencimiento(fechaVencimiento);
+					fechaVencimiento = fechaVencimiento.plusMonths(1);
+					detalle.setStoArticulo(this.stoArticuloSelected);
+
+					totalCapital = totalCapital.add(cuotaPrincipal);
+					totalInteres = totalInteres.add(cuotaInteres);
+					totalIVA = totalIVA.add(detalle.getMontoIva());
+					totalCuota = totalCuota.add(detalle.getMontoCuota());
+
+					creDesembolsoCabecera.addDetalle(detalle);
+				}
+
+				creDesembolsoCabecera.setCabeceraADetalle();
+				creDesembolsoCabecera.calcularTotales();
+				PrimeFaces.current().ajax().update(":form:dt-detalle");
+			}
+		} catch (Exception e) {
+			LOGGER.error("Ocurrió un error al generar cuotas", e);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+			PrimeFaces.current().ajax().update(":form:messages");
+		}
 	}
 
 	public void limpiarCuotas() {
@@ -532,8 +746,11 @@ public class CreDesembolsoController {
 			}
 			this.creDesembolsoCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.creDesembolsoCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
-			this.creDesembolsoCabecera.setNroDesembolso(this.creDesembolsoServiceImpl
-					.calcularNroDesembolsoDisponible(commonsUtilitiesController.getIdEmpresaLogueada()));
+			this.creDesembolsoCabecera.setIndFacturado("N");
+			if (Objects.isNull(this.creDesembolsoCabecera.getId())) {
+				this.creDesembolsoCabecera.setNroDesembolso(this.creDesembolsoServiceImpl
+						.calcularNroDesembolsoDisponible(commonsUtilitiesController.getIdEmpresaLogueada()));
+			}
 			if (!Objects.isNull(this.creDesembolsoServiceImpl.save(creDesembolsoCabecera))) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
@@ -545,12 +762,27 @@ public class CreDesembolsoController {
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			e.printStackTrace(System.err);
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-					e.getMessage().substring(0, e.getMessage().length()) + "...");
+
+			Throwable cause = e.getCause();
+			while (cause != null) {
+				if (cause instanceof ConstraintViolationException) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+							"La solicitud ya fue desembolsado.");
+					break;
+				}
+				cause = cause.getCause();
+			}
+
+			if (cause == null) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						e.getMessage().substring(0, e.getMessage().length()) + "...");
+			}
+
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 		}
 
 	}
-	
+
 	public void delete() {
 		try {
 			if (Objects.isNull(this.creDesembolsoCabecera.getCreSolicitudCredito())
