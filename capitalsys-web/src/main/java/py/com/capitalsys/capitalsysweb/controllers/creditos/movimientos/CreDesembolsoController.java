@@ -1,12 +1,9 @@
 package py.com.capitalsys.capitalsysweb.controllers.creditos.movimientos;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +14,6 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +24,6 @@ import org.primefaces.model.LazyDataModel;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsIva;
-import py.com.capitalsys.capitalsysentities.entities.base.BsParametro;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
@@ -43,7 +38,6 @@ import py.com.capitalsys.capitalsysentities.entities.stock.StoArticulo;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
-import py.com.capitalsys.capitalsysservices.services.base.BsTalonarioService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreSolicitudCreditoService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreTipoAmortizacionService;
@@ -520,7 +514,6 @@ public class CreDesembolsoController {
 				creDesembolsoCabecera.calcularTotales();
 				PrimeFaces.current().ajax().update(":form:dt-detalle");
 			}
-			var a = 0;
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
 			e.printStackTrace(System.err);
@@ -591,8 +584,6 @@ public class CreDesembolsoController {
 	        PrimeFaces.current().ajax().update(":form:messages");
 	    }
 	}
-
-
 
 	private void generarCuotasMetodoAleman() {
 		limpiarCuotas();

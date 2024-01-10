@@ -27,4 +27,9 @@ extends CommonServiceImpl<CreDesembolsoCabecera, CreDesembolsoRepository> implem
 		return this.repository.buscarCreDesembolsoCabeceraActivosLista(idEmpresa);
 	}
 
+	@Override
+	public List<CreDesembolsoCabecera> buscarCreDesembolsoDesembolsadoLista(Long idEmpresa) {
+		return this.repository.buscarCreDesembolsoDesembolsadoLista(idEmpresa);
+	}
+
 }

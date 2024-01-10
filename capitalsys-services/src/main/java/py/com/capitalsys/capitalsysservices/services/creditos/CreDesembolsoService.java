@@ -15,4 +15,6 @@ public interface CreDesembolsoService extends CommonService<CreDesembolsoCabecer
 	
 	List<CreDesembolsoCabecera> buscarCreDesembolsoCabeceraActivosLista(Long idEmpresa);
 	
+	List<CreDesembolsoCabecera> buscarCreDesembolsoDesembolsadoLista(Long idEmpresa);
+	
 }
