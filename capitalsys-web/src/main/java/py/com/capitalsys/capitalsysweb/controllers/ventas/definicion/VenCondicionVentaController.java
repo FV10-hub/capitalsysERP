@@ -103,7 +103,7 @@ public class VenCondicionVentaController {
 	public LazyDataModel<VenCondicionVenta> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<VenCondicionVenta>((List<VenCondicionVenta>) venCondicionVentaServiceImpl
-					.buscarVenCondicionVentaActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarVenCondicionVentaActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

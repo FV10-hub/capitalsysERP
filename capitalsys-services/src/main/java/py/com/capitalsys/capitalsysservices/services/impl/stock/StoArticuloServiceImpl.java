@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysservices.services.impl.stock;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +22,11 @@ extends CommonServiceImpl<StoArticulo, StoArticuloRepository> implements StoArti
 	@Override
 	public StoArticulo buscarArticuloPorCodigo(String param, Long empresaId) {
 		return this.repository.buscarArticuloPorCodigo(param, empresaId);
+	}
+
+	@Override
+	public BigDecimal retornaExistenciaArticulo(Long idArticulo, Long idEmpresa) {
+		return this.repository.retornaExistenciaArticulo(idArticulo, idEmpresa);
 	}
 
 	

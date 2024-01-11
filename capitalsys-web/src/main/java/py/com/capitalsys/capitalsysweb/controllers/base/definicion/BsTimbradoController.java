@@ -141,7 +141,7 @@ public class BsTimbradoController {
 	public LazyDataModel<BsTimbrado> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsTimbrado>((List<BsTimbrado>) bsTimbradoServiceImpl
-					.buscarBsTimbradoActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarBsTimbradoActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

@@ -269,7 +269,7 @@
 													styleClass="col-12 mb-2 md:col-6 mb-md-0">Tipo Amortizacion</p:outputLabel>
 												<div class="col-12 md:col-6">
 													<p:inputText id="tipoAmortLb"
-														placeholder="Pulse F9 para buscar"
+														placeholder="Pulse F9 para buscar" autocomplete="off"
 														value="#{creDesembolsoController.creDesembolsoCabecera.creTipoAmortizacion.descripcion}"
 														onkeydown="if (event.keyCode == 120) {
 						                                             PF('dlgTipoAmort').show()
@@ -283,7 +283,7 @@
 													styleClass="col-12 mb-2 md:col-6 mb-md-0">Talonario</p:outputLabel>
 												<div class="col-12 md:col-6">
 													<p:inputText id="talonarioLb"
-														placeholder="Pulse F9 para buscar"
+														placeholder="Pulse F9 para buscar" autocomplete="off"
 														value="#{creDesembolsoController.creDesembolsoCabecera.bsTalonario.bsTipoComprobante.descripcion}"
 														onkeydown="if (event.keyCode == 120) {
 						                                             PF('dlgTalonario').show()
@@ -297,7 +297,7 @@
 													styleClass="col-12 mb-2 md:col-6 pr-6">Desembolsado?</p:outputLabel>
 												<div class="col-12 md:col-6">
 													<p:toggleSwitch id="aprobadoLb" onIcon="pi pi-check"
-														offIcon="pi pi-times"
+														offIcon="pi pi-times" disabled="true"
 														value="#{creDesembolsoController.creDesembolsoCabecera.indDesembolsadoBoolean}" />
 												</div>
 											</div>

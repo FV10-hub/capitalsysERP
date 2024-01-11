@@ -114,7 +114,7 @@ public class VenVendedorController {
 	public LazyDataModel<VenVendedor> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<VenVendedor>((List<VenVendedor>) venVendedorServiceImpl
-					.buscarVenVendedorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarVenVendedorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

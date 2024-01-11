@@ -37,7 +37,7 @@ import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoCabec
 */
 @Entity
 @Table(name = "ven_facturas_cabecera", uniqueConstraints = @UniqueConstraint(name = "ven_fact_cab_unique_nroFact_des", columnNames = {
-		"nro_factura", "nro_factura_completo" }))
+		"id_comprobante", "tipo_factura", "nro_factura_completo" }))
 public class VenFacturaCabecera extends Common implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -53,7 +53,7 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	@Column(name = "observacion")
 	private String observacion;
 
-	// DESEMBOLSO O FACTURA NORMAL
+	// DESEMBOLSO, NCR(nota de credito) O FACTURA NORMAL
 	@Column(name = "tipo_factura")
 	private String tipoFactura;
 
@@ -68,7 +68,7 @@ public class VenFacturaCabecera extends Common implements Serializable {
 
 	@Column(name = "ind_impreso")
 	private String indImpreso;
-	
+
 	@Transient
 	private boolean indImpresoBoolean;
 
@@ -92,10 +92,6 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	@JoinColumn(name = "ven_vendedor_id", referencedColumnName = "id", nullable = false)
 	private VenVendedor venVendedor;
 
-	@OneToOne()
-	@JoinColumn(name = "cre_desembolso_credito_id", referencedColumnName = "id", nullable = true)
-	private CreDesembolsoCabecera creDesembolsoCabecera;
-
 	@ManyToOne
 	@JoinColumn(name = "bs_talonario_id", referencedColumnName = "id", nullable = false)
 	private BsTalonario bsTalonario;
@@ -103,8 +99,12 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
+	
+	@ManyToOne
+	@JoinColumn(name = "ven_condicion_venta_id", referencedColumnName = "id", nullable = false)
+	private VenCondicionVenta venCondicionVenta;
 
-	@OneToMany(mappedBy = "venFacturaCabecera", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "venFacturaCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<VenFacturaDetalle> venFacturaDetalleList;
 
 	@PrePersist
@@ -230,14 +230,6 @@ public class VenFacturaCabecera extends Common implements Serializable {
 		this.venVendedor = venVendedor;
 	}
 
-	public CreDesembolsoCabecera getCreDesembolsoCabecera() {
-		return creDesembolsoCabecera;
-	}
-
-	public void setCreDesembolsoCabecera(CreDesembolsoCabecera creDesembolsoCabecera) {
-		this.creDesembolsoCabecera = creDesembolsoCabecera;
-	}
-
 	public BsTalonario getBsTalonario() {
 		return bsTalonario;
 	}
@@ -269,7 +261,7 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	public void setIndImpreso(String indImpreso) {
 		this.indImpreso = indImpreso;
 	}
-	
+
 	public boolean isIndImpresoBoolean() {
 		if (!Objects.isNull(indImpreso)) {
 			indImpresoBoolean = "S".equalsIgnoreCase(indImpreso);
@@ -280,6 +272,14 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	public void setIndImpresoBoolean(boolean indImpresoBoolean) {
 		indImpreso = indImpresoBoolean ? "S" : "N";
 		this.indImpresoBoolean = indImpresoBoolean;
+	}
+
+	public VenCondicionVenta getVenCondicionVenta() {
+		return venCondicionVenta;
+	}
+
+	public void setVenCondicionVenta(VenCondicionVenta venCondicionVenta) {
+		this.venCondicionVenta = venCondicionVenta;
 	}
 
 	public void addDetalle(VenFacturaDetalle detalle) {
@@ -294,21 +294,21 @@ public class VenFacturaCabecera extends Common implements Serializable {
 		var exenta = BigDecimal.ZERO;
 		var totalLinea = detalle.getMontoLinea();
 		switch (detalle.getCodIva()) {
-			case "IVA10":
-				gravada = totalLinea.divide(BigDecimal.valueOf(1.1), 2, RoundingMode.HALF_UP);
-				iva = totalLinea.subtract(gravada);
-				break;
-			case "IVA5":
-				gravada = totalLinea.divide(BigDecimal.valueOf(1.05), 2, RoundingMode.HALF_UP);
-				iva = totalLinea.subtract(gravada);
-				break;
-			case "EXE":
-				exenta = totalLinea;
-				gravada = BigDecimal.ZERO;
-				iva = BigDecimal.ZERO;
-				break;
-			default:
-				break;
+		case "IVA10":
+			gravada = totalLinea.divide(BigDecimal.valueOf(1.1), 2, RoundingMode.HALF_UP);
+			iva = totalLinea.subtract(gravada);
+			break;
+		case "IVA5":
+			gravada = totalLinea.divide(BigDecimal.valueOf(1.05), 2, RoundingMode.HALF_UP);
+			iva = totalLinea.subtract(gravada);
+			break;
+		case "EXE":
+			exenta = totalLinea;
+			gravada = BigDecimal.ZERO;
+			iva = BigDecimal.ZERO;
+			break;
+		default:
+			break;
 		}
 		detalle.setMontoGravado(gravada);
 		detalle.setMontoExento(exenta);

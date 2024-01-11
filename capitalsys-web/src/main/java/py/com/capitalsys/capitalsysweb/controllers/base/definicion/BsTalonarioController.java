@@ -168,7 +168,7 @@ public class BsTalonarioController {
 	public LazyDataModel<BsTalonario> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsTalonario>((List<BsTalonario>) bsTalonarioServiceImpl
-					.buscarBsTalonarioActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarBsTalonarioActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}
@@ -180,7 +180,7 @@ public class BsTalonarioController {
 	public LazyDataModel<BsTimbrado> getLazyModelBsTimbrado() {
 		if (Objects.isNull(lazyModelBsTimbrado)) {
 			lazyModelBsTimbrado = new GenericLazyDataModel<BsTimbrado>((List<BsTimbrado>) bsTimbradoServiceImpl
-					.buscarBsTimbradoActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarBsTimbradoActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModelBsTimbrado;
 	}
@@ -193,7 +193,7 @@ public class BsTalonarioController {
 		if (Objects.isNull(lazyModelBsTipoComprobante)) {
 			lazyModelBsTipoComprobante = new GenericLazyDataModel<BsTipoComprobante>(
 					(List<BsTipoComprobante>) bsTipoComprobanteServiceImpl
-							.buscarBsTipoComprobanteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+							.buscarBsTipoComprobanteActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModelBsTipoComprobante;
 	}

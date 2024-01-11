@@ -129,7 +129,7 @@ public class CobHabilitacionCajaController {
 	public LazyDataModel<CobHabilitacionCaja> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CobHabilitacionCaja>(this.cobHabilitacionCajaServiceImpl
-					.buscarCobHabilitacionCajaActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarCobHabilitacionCajaActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

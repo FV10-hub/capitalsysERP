@@ -119,7 +119,7 @@ public class StoArticuloController {
 	public LazyDataModel<StoArticulo> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<StoArticulo>((List<StoArticulo>) stoArticuloServiceImpl
-					.buscarStoArticuloActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarStoArticuloActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

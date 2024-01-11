@@ -171,7 +171,7 @@ public class CobClienteController {
 	public LazyDataModel<CobCliente> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CobCliente>((List<CobCliente>) cobClienteServiceImpl
-					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

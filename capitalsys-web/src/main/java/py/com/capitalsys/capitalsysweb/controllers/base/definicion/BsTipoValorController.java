@@ -170,7 +170,7 @@ public class BsTipoValorController {
 	public LazyDataModel<BsTipoValor> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsTipoValor>((List<BsTipoValor>) bsTipoValorServiceImpl
-					.buscarTipoValorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarTipoValorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

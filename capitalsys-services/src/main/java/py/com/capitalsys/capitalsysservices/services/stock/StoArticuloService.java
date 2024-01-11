@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysservices.services.stock;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import py.com.capitalsys.capitalsysentities.entities.stock.StoArticulo;
@@ -14,4 +15,6 @@ public interface StoArticuloService extends CommonService<StoArticulo> {
 	List<StoArticulo> buscarStoArticuloActivosLista(Long idEmpresa);
 	
 	StoArticulo buscarArticuloPorCodigo(String param, Long empresaId);
+	
+	BigDecimal retornaExistenciaArticulo(Long idArticulo,Long idEmpresa);
 }

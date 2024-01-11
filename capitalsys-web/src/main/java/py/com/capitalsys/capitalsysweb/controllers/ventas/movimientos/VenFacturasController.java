@@ -3,9 +3,11 @@ package py.com.capitalsys.capitalsysweb.controllers.ventas.movimientos;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -14,6 +16,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
@@ -28,9 +31,11 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTipoComprobante;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCliente;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoCabecera;
+import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoDetalle;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreSolicitudCredito;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreTipoAmortizacion;
 import py.com.capitalsys.capitalsysentities.entities.stock.StoArticulo;
+import py.com.capitalsys.capitalsysentities.entities.ventas.VenCondicionVenta;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaCabecera;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaDetalle;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
@@ -39,6 +44,7 @@ import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobClienteService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
 import py.com.capitalsys.capitalsysservices.services.stock.StoArticuloService;
+import py.com.capitalsys.capitalsysservices.services.ventas.VenCondicionVentaService;
 import py.com.capitalsys.capitalsysservices.services.ventas.VenFacturasService;
 import py.com.capitalsys.capitalsysservices.services.ventas.VenVendedorService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
@@ -72,13 +78,13 @@ public class VenFacturasController {
 	private LazyDataModel<BsTalonario> lazyModelTalonario;
 	private LazyDataModel<CobCliente> lazyModelCliente;
 	private LazyDataModel<VenVendedor> lazyModelVenVendedor;
+	private LazyDataModel<VenCondicionVenta> lazyModelVenCondicionVenta;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
 	private boolean esVisibleFormulario = true;
 
 	private static final String DT_NAME = "dt-facturas";
-	private static final String DT_DIALOG_NAME = "manageFacturasDialog";
 
 	// services
 	@ManagedProperty("#{venFacturasServiceImpl}")
@@ -101,6 +107,9 @@ public class VenFacturasController {
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
+	
+	@ManagedProperty("#{venCondicionVentaServiceImpl}")
+	private VenCondicionVentaService venCondicionVentaServiceImpl;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -130,6 +139,7 @@ public class VenFacturasController {
 		this.lazyModelTalonario = null;
 		this.lazyModelCliente = null;
 		this.lazyModelVenVendedor = null;
+		this.lazyModelVenCondicionVenta = null;
 
 		this.esNuegoRegistro = true;
 		this.esVisibleFormulario = !esVisibleFormulario;
@@ -145,20 +155,14 @@ public class VenFacturasController {
 			venFacturaCabecera.setTipoFactura("FACTURA");
 			venFacturaCabecera.setEstado(Estado.ACTIVO.getEstado());
 			venFacturaCabecera.setBsEmpresa(new BsEmpresa());
+			venFacturaCabecera.setVenCondicionVenta(new VenCondicionVenta());
+			venFacturaCabecera.setVenCondicionVenta(new VenCondicionVenta());
 			venFacturaCabecera.setBsTalonario(new BsTalonario());
 			venFacturaCabecera.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());
 			venFacturaCabecera.setCobCliente(new CobCliente());
 			venFacturaCabecera.getCobCliente().setBsPersona(new BsPersona());
 			venFacturaCabecera.setVenVendedor(new VenVendedor());
 			venFacturaCabecera.getVenVendedor().setBsPersona(new BsPersona());
-			venFacturaCabecera.setCreDesembolsoCabecera(new CreDesembolsoCabecera());
-			venFacturaCabecera.getCreDesembolsoCabecera().setCreSolicitudCredito(new CreSolicitudCredito());
-			venFacturaCabecera.getCreDesembolsoCabecera().getCreSolicitudCredito().setCobCliente(new CobCliente());
-			venFacturaCabecera.getCreDesembolsoCabecera().getCreSolicitudCredito().getCobCliente()
-					.setBsPersona(new BsPersona());
-			venFacturaCabecera.getCreDesembolsoCabecera().getCreSolicitudCredito().setVenVendedor(new VenVendedor());
-			venFacturaCabecera.getCreDesembolsoCabecera().getCreSolicitudCredito().getVenVendedor()
-					.setBsPersona(new BsPersona());
 
 		}
 		return venFacturaCabecera;
@@ -173,22 +177,14 @@ public class VenFacturasController {
 			venFacturaCabeceraSelected = new VenFacturaCabecera();
 			venFacturaCabeceraSelected.setFechaFactura(LocalDate.now());
 			venFacturaCabeceraSelected.setBsEmpresa(new BsEmpresa());
+			venFacturaCabeceraSelected.setVenCondicionVenta(new VenCondicionVenta());
+			venFacturaCabeceraSelected.setVenCondicionVenta(new VenCondicionVenta());
 			venFacturaCabeceraSelected.setBsTalonario(new BsTalonario());
 			venFacturaCabeceraSelected.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());
 			venFacturaCabeceraSelected.setCobCliente(new CobCliente());
 			venFacturaCabeceraSelected.getCobCliente().setBsPersona(new BsPersona());
 			venFacturaCabeceraSelected.setVenVendedor(new VenVendedor());
 			venFacturaCabeceraSelected.getVenVendedor().setBsPersona(new BsPersona());
-			venFacturaCabeceraSelected.setCreDesembolsoCabecera(new CreDesembolsoCabecera());
-			venFacturaCabeceraSelected.getCreDesembolsoCabecera().setCreSolicitudCredito(new CreSolicitudCredito());
-			venFacturaCabeceraSelected.getCreDesembolsoCabecera().getCreSolicitudCredito()
-					.setCobCliente(new CobCliente());
-			venFacturaCabeceraSelected.getCreDesembolsoCabecera().getCreSolicitudCredito().getCobCliente()
-					.setBsPersona(new BsPersona());
-			venFacturaCabeceraSelected.getCreDesembolsoCabecera().getCreSolicitudCredito()
-					.setVenVendedor(new VenVendedor());
-			venFacturaCabeceraSelected.getCreDesembolsoCabecera().getCreSolicitudCredito().getVenVendedor()
-					.setBsPersona(new BsPersona());
 
 		}
 		return venFacturaCabeceraSelected;
@@ -196,6 +192,7 @@ public class VenFacturasController {
 
 	public void setVenFacturaCabeceraSelected(VenFacturaCabecera venFacturaCabeceraSelected) {
 		if (!Objects.isNull(venFacturaCabeceraSelected)) {
+			venFacturaCabeceraSelected.getVenFacturaDetalleList().sort(Comparator.comparing(VenFacturaDetalle::getNroOrden));
 			venFacturaCabecera = venFacturaCabeceraSelected;
 			venFacturaCabeceraSelected = null;
 			this.esNuegoRegistro = false;
@@ -226,13 +223,23 @@ public class VenFacturasController {
 
 	public void setCreDesembolsoCabecera(CreDesembolsoCabecera creDesembolsoCabecera) {
 		if (!Objects.isNull(creDesembolsoCabecera)) {
-			this.venFacturaCabecera.setCreDesembolsoCabecera(creDesembolsoCabecera);
+			var moduloCredito = this.bsModuloServiceImpl.findByCodigo(Modulos.VENTAS.getModulo());
+			var condicionVentaValorParametrizado = this.commonsUtilitiesController.getValorParametro("CREDES",
+					moduloCredito.getId());
+			Optional<VenCondicionVenta> condicion = this.venCondicionVentaServiceImpl.
+					buscarVenCondicionVentaActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
+					.stream()
+					.filter(con -> con.getCodCondicion().equalsIgnoreCase(condicionVentaValorParametrizado))
+					.findFirst();
+			if(condicion.isPresent()) {
+				this.venFacturaCabecera.setVenCondicionVenta(condicion.get());
+			}
+			this.venFacturaCabecera.setIdComprobate(creDesembolsoCabecera.getId());
 			this.venFacturaCabecera.setVenVendedor(creDesembolsoCabecera.getCreSolicitudCredito().getVenVendedor());
 			this.venFacturaCabecera.setCobCliente(creDesembolsoCabecera.getCreSolicitudCredito().getCobCliente());
 			this.venFacturaCabecera.setIdComprobate(creDesembolsoCabecera.getId());
 			this.venFacturaCabecera.setTipoFactura("DESEMBOLSO");
-			cargarDetalleSiEsDesembolso();
-			creDesembolsoCabecera = null;
+			cargarDetalleSiEsDesembolso(creDesembolsoCabecera);
 		}
 		this.creDesembolsoCabecera = creDesembolsoCabecera;
 	}
@@ -266,6 +273,12 @@ public class VenFacturasController {
 
 	public void setStoArticuloSelected(StoArticulo stoArticuloSelected) {
 		if (stoArticuloSelected != null) {
+			BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(stoArticuloSelected.getId(), this.commonsUtilitiesController.getIdEmpresaLogueada());
+			if (stoArticuloSelected.getIndInventariable().equalsIgnoreCase("S") && existencia.compareTo(BigDecimal.ZERO) <= 0) {
+			    CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El Articulo no tiene existencia suficiente.");
+			    PrimeFaces.current().ajax().update("form:messages", "form:btnAddDetalle");
+			    return;
+			}
 			detalle.setStoArticulo(stoArticuloSelected);
 			detalle.setCantidad(1);
 			detalle.setCodIva(stoArticuloSelected.getBsIva().getCodIva());
@@ -343,8 +356,11 @@ public class VenFacturasController {
 
 	public LazyDataModel<StoArticulo> getLazyModelArticulos() {
 		if (Objects.isNull(lazyModelArticulos)) {
-			lazyModelArticulos = new GenericLazyDataModel<StoArticulo>((List<StoArticulo>) stoArticuloServiceImpl
-					.buscarStoArticuloActivosLista(sessionBean.getUsuarioLogueado().getId()));
+			List<StoArticulo> listaFiltrada = (List<StoArticulo>) stoArticuloServiceImpl
+					.buscarStoArticuloActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
+			        .filter(articulo -> "S".equals(articulo.getIndInventariable()))
+			        .collect(Collectors.toList());;
+			lazyModelArticulos = new GenericLazyDataModel<StoArticulo>(listaFiltrada);
 		}
 		return lazyModelArticulos;
 	}
@@ -371,7 +387,7 @@ public class VenFacturasController {
 	public LazyDataModel<CobCliente> getLazyModelCliente() {
 		if (Objects.isNull(lazyModelCliente)) {
 			lazyModelCliente = new GenericLazyDataModel<CobCliente>((List<CobCliente>) cobClienteServiceImpl
-					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarClienteActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelCliente;
 	}
@@ -383,13 +399,25 @@ public class VenFacturasController {
 	public LazyDataModel<VenVendedor> getLazyModelVenVendedor() {
 		if (Objects.isNull(lazyModelVenVendedor)) {
 			lazyModelVenVendedor = new GenericLazyDataModel<VenVendedor>((List<VenVendedor>) venVendedorServiceImpl
-					.buscarVenVendedorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarVenVendedorActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelVenVendedor;
 	}
 
 	public void setLazyModelVenVendedor(LazyDataModel<VenVendedor> lazyModelVenVendedor) {
 		this.lazyModelVenVendedor = lazyModelVenVendedor;
+	}
+
+	public LazyDataModel<VenCondicionVenta> getLazyModelVenCondicionVenta() {
+		if (Objects.isNull(lazyModelVenCondicionVenta)) {
+			lazyModelVenCondicionVenta = new GenericLazyDataModel<VenCondicionVenta>((List<VenCondicionVenta>) venCondicionVentaServiceImpl
+					.buscarVenCondicionVentaActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+		}
+		return lazyModelVenCondicionVenta;
+	}
+
+	public void setLazyModelVenCondicionVenta(LazyDataModel<VenCondicionVenta> lazyModelVenCondicionVenta) {
+		this.lazyModelVenCondicionVenta = lazyModelVenCondicionVenta;
 	}
 
 	// SERVICES
@@ -465,8 +493,29 @@ public class VenFacturasController {
 		this.commonsUtilitiesController = commonsUtilitiesController;
 	}
 
+	public VenCondicionVentaService getVenCondicionVentaServiceImpl() {
+		return venCondicionVentaServiceImpl;
+	}
+
+	public void setVenCondicionVentaServiceImpl(VenCondicionVentaService venCondicionVentaServiceImpl) {
+		this.venCondicionVentaServiceImpl = venCondicionVentaServiceImpl;
+	}
+
 	// METODOS
 	public void calculaTotalLineaDetalle() {
+		BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(detalle.getStoArticulo().getId(), this.commonsUtilitiesController.getIdEmpresaLogueada());
+		if (detalle.getStoArticulo().getIndInventariable().equalsIgnoreCase("S") && existencia.compareTo(new BigDecimal(detalle.getCantidad())) < 0) {
+			detalle.setStoArticulo(new StoArticulo());
+			detalle.setCantidad(1);
+			detalle.setCodIva(null);
+			detalle.setPrecioUnitario(BigDecimal.ZERO);
+			detalle.setMontoLinea(BigDecimal.ZERO);
+			stoArticuloSelected = null;
+		    getStoArticuloSelected();
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El Articulo no tiene existencia suficiente.");
+		    PrimeFaces.current().ajax().update("form:messages", "form:articuloLb", "form:codIvaLb", "form:totalineaLb", "form:precioLb", "form:form:btnAddDetalle");
+		    return;
+		}
 		detalle.setMontoLinea(detalle.getStoArticulo().getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())));
 	}
 	
@@ -484,15 +533,18 @@ public class VenFacturasController {
 	}
 
 	public void agregarDetalle() {
-		if (!(Objects.isNull(venFacturaCabecera.getCreDesembolsoCabecera())
-				|| Objects.isNull(venFacturaCabecera.getCreDesembolsoCabecera().getId()))) {
-			cargarDetalleSiEsDesembolso();
+		if (StringUtils.equalsIgnoreCase("DESEMBOLSO", venFacturaCabecera.getTipoFactura())) {
+			cargarDetalleSiEsDesembolso(creDesembolsoCabecera);
+			return;
+		}
+		if (StringUtils.equalsIgnoreCase("NCR", venFacturaCabecera.getTipoFactura())) {
+			//TODO: aca debo implementar notas de creditos
 			return;
 		}
 		cargaDetalleVenta();
 	}
 
-	private void cargarDetalleSiEsDesembolso() {
+	private void cargarDetalleSiEsDesembolso(CreDesembolsoCabecera creDesembolsoCabecera) {
 		limpiarDetalle();
 		try {
 			this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("DES",
@@ -502,13 +554,16 @@ public class VenFacturasController {
 			e.printStackTrace(System.err);
 		}
 		this.detalle = new VenFacturaDetalle();
+		this.detalle.setEstado(Estado.ACTIVO.getEstado());
+		this.detalle.setUsuarioModificacion(this.sessionBean.getUsuarioLogueado().getCodUsuario());
 		this.detalle.setStoArticulo(stoArticuloSelected);
 		this.detalle.setCantidad(1);
 		this.detalle.setNroOrden(1);
 		this.detalle.setCodIva(stoArticuloSelected.getBsIva().getCodIva());
 		//TODO: revisar aca si esta bien que sete el total del interes nomas
-		this.detalle.setMontoLinea(venFacturaCabecera.getCreDesembolsoCabecera().getMontoTotalInteres().add(venFacturaCabecera.getCreDesembolsoCabecera().getMontoTotalIva()));
-
+		this.detalle.setMontoLinea(creDesembolsoCabecera.getMontoTotalInteres().add(creDesembolsoCabecera.getMontoTotalIva()));
+		this.detalle.setPrecioUnitario(this.detalle.getMontoLinea());
+		
 		this.venFacturaCabecera.addDetalle(detalle);
 		this.venFacturaCabecera.calcularTotales();
 		this.venFacturaCabecera.setCabeceraADetalle();
@@ -540,12 +595,14 @@ public class VenFacturasController {
 		venFacturaCabecera.setMontoTotalIva(BigDecimal.ZERO);
 		venFacturaCabecera.setMontoTotalFactura(BigDecimal.ZERO);
 
+		this.detalle.setEstado(Estado.ACTIVO.getEstado());
+		this.detalle.setUsuarioModificacion(this.sessionBean.getUsuarioLogueado().getCodUsuario());
 		this.venFacturaCabecera.addDetalle(detalle);
 		this.venFacturaCabecera.calcularTotales();
 		this.venFacturaCabecera.setCabeceraADetalle();
 
 		detalle = null;
-		PrimeFaces.current().ajax().update(":form:dt-detalle");
+		PrimeFaces.current().ajax().update(":form:dt-detalle", ":form:btnGuardar");
 	}
 
 	public void limpiarDetalle() {
@@ -565,6 +622,12 @@ public class VenFacturasController {
 						"Debe seleccionar un Talonario.");
 				return;
 			}
+			if (Objects.isNull(this.venFacturaCabecera.getVenCondicionVenta())
+					|| Objects.isNull(this.venFacturaCabecera.getVenCondicionVenta().getId())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"Debe seleccionar una Condicion de Venta.");
+				return;
+			}
 			if (CollectionUtils.isEmpty(venFacturaCabecera.getVenFacturaDetalleList())
 					|| venFacturaCabecera.getVenFacturaDetalleList().size() == 0) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
@@ -574,7 +637,7 @@ public class VenFacturasController {
 			this.venFacturaCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.venFacturaCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 			if (Objects.isNull(this.venFacturaCabecera.getId())) {
-				this.venFacturaCabecera.setIndImpreso("N");
+				this.venFacturaCabecera.setIndImpresoBoolean(false);
 				this.venFacturaCabecera.setNroFactura(this.venFacturasServiceImpl
 						.calcularNroFacturaDisponible(commonsUtilitiesController.getIdEmpresaLogueada(),
 								this.venFacturaCabecera.getBsTalonario().getId()));

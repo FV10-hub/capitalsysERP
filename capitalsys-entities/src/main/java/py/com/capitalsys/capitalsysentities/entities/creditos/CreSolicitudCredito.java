@@ -136,11 +136,11 @@ public class CreSolicitudCredito  extends Common implements Serializable {
 	}
 
 	public String getIndDesembolsado() {
-		return indAutorizado;
+		return indDesembolsado;
 	}
 
 	public void setIndDesembolsado(String indDesembolsado) {
-		this.indAutorizado = indDesembolsado;
+		this.indDesembolsado = indDesembolsado;
 	}
 
 	public boolean isIndAutorizadoBoolean() {

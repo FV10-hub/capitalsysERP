@@ -171,7 +171,7 @@ public class BsTipoComprobanteController {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<BsTipoComprobante>(
 					(List<BsTipoComprobante>) bsTipoComprobanteServiceImpl
-							.buscarBsTipoComprobanteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+							.buscarBsTipoComprobanteActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

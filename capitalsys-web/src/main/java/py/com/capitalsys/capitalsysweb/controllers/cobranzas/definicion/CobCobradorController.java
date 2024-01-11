@@ -173,7 +173,7 @@ public class CobCobradorController {
 	public LazyDataModel<CobCobrador> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CobCobrador>((List<CobCobrador>) 
-					cobCobradorServiceImpl.buscarCobradorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					cobCobradorServiceImpl.buscarCobradorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}

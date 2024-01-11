@@ -247,7 +247,7 @@ public class CreSolicitudCreditoController {
 		if (Objects.isNull(lazyModel)) {
 			lazyModel = new GenericLazyDataModel<CreSolicitudCredito>(
 					(List<CreSolicitudCredito>) creSolicitudCreditoServiceImpl
-							.buscarSolicitudActivosLista(sessionBean.getUsuarioLogueado().getId()));
+							.buscarSolicitudActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModel;
 	}
@@ -259,7 +259,7 @@ public class CreSolicitudCreditoController {
 	public LazyDataModel<CobCliente> getLazyModelCliente() {
 		if (Objects.isNull(lazyModelCliente)) {
 			lazyModelCliente = new GenericLazyDataModel<CobCliente>((List<CobCliente>) cobClienteServiceImpl
-					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarClienteActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModelCliente;
 	}
@@ -271,7 +271,7 @@ public class CreSolicitudCreditoController {
 	public LazyDataModel<VenVendedor> getLazyModelVenVendedor() {
 		if (Objects.isNull(lazyModelVenVendedor)) {
 			lazyModelVenVendedor = new GenericLazyDataModel<VenVendedor>((List<VenVendedor>) venVendedorServiceImpl
-					.buscarVenVendedorActivosLista(sessionBean.getUsuarioLogueado().getId()));
+					.buscarVenVendedorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()));
 		}
 		return lazyModelVenVendedor;
 	}

@@ -3,7 +3,10 @@ package py.com.capitalsys.capitalsysweb.controllers.creditos.movimientos;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -152,7 +155,6 @@ public class CreDesembolsoController {
 				creDesembolsoCabecera.setBsEmpresa(new BsEmpresa());
 				creDesembolsoCabecera.setBsTalonario(new BsTalonario());
 				creDesembolsoCabecera.getBsTalonario().setBsTipoComprobante(new BsTipoComprobante());
-				;
 				creDesembolsoCabecera.setCreTipoAmortizacion(new CreTipoAmortizacion());
 				creDesembolsoCabecera.setCreSolicitudCredito(new CreSolicitudCredito());
 				creDesembolsoCabecera.getCreSolicitudCredito().setCobCliente(new CobCliente());
@@ -191,6 +193,7 @@ public class CreDesembolsoController {
 
 	public void setCreDesembolsoCabeceraSelected(CreDesembolsoCabecera creDesembolsoCabeceraSelected) {
 		if (!Objects.isNull(creDesembolsoCabeceraSelected)) {
+			creDesembolsoCabeceraSelected.getCreDesembolsoDetalleList().sort(Comparator.comparing(CreDesembolsoDetalle::getNroCuota));
 			creDesembolsoCabecera = creDesembolsoCabeceraSelected;
 			creDesembolsoCabeceraSelected = null;
 			this.esNuegoRegistro = false;
@@ -487,6 +490,7 @@ public class CreDesembolsoController {
 				BigDecimal totalCuota = BigDecimal.ZERO;
 
 				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				int diaHabilPrimerVencimiento = fechaVencimiento.getDayOfMonth();
 
 				for (int i = 1; i <= creDesembolsoCabecera.getCreSolicitudCredito().getPlazo(); i++) {
 					detalle = new CreDesembolsoDetalle();
@@ -499,8 +503,30 @@ public class CreDesembolsoController {
 					detalle.setCantidad(1);
 					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 					detalle.setEstado(Estado.ACTIVO.getEstado());
-					detalle.setFechaVencimiento(fechaVencimiento);
-					fechaVencimiento = fechaVencimiento.plusMonths(1);
+
+					if (i == 1) {
+						detalle.setFechaVencimiento(fechaVencimiento);
+						fechaVencimiento = fechaVencimiento.plusMonths(1);
+					} else {
+						int ultimoDiaHabilActual = YearMonth.from(fechaVencimiento).atEndOfMonth().getDayOfMonth();
+						if (ultimoDiaHabilActual < diaHabilPrimerVencimiento) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									ultimoDiaHabilActual);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else if (fechaVencimiento.getMonth() == Month.FEBRUARY) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									diaHabilPrimerVencimiento);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else {
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = fechaVencimiento.plusMonths(1);
+						}
+					}
+
 					detalle.setStoArticulo(this.stoArticuloSelected);
 
 					totalCapital = totalCapital.add(montoXcuota);
@@ -525,64 +551,86 @@ public class CreDesembolsoController {
 	}
 
 	private void generarCuotasMetodoFrances() {
-	    try {
-	        this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
-	                this.commonsUtilitiesController.getIdEmpresaLogueada());
+		try {
+			this.stoArticuloSelected = this.stoArticuloServiceImpl.buscarArticuloPorCodigo("CUO",
+					this.commonsUtilitiesController.getIdEmpresaLogueada());
 
-	        if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
-	            creDesembolsoCabecera.setCreDesembolsoDetalleList(new ArrayList<CreDesembolsoDetalle>());
-	            double monto = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado().doubleValue();
-	            double tasaAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100)).doubleValue();
-	            double plazoMeses = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
-	            double iva = this.stoArticuloSelected.getBsIva().getPorcentaje().divide(BigDecimal.valueOf(100)).doubleValue();
-	            
-	            //////
-	            double tasaMensual = tasaAnual / 12;
-	            double cuota = (monto * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -plazoMeses));
-	            double intereses;
-	            double capital;
-	            double saldo = monto;
-	            
+			if (CollectionUtils.isEmpty(creDesembolsoCabecera.getCreDesembolsoDetalleList())) {
+				creDesembolsoCabecera.setCreDesembolsoDetalleList(new ArrayList<CreDesembolsoDetalle>());
+				double monto = creDesembolsoCabecera.getCreSolicitudCredito().getMontoAprobado().doubleValue();
+				double tasaAnual = creDesembolsoCabecera.getTazaAnual().divide(BigDecimal.valueOf(100)).doubleValue();
+				double plazoMeses = creDesembolsoCabecera.getCreSolicitudCredito().getPlazo();
+				double iva = this.stoArticuloSelected.getBsIva().getPorcentaje().divide(BigDecimal.valueOf(100))
+						.doubleValue();
 
-	            LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				//////
+				double tasaMensual = tasaAnual / 12;
+				double cuota = (monto * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -plazoMeses));
+				double intereses;
+				double capital;
+				double saldo = monto;
 
-	            for (int i = 1; i <= plazoMeses; i++) {
-	            	
-	            	intereses = saldo * tasaMensual;
-	                capital = cuota - intereses;
-	                saldo -= capital;
-	                double montoIva = cuota * iva;
-	                double cuotaConIva = cuota + montoIva;
-	                
-	                
-	                CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
+				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				int diaHabilPrimerVencimiento = fechaVencimiento.getDayOfMonth();
 
-	                detalle.setMontoCapital(BigDecimal.valueOf(capital));
-	                detalle.setMontoInteres(BigDecimal.valueOf(intereses));
-	                detalle.setMontoIva(BigDecimal.valueOf(montoIva));
-	                detalle.setMontoCuota(BigDecimal.valueOf(cuotaConIva));
-	                detalle.setNroCuota(i);
-	                detalle.setCantidad(1);
-	                detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-	                detalle.setEstado(Estado.ACTIVO.getEstado());
-	                detalle.setFechaVencimiento(fechaVencimiento);
-	                fechaVencimiento = fechaVencimiento.plusMonths(1);
-	                detalle.setStoArticulo(this.stoArticuloSelected);
+				for (int i = 1; i <= plazoMeses; i++) {
 
-	                creDesembolsoCabecera.addDetalle(detalle);
-	            }
+					intereses = saldo * tasaMensual;
+					capital = cuota - intereses;
+					saldo -= capital;
+					double montoIva = cuota * iva;
+					double cuotaConIva = cuota + montoIva;
 
-	            creDesembolsoCabecera.setCabeceraADetalle();
-	            creDesembolsoCabecera.calcularTotales();
-	            PrimeFaces.current().ajax().update(":form:dt-detalle");
-	        }
-	    } catch (Exception e) {
-	        LOGGER.error("Ocurrió un error al generar cuotas METODO FRANCES", e);
-	        e.printStackTrace(System.err);
-	        CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-	                e.getMessage().substring(0, e.getMessage().length()) + "...");
-	        PrimeFaces.current().ajax().update(":form:messages");
-	    }
+					CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
+
+					detalle.setMontoCapital(BigDecimal.valueOf(capital));
+					detalle.setMontoInteres(BigDecimal.valueOf(intereses));
+					detalle.setMontoIva(BigDecimal.valueOf(montoIva));
+					detalle.setMontoCuota(BigDecimal.valueOf(cuotaConIva));
+					detalle.setNroCuota(i);
+					detalle.setCantidad(1);
+					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+					detalle.setEstado(Estado.ACTIVO.getEstado());
+
+					if (i == 1) {
+						detalle.setFechaVencimiento(fechaVencimiento);
+						fechaVencimiento = fechaVencimiento.plusMonths(1);
+					} else {
+						int ultimoDiaHabilActual = YearMonth.from(fechaVencimiento).atEndOfMonth().getDayOfMonth();
+						if (ultimoDiaHabilActual < diaHabilPrimerVencimiento) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									ultimoDiaHabilActual);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else if (fechaVencimiento.getMonth() == Month.FEBRUARY) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									diaHabilPrimerVencimiento);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else {
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = fechaVencimiento.plusMonths(1);
+						}
+					}
+
+					detalle.setStoArticulo(this.stoArticuloSelected);
+
+					creDesembolsoCabecera.addDetalle(detalle);
+				}
+
+				creDesembolsoCabecera.setCabeceraADetalle();
+				creDesembolsoCabecera.calcularTotales();
+				PrimeFaces.current().ajax().update(":form:dt-detalle");
+			}
+		} catch (Exception e) {
+			LOGGER.error("Ocurrió un error al generar cuotas METODO FRANCES", e);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+			PrimeFaces.current().ajax().update(":form:messages");
+		}
 	}
 
 	private void generarCuotasMetodoAleman() {
@@ -605,6 +653,7 @@ public class CreDesembolsoController {
 				BigDecimal totalCuota = BigDecimal.ZERO;
 
 				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				int diaHabilPrimerVencimiento = fechaVencimiento.getDayOfMonth();
 
 				for (int i = 1; i <= plazo; i++) {
 					CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
@@ -621,8 +670,30 @@ public class CreDesembolsoController {
 					detalle.setCantidad(1);
 					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 					detalle.setEstado(Estado.ACTIVO.getEstado());
-					detalle.setFechaVencimiento(fechaVencimiento);
-					fechaVencimiento = fechaVencimiento.plusMonths(1);
+
+					if (i == 1) {
+						detalle.setFechaVencimiento(fechaVencimiento);
+						fechaVencimiento = fechaVencimiento.plusMonths(1);
+					} else {
+						int ultimoDiaHabilActual = YearMonth.from(fechaVencimiento).atEndOfMonth().getDayOfMonth();
+						if (ultimoDiaHabilActual < diaHabilPrimerVencimiento) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									ultimoDiaHabilActual);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else if (fechaVencimiento.getMonth() == Month.FEBRUARY) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									diaHabilPrimerVencimiento);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else {
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = fechaVencimiento.plusMonths(1);
+						}
+					}
+
 					detalle.setStoArticulo(this.stoArticuloSelected);
 
 					totalCapital = totalCapital.add(cuotaCapital);
@@ -669,6 +740,7 @@ public class CreDesembolsoController {
 				BigDecimal totalCuota = BigDecimal.ZERO;
 
 				LocalDate fechaVencimiento = creDesembolsoCabecera.getCreSolicitudCredito().getPrimerVencimiento();
+				int diaHabilPrimerVencimiento = fechaVencimiento.getDayOfMonth();
 
 				for (int i = 1; i <= plazo; i++) {
 					CreDesembolsoDetalle detalle = new CreDesembolsoDetalle();
@@ -682,8 +754,30 @@ public class CreDesembolsoController {
 					detalle.setCantidad(1);
 					detalle.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 					detalle.setEstado(Estado.ACTIVO.getEstado());
-					detalle.setFechaVencimiento(fechaVencimiento);
-					fechaVencimiento = fechaVencimiento.plusMonths(1);
+
+					if (i == 1) {
+						detalle.setFechaVencimiento(fechaVencimiento);
+						fechaVencimiento = fechaVencimiento.plusMonths(1);
+					} else {
+						int ultimoDiaHabilActual = YearMonth.from(fechaVencimiento).atEndOfMonth().getDayOfMonth();
+						if (ultimoDiaHabilActual < diaHabilPrimerVencimiento) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									ultimoDiaHabilActual);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else if (fechaVencimiento.getMonth() == Month.FEBRUARY) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									diaHabilPrimerVencimiento);
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else {
+							detalle.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = fechaVencimiento.plusMonths(1);
+						}
+					}
+
 					detalle.setStoArticulo(this.stoArticuloSelected);
 
 					totalCapital = totalCapital.add(cuotaPrincipal);
