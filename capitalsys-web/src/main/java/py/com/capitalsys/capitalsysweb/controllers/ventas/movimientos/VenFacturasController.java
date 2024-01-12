@@ -2,8 +2,11 @@ package py.com.capitalsys.capitalsysweb.controllers.ventas.movimientos;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +17,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.persistence.Column;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +34,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTipoComprobante;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCliente;
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobSaldo;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoCabecera;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoDetalle;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreSolicitudCredito;
@@ -42,6 +47,7 @@ import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobClienteService;
+import py.com.capitalsys.capitalsysservices.services.cobranzas.CobSaldoService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
 import py.com.capitalsys.capitalsysservices.services.stock.StoArticuloService;
 import py.com.capitalsys.capitalsysservices.services.ventas.VenCondicionVentaService;
@@ -79,6 +85,7 @@ public class VenFacturasController {
 	private LazyDataModel<CobCliente> lazyModelCliente;
 	private LazyDataModel<VenVendedor> lazyModelVenVendedor;
 	private LazyDataModel<VenCondicionVenta> lazyModelVenCondicionVenta;
+	List<CobSaldo> listaSaldoAGenerar;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
@@ -107,9 +114,14 @@ public class VenFacturasController {
 
 	@ManagedProperty("#{bsModuloServiceImpl}")
 	private BsModuloService bsModuloServiceImpl;
-	
+
 	@ManagedProperty("#{venCondicionVentaServiceImpl}")
 	private VenCondicionVentaService venCondicionVentaServiceImpl;
+
+	@ManagedProperty("#{cobSaldoServiceImpl}")
+	private CobSaldoService cobSaldoServiceImpl;
+
+	// CobSaldoServiceImpl
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -144,6 +156,7 @@ public class VenFacturasController {
 		this.esNuegoRegistro = true;
 		this.esVisibleFormulario = !esVisibleFormulario;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado(), "ANULADO");
+		this.listaSaldoAGenerar = new ArrayList<CobSaldo>();
 	}
 
 	// GETTERS Y SETTERS
@@ -192,7 +205,8 @@ public class VenFacturasController {
 
 	public void setVenFacturaCabeceraSelected(VenFacturaCabecera venFacturaCabeceraSelected) {
 		if (!Objects.isNull(venFacturaCabeceraSelected)) {
-			venFacturaCabeceraSelected.getVenFacturaDetalleList().sort(Comparator.comparing(VenFacturaDetalle::getNroOrden));
+			venFacturaCabeceraSelected.getVenFacturaDetalleList()
+					.sort(Comparator.comparing(VenFacturaDetalle::getNroOrden));
 			venFacturaCabecera = venFacturaCabeceraSelected;
 			venFacturaCabeceraSelected = null;
 			this.esNuegoRegistro = false;
@@ -226,12 +240,11 @@ public class VenFacturasController {
 			var moduloCredito = this.bsModuloServiceImpl.findByCodigo(Modulos.VENTAS.getModulo());
 			var condicionVentaValorParametrizado = this.commonsUtilitiesController.getValorParametro("CREDES",
 					moduloCredito.getId());
-			Optional<VenCondicionVenta> condicion = this.venCondicionVentaServiceImpl.
-					buscarVenCondicionVentaActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
-					.stream()
-					.filter(con -> con.getCodCondicion().equalsIgnoreCase(condicionVentaValorParametrizado))
+			Optional<VenCondicionVenta> condicion = this.venCondicionVentaServiceImpl
+					.buscarVenCondicionVentaActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
+					.stream().filter(con -> con.getCodCondicion().equalsIgnoreCase(condicionVentaValorParametrizado))
 					.findFirst();
-			if(condicion.isPresent()) {
+			if (condicion.isPresent()) {
 				this.venFacturaCabecera.setVenCondicionVenta(condicion.get());
 			}
 			this.venFacturaCabecera.setIdComprobate(creDesembolsoCabecera.getId());
@@ -273,11 +286,14 @@ public class VenFacturasController {
 
 	public void setStoArticuloSelected(StoArticulo stoArticuloSelected) {
 		if (stoArticuloSelected != null) {
-			BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(stoArticuloSelected.getId(), this.commonsUtilitiesController.getIdEmpresaLogueada());
-			if (stoArticuloSelected.getIndInventariable().equalsIgnoreCase("S") && existencia.compareTo(BigDecimal.ZERO) <= 0) {
-			    CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El Articulo no tiene existencia suficiente.");
-			    PrimeFaces.current().ajax().update("form:messages", "form:btnAddDetalle");
-			    return;
+			BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(stoArticuloSelected.getId(),
+					this.commonsUtilitiesController.getIdEmpresaLogueada());
+			if (stoArticuloSelected.getIndInventariable().equalsIgnoreCase("S")
+					&& existencia.compareTo(BigDecimal.ZERO) <= 0) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"El Articulo no tiene existencia suficiente.");
+				PrimeFaces.current().ajax().update("form:messages", "form:btnAddDetalle");
+				return;
 			}
 			detalle.setStoArticulo(stoArticuloSelected);
 			detalle.setCantidad(1);
@@ -324,15 +340,12 @@ public class VenFacturasController {
 	public void setEsVisibleFormulario(boolean esVisibleFormulario) {
 		this.esVisibleFormulario = esVisibleFormulario;
 	}
-	
-	
 
 	// LAZY
 	public LazyDataModel<VenFacturaCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<VenFacturaCabecera>(
-					(List<VenFacturaCabecera>) venFacturasServiceImpl
-							.buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+			lazyModel = new GenericLazyDataModel<VenFacturaCabecera>((List<VenFacturaCabecera>) venFacturasServiceImpl
+					.buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModel;
 	}
@@ -344,7 +357,7 @@ public class VenFacturasController {
 	public LazyDataModel<CreDesembolsoCabecera> getLazyModelDesembolso() {
 		if (Objects.isNull(lazyModelDesembolso)) {
 			lazyModelDesembolso = new GenericLazyDataModel<CreDesembolsoCabecera>(
-					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl.buscarCreDesembolsoCabeceraActivosLista(
+					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl.buscarCreDesembolsoAFacturarLista(
 							this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelDesembolso;
@@ -358,8 +371,8 @@ public class VenFacturasController {
 		if (Objects.isNull(lazyModelArticulos)) {
 			List<StoArticulo> listaFiltrada = (List<StoArticulo>) stoArticuloServiceImpl
 					.buscarStoArticuloActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
-			        .filter(articulo -> "S".equals(articulo.getIndInventariable()))
-			        .collect(Collectors.toList());;
+					.filter(articulo -> "S".equals(articulo.getIndInventariable())).collect(Collectors.toList());
+			;
 			lazyModelArticulos = new GenericLazyDataModel<StoArticulo>(listaFiltrada);
 		}
 		return lazyModelArticulos;
@@ -410,8 +423,9 @@ public class VenFacturasController {
 
 	public LazyDataModel<VenCondicionVenta> getLazyModelVenCondicionVenta() {
 		if (Objects.isNull(lazyModelVenCondicionVenta)) {
-			lazyModelVenCondicionVenta = new GenericLazyDataModel<VenCondicionVenta>((List<VenCondicionVenta>) venCondicionVentaServiceImpl
-					.buscarVenCondicionVentaActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+			lazyModelVenCondicionVenta = new GenericLazyDataModel<VenCondicionVenta>(
+					(List<VenCondicionVenta>) venCondicionVentaServiceImpl.buscarVenCondicionVentaActivosLista(
+							this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelVenCondicionVenta;
 	}
@@ -500,31 +514,44 @@ public class VenFacturasController {
 	public void setVenCondicionVentaServiceImpl(VenCondicionVentaService venCondicionVentaServiceImpl) {
 		this.venCondicionVentaServiceImpl = venCondicionVentaServiceImpl;
 	}
+	
+	public CobSaldoService getCobSaldoServiceImpl() {
+		return cobSaldoServiceImpl;
+	}
+
+	public void setCobSaldoServiceImpl(CobSaldoService cobSaldoServiceImpl) {
+		this.cobSaldoServiceImpl = cobSaldoServiceImpl;
+	}
 
 	// METODOS
 	public void calculaTotalLineaDetalle() {
-		BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(detalle.getStoArticulo().getId(), this.commonsUtilitiesController.getIdEmpresaLogueada());
-		if (detalle.getStoArticulo().getIndInventariable().equalsIgnoreCase("S") && existencia.compareTo(new BigDecimal(detalle.getCantidad())) < 0) {
+		BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(detalle.getStoArticulo().getId(),
+				this.commonsUtilitiesController.getIdEmpresaLogueada());
+		if (detalle.getStoArticulo().getIndInventariable().equalsIgnoreCase("S")
+				&& existencia.compareTo(new BigDecimal(detalle.getCantidad())) < 0) {
 			detalle.setStoArticulo(new StoArticulo());
 			detalle.setCantidad(1);
 			detalle.setCodIva(null);
 			detalle.setPrecioUnitario(BigDecimal.ZERO);
 			detalle.setMontoLinea(BigDecimal.ZERO);
 			stoArticuloSelected = null;
-		    getStoArticuloSelected();
-			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El Articulo no tiene existencia suficiente.");
-		    PrimeFaces.current().ajax().update("form:messages", "form:articuloLb", "form:codIvaLb", "form:totalineaLb", "form:precioLb", "form:form:btnAddDetalle");
-		    return;
+			getStoArticuloSelected();
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					"El Articulo no tiene existencia suficiente.");
+			PrimeFaces.current().ajax().update("form:messages", "form:articuloLb", "form:codIvaLb", "form:totalineaLb",
+					"form:precioLb", "form:form:btnAddDetalle");
+			return;
 		}
-		detalle.setMontoLinea(detalle.getStoArticulo().getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())));
+		detalle.setMontoLinea(
+				detalle.getStoArticulo().getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad())));
 	}
-	
+
 	public void abrirDialogoAddDetalle() {
 		detalle = new VenFacturaDetalle();
 		detalle.setVenFacturaCabecera(new VenFacturaCabecera());
 		detalle.setStoArticulo(new StoArticulo());
 	}
-	
+
 	public void eliminaDetalle() {
 		venFacturaCabecera.getVenFacturaDetalleList().removeIf(det -> det.equals(detalle));
 		this.detalle = null;
@@ -538,7 +565,7 @@ public class VenFacturasController {
 			return;
 		}
 		if (StringUtils.equalsIgnoreCase("NCR", venFacturaCabecera.getTipoFactura())) {
-			//TODO: aca debo implementar notas de creditos
+			// TODO: aca debo implementar notas de creditos
 			return;
 		}
 		cargaDetalleVenta();
@@ -560,13 +587,15 @@ public class VenFacturasController {
 		this.detalle.setCantidad(1);
 		this.detalle.setNroOrden(1);
 		this.detalle.setCodIva(stoArticuloSelected.getBsIva().getCodIva());
-		//TODO: revisar aca si esta bien que sete el total del interes nomas
-		this.detalle.setMontoLinea(creDesembolsoCabecera.getMontoTotalInteres().add(creDesembolsoCabecera.getMontoTotalIva()));
+		// TODO: revisar aca si esta bien que sete el total del interes nomas
+		this.detalle.setMontoLinea(
+				creDesembolsoCabecera.getMontoTotalInteres().add(creDesembolsoCabecera.getMontoTotalIva()));
 		this.detalle.setPrecioUnitario(this.detalle.getMontoLinea());
-		
+
 		this.venFacturaCabecera.addDetalle(detalle);
 		this.venFacturaCabecera.calcularTotales();
 		this.venFacturaCabecera.setCabeceraADetalle();
+		prepararSaldoAGenerarCredito(creDesembolsoCabecera);
 
 		detalle = null;
 		PrimeFaces.current().ajax().update(":form:dt-detalle");
@@ -582,8 +611,7 @@ public class VenFacturasController {
 			detalle.setNroOrden(1);
 		} else {
 			Optional<Integer> maxNroOrden = venFacturaCabecera.getVenFacturaDetalleList().stream()
-					.map(VenFacturaDetalle::getNroOrden)
-					.max(Integer::compareTo);
+					.map(VenFacturaDetalle::getNroOrden).max(Integer::compareTo);
 			if (maxNroOrden.isPresent()) {
 				detalle.setNroOrden(maxNroOrden.get() + 1);
 			} else {
@@ -605,7 +633,112 @@ public class VenFacturasController {
 		PrimeFaces.current().ajax().update(":form:dt-detalle", ":form:btnGuardar");
 	}
 
+	private void prepararSaldoAGenerarCredito(CreDesembolsoCabecera desembolso) {
+		if (!Objects.isNull(desembolso)) {
+			desembolso.getCreDesembolsoDetalleList().forEach(detalle -> {
+				CobSaldo saldo = new CobSaldo();
+
+				saldo.setIdComprobate(desembolso.getId());
+				saldo.setTipoComprobante("DESEMBOLSO");
+				saldo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+				saldo.setNroComprobanteCompleto(desembolso.getNroDesembolso().toString());
+
+				// montos
+				saldo.setIdCuota(detalle.getId());
+				saldo.setNroCuota(detalle.getNroCuota().intValue());
+				saldo.setMontoCuota(detalle.getMontoCuota());
+				saldo.setSaldoCuota(detalle.getMontoCuota());
+
+				// otros
+				saldo.setFechaVencimiento(detalle.getFechaVencimiento());
+				saldo.setCobCliente(this.venFacturaCabecera.getCobCliente());
+				saldo.setBsEmpresa(desembolso.getBsEmpresa());
+				this.listaSaldoAGenerar.add(saldo);
+			});
+		}
+	}
+
+	private void parseaDetalleASaldo(VenFacturaCabecera factura) {
+		if (!Objects.isNull(factura)) {
+
+			boolean tipoCondicion = "CON".equalsIgnoreCase(factura.getVenCondicionVenta().getCodCondicion());
+			this.listaSaldoAGenerar = new ArrayList<CobSaldo>();
+			if (tipoCondicion) {
+				CobSaldo saldo = new CobSaldo();
+
+				saldo.setIdComprobate(factura.getId());
+				saldo.setTipoComprobante("FACTURA");
+				saldo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+				saldo.setNroComprobanteCompleto(factura.getNroFacturaCompleto());
+				
+				// montos
+				saldo.setIdCuota(factura.getId());
+				saldo.setNroCuota(1);
+				saldo.setMontoCuota(factura.getMontoTotalFactura());
+				saldo.setSaldoCuota(factura.getMontoTotalFactura());
+				
+				saldo.setFechaVencimiento(factura.getFechaFactura());
+				
+				saldo.setCobCliente(this.venFacturaCabecera.getCobCliente());
+				saldo.setBsEmpresa(factura.getBsEmpresa());
+				this.listaSaldoAGenerar.add(saldo);
+				
+			} else {
+				int plazo = factura.getVenCondicionVenta().getPlazo().intValue();
+				BigDecimal montoCuota = factura.getMontoTotalFactura()
+						.divide(factura.getVenCondicionVenta().getPlazo());
+				LocalDate fechaVencimiento = LocalDate.of(factura.getFechaFactura().getYear(),
+						factura.getFechaFactura().getMonth(), factura.getFechaFactura().getDayOfMonth());
+				int diaHabilPrimerVencimiento = fechaVencimiento.getDayOfMonth();
+				for (int i = 1; i <= plazo; i++) {
+					CobSaldo saldo = new CobSaldo();
+
+					saldo.setIdComprobate(factura.getId());
+					saldo.setTipoComprobante("FACTURA");
+					saldo.setNroComprobanteCompleto(factura.getNroFacturaCompleto());
+
+					// montos
+					saldo.setIdCuota(factura.getId());
+					saldo.setNroCuota(i);
+					saldo.setMontoCuota(montoCuota);
+					saldo.setSaldoCuota(montoCuota);
+					
+					saldo.setFechaVencimiento(fechaVencimiento);
+
+					// otros
+					if (i == 1) {
+						saldo.setFechaVencimiento(fechaVencimiento);
+						fechaVencimiento = fechaVencimiento.plusMonths(1);
+					} else {
+						int ultimoDiaHabilActual = YearMonth.from(fechaVencimiento).atEndOfMonth().getDayOfMonth();
+						if (ultimoDiaHabilActual < diaHabilPrimerVencimiento) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									ultimoDiaHabilActual);
+							saldo.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else if (fechaVencimiento.getMonth() == Month.FEBRUARY) {
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(), fechaVencimiento.getMonth(),
+									diaHabilPrimerVencimiento);
+							saldo.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = LocalDate.of(fechaVencimiento.getYear(),
+									fechaVencimiento.plusMonths(1).getMonth(), diaHabilPrimerVencimiento);
+						} else {
+							saldo.setFechaVencimiento(fechaVencimiento);
+							fechaVencimiento = fechaVencimiento.plusMonths(1);
+						}
+					}
+					saldo.setCobCliente(this.venFacturaCabecera.getCobCliente());
+					saldo.setBsEmpresa(factura.getBsEmpresa());
+					this.listaSaldoAGenerar.add(saldo);
+				}
+			}
+
+		}
+	}
+
 	public void limpiarDetalle() {
+		this.listaSaldoAGenerar = new ArrayList<CobSaldo>();
 		venFacturaCabecera.setVenFacturaDetalleList(new ArrayList<VenFacturaDetalle>());
 		venFacturaCabecera.setMontoTotalGravada(BigDecimal.ZERO);
 		venFacturaCabecera.setMontoTotalExenta(BigDecimal.ZERO);
@@ -618,8 +751,7 @@ public class VenFacturasController {
 		try {
 			if (Objects.isNull(this.venFacturaCabecera.getBsTalonario())
 					|| Objects.isNull(this.venFacturaCabecera.getBsTalonario().getId())) {
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-						"Debe seleccionar un Talonario.");
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Talonario.");
 				return;
 			}
 			if (Objects.isNull(this.venFacturaCabecera.getVenCondicionVenta())
@@ -638,20 +770,31 @@ public class VenFacturasController {
 			this.venFacturaCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 			if (Objects.isNull(this.venFacturaCabecera.getId())) {
 				this.venFacturaCabecera.setIndImpresoBoolean(false);
-				this.venFacturaCabecera.setNroFactura(this.venFacturasServiceImpl
-						.calcularNroFacturaDisponible(commonsUtilitiesController.getIdEmpresaLogueada(),
-								this.venFacturaCabecera.getBsTalonario().getId()));
+				this.venFacturaCabecera.setNroFactura(this.venFacturasServiceImpl.calcularNroFacturaDisponible(
+						commonsUtilitiesController.getIdEmpresaLogueada(),
+						this.venFacturaCabecera.getBsTalonario().getId()));
 				String formato = "%s-%s-%09d";
 				this.venFacturaCabecera.setNroFacturaCompleto(String.format(formato,
 						this.venFacturaCabecera.getBsTalonario().getBsTimbrado().getCodEstablecimiento(),
 						this.venFacturaCabecera.getBsTalonario().getBsTimbrado().getCodExpedicion(),
 						this.venFacturaCabecera.getNroFactura()));
 			}
-			if (!Objects.isNull(this.venFacturasServiceImpl.save(this.venFacturaCabecera))) {
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-						"El registro se guardo correctamente.");
+			VenFacturaCabecera facturaGuardada = this.venFacturasServiceImpl.save(this.venFacturaCabecera);
+			if (!Objects.isNull(facturaGuardada)) {
+				//TODO: aca debo ver el caso de NCR
+				if(facturaGuardada.getTipoFactura().equalsIgnoreCase("FACTURA")) {
+					parseaDetalleASaldo(facturaGuardada);
+				}
+				if (!Objects.isNull(this.cobSaldoServiceImpl.saveAll(listaSaldoAGenerar))) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+							"El registro se guardo correctamente.");	
+				}else {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+							"No se Pudieron crear los saldos.");
+				}
+					
 			} else {
-				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!", "No se pudo insertar el registro.");
 			}
 			this.cleanFields();
 			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
@@ -662,8 +805,7 @@ public class VenFacturasController {
 			Throwable cause = e.getCause();
 			while (cause != null) {
 				if (cause instanceof ConstraintViolationException) {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-							"La factura ya fue creada.");
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "La factura ya fue creada.");
 					break;
 				}
 				cause = cause.getCause();

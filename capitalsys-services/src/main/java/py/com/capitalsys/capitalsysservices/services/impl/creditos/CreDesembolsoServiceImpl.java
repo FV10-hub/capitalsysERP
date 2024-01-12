@@ -28,8 +28,8 @@ extends CommonServiceImpl<CreDesembolsoCabecera, CreDesembolsoRepository> implem
 	}
 
 	@Override
-	public List<CreDesembolsoCabecera> buscarCreDesembolsoDesembolsadoLista(Long idEmpresa) {
-		return this.repository.buscarCreDesembolsoDesembolsadoLista(idEmpresa);
+	public List<CreDesembolsoCabecera> buscarCreDesembolsoAFacturarLista(Long idEmpresa) {
+		return this.repository.buscarCreDesembolsoAFacturarLista(idEmpresa);
 	}
 
 }

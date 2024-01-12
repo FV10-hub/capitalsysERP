@@ -3,6 +3,7 @@
  */
 package py.com.capitalsys.capitalsysservices.services.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class CommonServiceImpl<E, R extends PagingAndSortingRepository<E, Long>>
 
 	@Autowired
 	protected R repository;
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public Iterable<E> findAll() {
@@ -46,6 +47,12 @@ public class CommonServiceImpl<E, R extends PagingAndSortingRepository<E, Long>>
 	@Transactional(readOnly = true)
 	public Page<E> findAll(Pageable pageable) {
 		return repository.findAll(pageable);
+	}
+
+	@Override
+	@Transactional
+	public List<E> saveAll(List<E> entities) {
+		return (List<E>) repository.saveAll(entities);
 	}
 
 }

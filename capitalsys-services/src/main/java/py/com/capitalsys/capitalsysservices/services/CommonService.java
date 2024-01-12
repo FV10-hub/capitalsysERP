@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysservices.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ public interface CommonService<E> {
 	public Optional<E> findById(Long id);
 
 	public E save(E entity);
+	
+	public List<E> saveAll(List<E> entities);
 
 	public void deleteById(Long id);
 
