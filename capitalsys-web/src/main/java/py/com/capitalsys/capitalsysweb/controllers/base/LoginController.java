@@ -1,6 +1,7 @@
 package py.com.capitalsys.capitalsysweb.controllers.base;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.faces.application.FacesMessage;
@@ -22,8 +23,13 @@ import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
  **/
 @ManagedBean
 @ViewScoped
-public class LoginController {
+public class LoginController implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Objeto que permite mostrar los mensajes de LOG en la consola del servidor o en un archivo externo.
 	 */
