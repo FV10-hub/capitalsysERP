@@ -372,7 +372,6 @@ public class VenFacturasController {
 			List<StoArticulo> listaFiltrada = (List<StoArticulo>) stoArticuloServiceImpl
 					.buscarStoArticuloActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
 					.filter(articulo -> "S".equals(articulo.getIndInventariable())).collect(Collectors.toList());
-			;
 			lazyModelArticulos = new GenericLazyDataModel<StoArticulo>(listaFiltrada);
 		}
 		return lazyModelArticulos;

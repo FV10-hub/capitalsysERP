@@ -57,7 +57,7 @@ public class StoAjusteInventarioCabecera extends Common implements Serializable 
 	@Column(name = "nro_operacion")
 	private Long nroOperacion;
 	
-	@Column(name = "ind_impreso")
+	@Column(name = "ind_autorizado")
 	private String indAutorizado;
 
 	@Transient
@@ -188,7 +188,7 @@ public class StoAjusteInventarioCabecera extends Common implements Serializable 
 	public void setCabeceraADetalle() {
 		if (!Objects.isNull(this.stoAjusteInventarioDetalleList)) {
 			this.stoAjusteInventarioDetalleList.forEach(detalle -> {
-				detalle.setStoAjusteInventarioCabecera(null);
+				detalle.setStoAjusteInventarioCabecera(this);
 			});
 		}
 	}

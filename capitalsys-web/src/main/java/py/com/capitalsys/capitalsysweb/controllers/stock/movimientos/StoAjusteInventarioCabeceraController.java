@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -32,6 +33,7 @@ import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.CommonsUtilitiesController;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
+import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 
 @ManagedBean
 @ViewScoped
@@ -96,6 +98,7 @@ public class StoAjusteInventarioCabeceraController {
     public StoAjusteInventarioCabecera getStoAjusteInventarioCabecera() {
         if (Objects.isNull(stoAjusteInventarioCabecera)) {
             this.stoAjusteInventarioCabecera = new StoAjusteInventarioCabecera();
+            this.stoAjusteInventarioCabecera.setTipoOperacion("ENTRADA");
             this.stoAjusteInventarioCabecera.setBsEmpresa(new BsEmpresa());
             this.stoAjusteInventarioCabecera.setEstado(Estado.ACTIVO.getEstado());
             this.stoAjusteInventarioCabecera.setFechaOperacion(LocalDate.now());
@@ -140,7 +143,7 @@ public class StoAjusteInventarioCabeceraController {
     }
 
     public void setStoArticuloSelected(StoArticulo stoArticuloSelected) {
-        if (Objects.isNull(stoArticuloSelected)) {
+        if (!Objects.isNull(stoArticuloSelected)) {
             BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(stoArticuloSelected.getId(),
 					this.commonsUtilitiesController.getIdEmpresaLogueada());
             detalle.setCantidadSistema(existencia.intValue());
@@ -164,6 +167,10 @@ public class StoAjusteInventarioCabeceraController {
     }
 
     public LazyDataModel<StoAjusteInventarioCabecera> getLazyModel() {
+    	if (Objects.isNull(lazyModel)) {
+    		lazyModel = new GenericLazyDataModel<StoAjusteInventarioCabecera>(
+    				this.stoAjusteInventarioCabeceraServiceImpl.buscarStoAjusteInventarioCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+		}
         return lazyModel;
     }
 
@@ -172,6 +179,13 @@ public class StoAjusteInventarioCabeceraController {
     }
 
     public LazyDataModel<StoArticulo> getLazyModelArticulos() {
+    	if (Objects.isNull(lazyModelArticulos)) {
+			List<StoArticulo> listaFiltrada = (List<StoArticulo>) stoArticuloServiceImpl
+					.buscarStoArticuloActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
+					.filter(articulo -> "S".equals(articulo.getIndInventariable())).collect(Collectors.toList());
+			lazyModelArticulos = new GenericLazyDataModel<StoArticulo>(listaFiltrada);
+		}
+    	
         return lazyModelArticulos;
     }
 
@@ -261,23 +275,32 @@ public class StoAjusteInventarioCabeceraController {
         PrimeFaces.current().ajax().update(":form:btnLimpiar");
     }
 
-    private void cargaDetalle() {
-        if (CollectionUtils.isEmpty(stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList())) {
-            detalle.setNroOrden(1);
-        } else {
-            Optional<Integer> maxNroOrden = stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList()
-                    .stream()
-                    .map(StoAjusteInventarioDetalle::getNroOrden)
-                    .max(Integer::compareTo);
-            if (maxNroOrden.isPresent()) {
-                detalle.setNroOrden(maxNroOrden.get() + 1);
-            } else {
+    public void cargaDetalle() {
+    	Optional<StoAjusteInventarioDetalle> existente = stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList()
+    			.stream()
+    			.filter(det -> det.getStoArticulo().getId() == detalle.getStoArticulo().getId())
+    			.findFirst();
+        if(!existente.isPresent()) {
+        	if (CollectionUtils.isEmpty(stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList())) {
                 detalle.setNroOrden(1);
+            } else {
+                Optional<Integer> maxNroOrden = stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList()
+                        .stream()
+                        .map(StoAjusteInventarioDetalle::getNroOrden)
+                        .max(Integer::compareTo);
+                if (maxNroOrden.isPresent()) {
+                    detalle.setNroOrden(maxNroOrden.get() + 1);
+                } else {
+                    detalle.setNroOrden(1);
+                }
             }
+        	this.stoAjusteInventarioCabecera.addDetalle(detalle);
+        }else {
+        	detalle.setNroOrden(existente.get().getNroOrden());
+        	int indice = stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList().indexOf(existente.get());
+        	stoAjusteInventarioCabecera.getStoAjusteInventarioDetalleList().set(indice, detalle);
         }
-        this.stoAjusteInventarioCabecera.addDetalle(detalle);
         this.stoAjusteInventarioCabecera.setCabeceraADetalle();
-
         detalle = null;
         PrimeFaces.current().ajax().update(":form:dt-detalle", ":form:btnGuardar");
     }
@@ -296,7 +319,7 @@ public class StoAjusteInventarioCabeceraController {
             PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
         } catch (Exception e) {
             LOGGER.error("Ocurrio un error al Guardar", System.err);
-            // e.printStackTrace(System.err);
+            e.printStackTrace(System.err);
             CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
                     e.getMessage().substring(0, e.getMessage().length()) + "...");
         }
@@ -320,7 +343,7 @@ public class StoAjusteInventarioCabeceraController {
             PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
         } catch (Exception e) {
             LOGGER.error("Ocurrio un error al Guardar", System.err);
-            // e.printStackTrace(System.err);
+            e.printStackTrace(System.err);
             CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
                     e.getMessage().substring(0, e.getMessage().length()) + "...");
         }

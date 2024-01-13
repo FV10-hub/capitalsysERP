@@ -28,7 +28,7 @@ public class StoAjusteInventarioCabeceraServiceImpl extends CommonServiceImpl<St
 
 	@Override
 	public Long calcularNroFacturaDisponible(Long idEmpresa) {
-		return this.repository.calcularNroFacturaDisponible(idEmpresa);
+		return this.repository.calcularNroOperacionDisponible(idEmpresa);
 	}
 
 

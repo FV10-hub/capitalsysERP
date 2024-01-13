@@ -18,8 +18,8 @@ public interface StoAjusteInventarioCabeceraRepository extends PagingAndSortingR
 	@Query("SELECT m FROM StoAjusteInventarioCabecera m")
 	List<StoAjusteInventarioCabecera> buscarTodosLista();
 
-	@Query(value = "SELECT COALESCE(MAX(m.nro_factura), 0) + 1 FROM sto_ajuste_inventarios_cabecera m where bs_empresa_id = ?1", nativeQuery = true)
-	Long calcularNroFacturaDisponible(Long idEmpresa);
+	@Query(value = "SELECT COALESCE(MAX(m.nro_operacion), 0) + 1 FROM sto_ajuste_inventarios_cabecera m where bs_empresa_id = ?1", nativeQuery = true)
+	Long calcularNroOperacionDisponible(Long idEmpresa);
 
 	@Query("SELECT m FROM StoAjusteInventarioCabecera m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1")
 	List<StoAjusteInventarioCabecera> buscarStoAjusteInventarioCabeceraActivosLista(Long idEmpresa);

@@ -121,7 +121,7 @@
 								<p:toolbarGroup>
 									<p:commandButton value="Guardar" icon="pi pi-save"
 										id="btnGuardar"
-										disabled="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.venFacturaDetalleList.size() == 0}"
+										disabled="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.stoAjusteInventarioDetalleList.size() == 0}"
 										actionListener="#{stoAjusteInventarioCabeceraController.guardar}"
 										update=":form" styleClass="ui-button-success"
 										style="margin-right: .5rem" />
@@ -160,7 +160,7 @@
 														value="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.observacion}" />
 											</div>
 										</div>
-										<div class="field grid md:col-4">
+										<div class="field grid md:col-4 flex align-items-center">
 											<p:outputLabel for="tipoLb"
 												styleClass="col-12 mb-2 md:col-4 mb-md-0">Tipo Ajuste</p:outputLabel>
 											<div class="col-12 md:col-8">
@@ -218,7 +218,7 @@
 											<div class="col-4 md:col-2">
 												<p:commandButton value="Limpiar Detalles" icon="pi pi-bolt"
 													id="btnLimpiar"
-													disabled="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.venFacturaDetalleList.size() == 0}"
+													disabled="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.stoAjusteInventarioDetalleList.size() == 0}"
 													actionListener="#{stoAjusteInventarioCabeceraController.limpiarDetalle}"
 													process="@this" update=":form:dt-detalle :form:btnGuardar"
 													styleClass="ui-button-primary" style="margin-right: .5rem" />
@@ -229,7 +229,7 @@
 										<div class="col-12 md:col-12">
 											<p:dataTable id="dt-detalle" widgetVar="dtDetalle"
 												var="detalle"
-												value="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.venFacturaDetalleList}"
+												value="#{stoAjusteInventarioCabeceraController.stoAjusteInventarioCabecera.stoAjusteInventarioDetalleList}"
 												reflow="true" paginator="true" rows="12" scrollable="true"
 												scrollHeight="300" paginatorPosition="bottom"
 												emptyMessage="No hay Registros">
@@ -284,13 +284,13 @@
 										 PF('dlgArticulo').show()
 									 }" />
 									</div>
-									<div class="field">
+									<div class="field col-12 md:col-6">
 										<p:outputLabel for="cantidadActualLb">Cantidad Actual</p:outputLabel>
 										<p:spinner id="cantidadActualLb"
 											value="#{stoAjusteInventarioCabeceraController.detalle.cantidadSistema}">
 										</p:spinner>
 									</div>
-									<div class="field">
+									<div class="field  col-12 md:col-6">
 										<p:outputLabel for="cantidadLb">Cantidad Fisica</p:outputLabel>
 										<p:spinner id="cantidadLb"
 											value="#{stoAjusteInventarioCabeceraController.detalle.cantidadFisica}">
@@ -300,8 +300,8 @@
 							</p:outputPanel>
 
 							<f:facet name="footer">
-								<p:commandButton value="Guardar" icon="pi pi-check"
-									actionListener="#{stoAjusteInventarioCabeceraController.agregarDetalle}"
+								<p:commandButton value="Agregar" icon="pi pi-check"
+									actionListener="#{stoAjusteInventarioCabeceraController.cargaDetalle}"
 									update=":form:dt-detalle"
 									oncomplete="PF('dlgAddDetalle').hide()" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
