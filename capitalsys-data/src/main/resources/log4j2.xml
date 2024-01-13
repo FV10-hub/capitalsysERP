@@ -6,9 +6,11 @@
 	<Appenders>
 		<Console name="LogToConsole" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36}- linea [%L] -  %msg%n" />
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{1.} [%-4L] - %msg%n" />
 		</Console>
-		<!-- con esta configuracion los acrchivos se van a crear cuando la fecha es diferente a la fecha
+		<!-- 
+		patron anterior %d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36}- linea [%L] -  %msg%n
+		con esta configuracion los acrchivos se van a crear cuando la fecha es diferente a la fecha
 		del archivo semilla Capitalsys.log y cuando el archivo supera los 30 mb 
 		https://mkyong.com/logging/log4j2-xml-example/
 		-->
@@ -17,8 +19,7 @@
 			filePattern="${log.file.location}/Capitalsys.%d{dd-MM-yyyy}.log"
 			ignoreExceptions="false">
 			<PatternLayout>
-				<Pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %-5level %logger{36}- linea [%L] -
-					%msg%n</Pattern>
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{1.} [%-4L] - %msg%n</Pattern>
 			</PatternLayout>
 			<Policies>
 				

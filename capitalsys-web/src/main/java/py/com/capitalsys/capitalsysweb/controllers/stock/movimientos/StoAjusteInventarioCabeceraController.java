@@ -309,12 +309,17 @@ public class StoAjusteInventarioCabeceraController {
         try {
             this.stoAjusteInventarioCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
             this.stoAjusteInventarioCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+            if (Objects.isNull(this.stoAjusteInventarioCabecera.getId())) {
+            	this.stoAjusteInventarioCabecera.setNroOperacion(this.stoAjusteInventarioCabeceraServiceImpl.calcularNroOperacionDisponible(
+						commonsUtilitiesController.getIdEmpresaLogueada()));
+            }
             if (!Objects.isNull(this.stoAjusteInventarioCabeceraServiceImpl.save(stoAjusteInventarioCabecera))) {
                 CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
                         "El registro se guardo correctamente.");
             } else {
                 CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
             }
+           
             this.cleanFields();
             PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
         } catch (Exception e) {

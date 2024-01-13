@@ -134,7 +134,7 @@ public class StoAjusteInventarioCabecera extends Common implements Serializable 
 	}
 
 	public boolean isIndAutorizadoBoolean() {
-		if (Objects.isNull(indAutorizado)) {
+		if (!Objects.isNull(indAutorizado)) {
 			indAutorizadoBoolean = "S".equalsIgnoreCase(indAutorizado);
 		}
 		return indAutorizadoBoolean;

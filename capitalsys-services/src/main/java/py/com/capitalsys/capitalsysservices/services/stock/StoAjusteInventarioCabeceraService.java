@@ -9,7 +9,7 @@ public interface StoAjusteInventarioCabeceraService extends CommonService<StoAju
 
 	List<StoAjusteInventarioCabecera> buscarTodosLista();
 
-	Long calcularNroFacturaDisponible(Long idEmpresa);
+	Long calcularNroOperacionDisponible(Long idEmpresa);
 
 	List<StoAjusteInventarioCabecera> buscarStoAjusteInventarioCabeceraActivosLista(Long idEmpresa);
 
