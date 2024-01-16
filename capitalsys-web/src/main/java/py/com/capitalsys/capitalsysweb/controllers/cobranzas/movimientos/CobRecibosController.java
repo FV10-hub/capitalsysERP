@@ -37,6 +37,7 @@ import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCa
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboCabecera;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboDetalle;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobSaldo;
+import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaDetalle;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCajaService;
@@ -555,6 +556,12 @@ public class CobRecibosController {
 		this.detalle = null;
 		this.cobReciboCabecera.calcularTotales();
 		PrimeFaces.current().ajax().update(":form:dt-detalle");
+	}
+	
+	public void limpiarDetalle() {
+		cobReciboCabecera.setCobReciboDetalleList((new ArrayList<CobReciboDetalle>()));
+		cobReciboCabecera.setMontoTotalRecibo(BigDecimal.ZERO);
+		PrimeFaces.current().ajax().update(":form:btnLimpiar");
 	}
 
 	public void agregarDetalle() {

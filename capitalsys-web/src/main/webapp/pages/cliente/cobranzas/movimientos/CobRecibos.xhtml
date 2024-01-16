@@ -220,7 +220,7 @@
 													styleClass="col-12 mb-2 md:col-4 mb-md-0">Talonario</p:outputLabel>
 												<div class="col-12 md:col-6">
 													<p:inputText id="talonarioLb"
-														placeholder="Pulse F9 para buscar"
+														placeholder="Pulse F9 para buscar" autocomplete="off"
 														value="#{cobRecibosController.cobReciboCabecera.bsTalonario.bsTipoComprobante.descripcion}"
 														onkeydown="if (event.keyCode == 120) {
 															PF('dlgTalonario').show()
@@ -289,7 +289,7 @@
 														<f:convertNumber pattern="###,###,###" />
 													</h:outputText>
 												</p:column>
-												<p:column headerText="Saldo">
+												<p:column headerText="Saldo Cuota">
 													<f:facet name="footer">
 														<h5>Totales:</h5>
 													</f:facet>
@@ -358,7 +358,7 @@
 									</div>
 									<div class="field  col-12 md:col-6">
 										<p:outputLabel for="montoPagadoLb">Monto Pagado</p:outputLabel>
-										<p:inputNumber id="montoPagadoLb"
+										<p:inputNumber id="montoPagadoLb" disabled="true"
 											value="#{cobRecibosController.detalle.montoPagado}">
 										</p:inputNumber>
 									</div>
@@ -368,7 +368,7 @@
 							<f:facet name="footer">
 								<p:commandButton value="Agregar" icon="pi pi-plus"
 									actionListener="#{cobRecibosController.agregarDetalle}"
-									update=":form:dt-detalle"
+									update=":form:dt-detalle :form:btnLimpiar"
 									oncomplete="PF('dlgAddDetalle').hide()" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{cobRecibosController.setDetalle(null)}"
