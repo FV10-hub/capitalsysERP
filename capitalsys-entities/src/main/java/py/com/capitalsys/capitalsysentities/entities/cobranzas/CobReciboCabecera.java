@@ -65,6 +65,9 @@ public class CobReciboCabecera extends Common implements Serializable {
 
 	@Transient
 	private boolean indImpresoBoolean;
+
+	@Column(name = "ind_cobrado")
+	private String indCobrado;
 	
 	@Column(name = "monto_total_recibo")
 	private BigDecimal montoTotalRecibo;
@@ -222,6 +225,14 @@ public class CobReciboCabecera extends Common implements Serializable {
 
 	public void setNroReciboCompleto(String nroReciboCompleto) {
 		this.nroReciboCompleto = nroReciboCompleto;
+	}
+
+	public String getIndCobrado() {
+		return indCobrado;
+	}
+
+	public void setIndCobrado(String indCobrado) {
+		this.indCobrado = indCobrado;
 	}
 
 	@Override

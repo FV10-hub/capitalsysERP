@@ -6,7 +6,6 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,7 +16,6 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.persistence.Column;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,10 +31,11 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTipoComprobante;
+import py.com.capitalsys.capitalsysentities.entities.base.BsTipoValor;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCliente;
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCobrosValores;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobSaldo;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoCabecera;
-import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoDetalle;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreSolicitudCredito;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreTipoAmortizacion;
 import py.com.capitalsys.capitalsysentities.entities.stock.StoArticulo;
@@ -46,7 +45,9 @@ import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaDetalle;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
+import py.com.capitalsys.capitalsysservices.services.base.BsTipoValorService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobClienteService;
+import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCobrosValoresService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobSaldoService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
 import py.com.capitalsys.capitalsysservices.services.stock.StoArticuloService;
@@ -78,6 +79,7 @@ public class VenFacturasController {
 	private BsTalonario bsTalonarioSelected;
 	private StoArticulo stoArticuloSelected;
 	private VenFacturaDetalle detalle;
+	private CobCobrosValores cobCobrosValoresSelected;
 	private LazyDataModel<VenFacturaCabecera> lazyModel;
 	private LazyDataModel<CreDesembolsoCabecera> lazyModelDesembolso;
 	private LazyDataModel<StoArticulo> lazyModelArticulos;
@@ -85,11 +87,15 @@ public class VenFacturasController {
 	private LazyDataModel<CobCliente> lazyModelCliente;
 	private LazyDataModel<VenVendedor> lazyModelVenVendedor;
 	private LazyDataModel<VenCondicionVenta> lazyModelVenCondicionVenta;
+	private LazyDataModel<BsTipoValor> lazyModelTipoValor;
 	List<CobSaldo> listaSaldoAGenerar;
+	private List<CobCobrosValores> cobrosValoresList;
+	public BigDecimal montoTotalCobro = BigDecimal.ZERO;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
 	private boolean esVisibleFormulario = true;
+	private boolean estaCobrado;
 
 	private static final String DT_NAME = "dt-facturas";
 
@@ -121,7 +127,11 @@ public class VenFacturasController {
 	@ManagedProperty("#{cobSaldoServiceImpl}")
 	private CobSaldoService cobSaldoServiceImpl;
 
-	// CobSaldoServiceImpl
+	@ManagedProperty("#{cobCobrosValoresServiceImpl}")
+	private CobCobrosValoresService cobCobrosValoresServiceImpl;
+
+	@ManagedProperty("#{bsTipoValorServiceImpl}")
+	private BsTipoValorService bsTipoValorServiceImpl;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -152,18 +162,24 @@ public class VenFacturasController {
 		this.lazyModelCliente = null;
 		this.lazyModelVenVendedor = null;
 		this.lazyModelVenCondicionVenta = null;
+		this.cobCobrosValoresSelected = null;
+		this.lazyModelTipoValor = null;
 
 		this.esNuegoRegistro = true;
+		this.estaCobrado = false;
 		this.esVisibleFormulario = !esVisibleFormulario;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado(), "ANULADO");
 		this.listaSaldoAGenerar = new ArrayList<CobSaldo>();
+		this.cobrosValoresList = new ArrayList<>();
 	}
 
 	// GETTERS Y SETTERS
 	public VenFacturaCabecera getVenFacturaCabecera() {
 		if (Objects.isNull(venFacturaCabecera)) {
+			this.estaCobrado = false;
 			venFacturaCabecera = new VenFacturaCabecera();
 			venFacturaCabecera.setFechaFactura(LocalDate.now());
+			venFacturaCabecera.setIndCobrado("N");
 			venFacturaCabecera.setIdComprobate(null);
 			venFacturaCabecera.setTipoFactura("FACTURA");
 			venFacturaCabecera.setEstado(Estado.ACTIVO.getEstado());
@@ -207,6 +223,15 @@ public class VenFacturasController {
 		if (!Objects.isNull(venFacturaCabeceraSelected)) {
 			venFacturaCabeceraSelected.getVenFacturaDetalleList()
 					.sort(Comparator.comparing(VenFacturaDetalle::getNroOrden));
+			this.estaCobrado = venFacturaCabeceraSelected.getIndCobrado().equalsIgnoreCase("S");
+			if (this.estaCobrado) {
+				this.cobrosValoresList = this.cobCobrosValoresServiceImpl.buscarValoresPorComprobanteLista(
+						this.commonsUtilitiesController.getIdEmpresaLogueada(), venFacturaCabeceraSelected.getId(),
+						"FACTURA");
+				this.montoTotalCobro = cobrosValoresList.stream().map(CobCobrosValores::getMontoValor)
+						.reduce(BigDecimal.ZERO, BigDecimal::add);
+				getResultadoResta();
+			}
 			venFacturaCabecera = venFacturaCabeceraSelected;
 			venFacturaCabeceraSelected = null;
 			this.esNuegoRegistro = false;
@@ -341,11 +366,54 @@ public class VenFacturasController {
 		this.esVisibleFormulario = esVisibleFormulario;
 	}
 
+	public CobCobrosValores getCobCobrosValoresSelected() {
+		if (Objects.isNull(cobCobrosValoresSelected)) {
+			cobCobrosValoresSelected = new CobCobrosValores();
+			cobCobrosValoresSelected.setFechaValor(LocalDate.now());
+			cobCobrosValoresSelected.setFechaVencimiento(LocalDate.now());
+			cobCobrosValoresSelected.setIndDepositadoBoolean(false);
+			cobCobrosValoresSelected.setNroValor("0");
+			cobCobrosValoresSelected.setMontoValor(BigDecimal.ZERO);
+			cobCobrosValoresSelected.setBsEmpresa(new BsEmpresa());
+			cobCobrosValoresSelected.setBsTipoValor(new BsTipoValor());
+
+		}
+		return cobCobrosValoresSelected;
+	}
+
+	public void setCobCobrosValoresSelected(CobCobrosValores cobCobrosValoresSelected) {
+		this.cobCobrosValoresSelected = cobCobrosValoresSelected;
+	}
+
+	public List<CobCobrosValores> getCobrosValoresList() {
+		return cobrosValoresList;
+	}
+
+	public void setCobrosValoresList(List<CobCobrosValores> cobrosValoresList) {
+		this.cobrosValoresList = cobrosValoresList;
+	}
+
+	public boolean isEstaCobrado() {
+		return estaCobrado;
+	}
+
+	public void setEstaCobrado(boolean estaCobrado) {
+		this.estaCobrado = estaCobrado;
+	}
+
 	// LAZY
 	public LazyDataModel<VenFacturaCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<VenFacturaCabecera>((List<VenFacturaCabecera>) venFacturasServiceImpl
-					.buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+			//ordena la lista por fecha y por nroComprobante DESC
+			List<VenFacturaCabecera> listaOrdenada = venFacturasServiceImpl
+			        .buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
+			        .stream()
+			        .sorted(
+			            Comparator.comparing(VenFacturaCabecera::getFechaFactura).reversed()
+			            .thenComparing(Comparator.comparing(VenFacturaCabecera::getNroFacturaCompleto).reversed())
+			        )
+			        .collect(Collectors.toList());
+			lazyModel = new GenericLazyDataModel<VenFacturaCabecera>((List<VenFacturaCabecera>) listaOrdenada);
 		}
 		return lazyModel;
 	}
@@ -357,8 +425,8 @@ public class VenFacturasController {
 	public LazyDataModel<CreDesembolsoCabecera> getLazyModelDesembolso() {
 		if (Objects.isNull(lazyModelDesembolso)) {
 			lazyModelDesembolso = new GenericLazyDataModel<CreDesembolsoCabecera>(
-					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl.buscarCreDesembolsoAFacturarLista(
-							this.commonsUtilitiesController.getIdEmpresaLogueada()));
+					(List<CreDesembolsoCabecera>) creDesembolsoServiceImpl
+							.buscarCreDesembolsoAFacturarLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
 		}
 		return lazyModelDesembolso;
 	}
@@ -431,6 +499,20 @@ public class VenFacturasController {
 
 	public void setLazyModelVenCondicionVenta(LazyDataModel<VenCondicionVenta> lazyModelVenCondicionVenta) {
 		this.lazyModelVenCondicionVenta = lazyModelVenCondicionVenta;
+	}
+
+	public LazyDataModel<BsTipoValor> getLazyModelTipoValor() {
+		if (Objects.isNull(lazyModelTipoValor)) {
+			lazyModelTipoValor = new GenericLazyDataModel<BsTipoValor>((List<BsTipoValor>) bsTipoValorServiceImpl
+					.buscarTipoValorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()).stream()
+					.filter(tipo -> tipo.getBsModulo().getCodigo().equalsIgnoreCase(Modulos.COBRANZAS.getModulo()))
+					.collect(Collectors.toList()));
+		}
+		return lazyModelTipoValor;
+	}
+
+	public void setLazyModelTipoValor(LazyDataModel<BsTipoValor> lazyModelTipoValor) {
+		this.lazyModelTipoValor = lazyModelTipoValor;
 	}
 
 	// SERVICES
@@ -513,7 +595,7 @@ public class VenFacturasController {
 	public void setVenCondicionVentaServiceImpl(VenCondicionVentaService venCondicionVentaServiceImpl) {
 		this.venCondicionVentaServiceImpl = venCondicionVentaServiceImpl;
 	}
-	
+
 	public CobSaldoService getCobSaldoServiceImpl() {
 		return cobSaldoServiceImpl;
 	}
@@ -522,7 +604,86 @@ public class VenFacturasController {
 		this.cobSaldoServiceImpl = cobSaldoServiceImpl;
 	}
 
+	public CobCobrosValoresService getCobCobrosValoresServiceImpl() {
+		return cobCobrosValoresServiceImpl;
+	}
+
+	public void setCobCobrosValoresServiceImpl(CobCobrosValoresService cobCobrosValoresServiceImpl) {
+		this.cobCobrosValoresServiceImpl = cobCobrosValoresServiceImpl;
+	}
+
+	public BigDecimal getMontoTotalCobro() {
+		return montoTotalCobro;
+	}
+
+	public void setMontoTotalCobro(BigDecimal montoTotalCobro) {
+		this.montoTotalCobro = montoTotalCobro;
+	}
+
+	public BsTipoValorService getBsTipoValorServiceImpl() {
+		return bsTipoValorServiceImpl;
+	}
+
+	public void setBsTipoValorServiceImpl(BsTipoValorService bsTipoValorServiceImpl) {
+		this.bsTipoValorServiceImpl = bsTipoValorServiceImpl;
+	}
+
 	// METODOS
+	public void addCobroDetalle() {
+		if (!Objects.isNull(cobCobrosValoresSelected)) {
+			cobCobrosValoresSelected.setBsEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa());
+			cobCobrosValoresSelected.setTipoComprobante("FACTURA");
+			Optional<CobCobrosValores> existente = this.cobrosValoresList.stream().filter(det -> {
+				return det.getBsTipoValor().getId() == this.cobCobrosValoresSelected.getBsTipoValor().getId()
+						&& det.getNroValor() == this.cobCobrosValoresSelected.getNroValor();
+			}).findFirst();
+			if (!existente.isPresent()) {
+				if (CollectionUtils.isEmpty(this.cobrosValoresList)) {
+					cobCobrosValoresSelected.setNroOrden(1);
+				} else {
+					Optional<Integer> maxNroOrden = this.cobrosValoresList.stream().map(CobCobrosValores::getNroOrden)
+							.max(Integer::compareTo);
+					if (maxNroOrden.isPresent()) {
+						cobCobrosValoresSelected.setNroOrden(maxNroOrden.get() + 1);
+					} else {
+						cobCobrosValoresSelected.setNroOrden(1);
+					}
+				}
+				this.cobrosValoresList.add(cobCobrosValoresSelected);
+			} else {
+				cobCobrosValoresSelected.setNroOrden(existente.get().getNroOrden());
+				int indice = this.cobrosValoresList.indexOf(existente.get());
+				this.cobrosValoresList.set(indice, cobCobrosValoresSelected);
+			}
+			this.montoTotalCobro = montoTotalCobro.add(cobCobrosValoresSelected.getMontoValor());
+			this.venFacturaCabecera.setIndCobrado("S");
+			cobCobrosValoresSelected = null;
+			getCobCobrosValoresSelected();
+		} else {
+			cobCobrosValoresSelected = null;
+			getCobCobrosValoresSelected();
+		}
+
+		PrimeFaces.current().ajax().update("form:messages", "form:dt-cobros", ":form:manageCobroValor");
+	}
+
+	public void limpiarCobroDetalle() {
+		this.montoTotalCobro = BigDecimal.ZERO;
+		this.venFacturaCabecera.setIndCobrado("N");
+		this.cobrosValoresList = new ArrayList<>();
+		getResultadoResta();
+		PrimeFaces.current().ajax().update("form:messages", "form:dt-cobros");
+	}
+
+	public BigDecimal getResultadoResta() {
+		if (!Objects.isNull(venFacturaCabecera)) {
+			BigDecimal montoTotalFactura = venFacturaCabecera.getMontoTotalFactura();
+			return montoTotalFactura.subtract(montoTotalCobro);
+		}
+		return BigDecimal.ZERO;
+
+	}
+
 	public void calculaTotalLineaDetalle() {
 		BigDecimal existencia = this.stoArticuloServiceImpl.retornaExistenciaArticulo(detalle.getStoArticulo().getId(),
 				this.commonsUtilitiesController.getIdEmpresaLogueada());
@@ -663,25 +824,25 @@ public class VenFacturasController {
 			boolean tipoCondicion = "CON".equalsIgnoreCase(factura.getVenCondicionVenta().getCodCondicion());
 			this.listaSaldoAGenerar = new ArrayList<CobSaldo>();
 			if (tipoCondicion) {
-				CobSaldo saldo = new CobSaldo();
 
-				saldo.setIdComprobate(factura.getId());
-				saldo.setTipoComprobante("FACTURA");
-				saldo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
-				saldo.setNroComprobanteCompleto(factura.getNroFacturaCompleto());
-				
-				// montos
-				saldo.setIdCuota(factura.getId());
-				saldo.setNroCuota(1);
-				saldo.setMontoCuota(factura.getMontoTotalFactura());
-				saldo.setSaldoCuota(factura.getMontoTotalFactura());
-				
-				saldo.setFechaVencimiento(factura.getFechaFactura());
-				
-				saldo.setCobCliente(this.venFacturaCabecera.getCobCliente());
-				saldo.setBsEmpresa(factura.getBsEmpresa());
-				this.listaSaldoAGenerar.add(saldo);
-				
+				/*
+				 * TODO: COMENTADO POR QUE FACTURAS AL CONTADO NO VAN A GENERAR SALDOY SE VAN A
+				 * COBRAR AL MOMENTO CobSaldo saldo = new CobSaldo();
+				 * 
+				 * saldo.setIdComprobate(factura.getId()); saldo.setTipoComprobante("FACTURA");
+				 * saldo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario()
+				 * ); saldo.setNroComprobanteCompleto(factura.getNroFacturaCompleto());
+				 * 
+				 * // montos saldo.setIdCuota(factura.getId()); saldo.setNroCuota(1);
+				 * saldo.setMontoCuota(factura.getMontoTotalFactura());
+				 * saldo.setSaldoCuota(factura.getMontoTotalFactura());
+				 * 
+				 * saldo.setFechaVencimiento(factura.getFechaFactura());
+				 * 
+				 * saldo.setCobCliente(this.venFacturaCabecera.getCobCliente());
+				 * saldo.setBsEmpresa(factura.getBsEmpresa());
+				 * this.listaSaldoAGenerar.add(saldo);
+				 */
 			} else {
 				int plazo = factura.getVenCondicionVenta().getPlazo().intValue();
 				BigDecimal montoCuota = factura.getMontoTotalFactura()
@@ -701,7 +862,7 @@ public class VenFacturasController {
 					saldo.setNroCuota(i);
 					saldo.setMontoCuota(montoCuota);
 					saldo.setSaldoCuota(montoCuota);
-					
+
 					saldo.setFechaVencimiento(fechaVencimiento);
 
 					// otros
@@ -778,20 +939,46 @@ public class VenFacturasController {
 						this.venFacturaCabecera.getBsTalonario().getBsTimbrado().getCodExpedicion(),
 						this.venFacturaCabecera.getNroFactura()));
 			}
+
 			VenFacturaCabecera facturaGuardada = this.venFacturasServiceImpl.save(this.venFacturaCabecera);
+
 			if (!Objects.isNull(facturaGuardada)) {
-				//TODO: aca debo ver el caso de NCR
-				if(facturaGuardada.getTipoFactura().equalsIgnoreCase("FACTURA")) {
-					parseaDetalleASaldo(facturaGuardada);
+
+				if (CollectionUtils.isNotEmpty(cobrosValoresList) && cobrosValoresList.size() > 0
+						&& "CON".equalsIgnoreCase(facturaGuardada.getVenCondicionVenta().getCodCondicion())) {
+					/*
+					 * montoTotalCobro =
+					 * cobrosValoresList.stream().map(CobCobrosValores::getMontoValor)
+					 * .reduce(BigDecimal.ZERO, BigDecimal::add);
+					 */
+					if (!(montoTotalCobro.compareTo(this.venFacturaCabecera.getMontoTotalFactura()) == 0)) {
+						CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El cobro debe ser exacto.");
+						return;
+					}
+					this.cobrosValoresList = cobrosValoresList.stream().map(cobro -> {
+						cobro.setUsuarioModificacion(facturaGuardada.getUsuarioModificacion());
+						cobro.setIdComprobate(facturaGuardada.getId());
+						cobro.setNroComprobanteCompleto(facturaGuardada.getNroFacturaCompleto());
+						cobro.setTipoComprobante("FACTURA");
+						return cobro;
+					}).collect(Collectors.toList());
+					this.cobCobrosValoresServiceImpl.saveAll(cobrosValoresList);
+				} else {
+
+					// TODO: aca debo ver el caso de NCR
+					if (facturaGuardada.getTipoFactura().equalsIgnoreCase("FACTURA")) {
+						parseaDetalleASaldo(facturaGuardada);
+					}
+					if (!Objects.isNull(this.cobSaldoServiceImpl.saveAll(listaSaldoAGenerar))) {
+						CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+								"El registro se guardo correctamente.");
+					} else {
+						CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+								"No se Pudieron crear los saldos.");
+					}
+
 				}
-				if (!Objects.isNull(this.cobSaldoServiceImpl.saveAll(listaSaldoAGenerar))) {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
-							"El registro se guardo correctamente.");	
-				}else {
-					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
-							"No se Pudieron crear los saldos.");
-				}
-					
+
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_FATAL, "¡ERROR!", "No se pudo insertar el registro.");
 			}
@@ -828,6 +1015,9 @@ public class VenFacturasController {
 			}
 			if (!Objects.isNull(this.venFacturaCabecera)) {
 				this.venFacturasServiceImpl.deleteById(this.venFacturaCabecera.getId());
+				if (CollectionUtils.isNotEmpty(cobrosValoresList) && cobrosValoresList.size() > 0) {
+					this.cobCobrosValoresServiceImpl.deleteAll(cobrosValoresList);
+				}
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se elimino correctamente.");
 			} else {

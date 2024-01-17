@@ -25,7 +25,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.Common;
 */
 @Entity
 @Table(name = "cob_saldos", uniqueConstraints = @UniqueConstraint(name = "cob_saldos_unique_persona_empresa", columnNames = {
-		"bs_empresa_id", "cob_cliente_id", "id_comprobante", "nro_cuota" }))
+		"bs_empresa_id", "cob_cliente_id", "id_comprobante","tipo_comprobante", "nro_cuota" }))
 public class CobSaldo extends Common implements Serializable {
 
 	private static final long serialVersionUID = 1L;

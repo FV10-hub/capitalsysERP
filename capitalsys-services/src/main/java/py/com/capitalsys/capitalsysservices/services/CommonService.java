@@ -17,6 +17,8 @@ public interface CommonService<E> {
 	public E save(E entity);
 	
 	public List<E> saveAll(List<E> entities);
+	
+	public List<E> deleteAll(List<E> entities);
 
 	public void deleteById(Long id);
 

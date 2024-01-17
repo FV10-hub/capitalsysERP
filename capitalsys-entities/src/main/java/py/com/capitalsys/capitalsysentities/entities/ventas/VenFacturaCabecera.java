@@ -72,6 +72,9 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	@Transient
 	private boolean indImpresoBoolean;
 
+	@Column(name = "ind_cobrado")
+	private String indCobrado;
+
 	@Column(name = "monto_total_gravada")
 	private BigDecimal montoTotalGravada;
 
@@ -280,6 +283,14 @@ public class VenFacturaCabecera extends Common implements Serializable {
 
 	public void setVenCondicionVenta(VenCondicionVenta venCondicionVenta) {
 		this.venCondicionVenta = venCondicionVenta;
+	}
+
+	public String getIndCobrado() {
+		return indCobrado;
+	}
+
+	public void setIndCobrado(String indCobrado) {
+		this.indCobrado = indCobrado;
 	}
 
 	public void addDetalle(VenFacturaDetalle detalle) {

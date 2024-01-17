@@ -3,6 +3,7 @@
  */
 package py.com.capitalsys.capitalsysservices.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +54,19 @@ public class CommonServiceImpl<E, R extends PagingAndSortingRepository<E, Long>>
 	@Transactional
 	public List<E> saveAll(List<E> entities) {
 		return (List<E>) repository.saveAll(entities);
+	}
+
+	@Override
+	@Transactional
+	public List<E> deleteAll(List<E> entities) {
+		List<E> deletedEntities = new ArrayList<>();
+	    
+	    for (E entity : entities) {
+	        repository.delete(entity);
+	        deletedEntities.add(entity);
+	    }
+
+	    return deletedEntities;
 	}
 
 }
