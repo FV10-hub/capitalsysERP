@@ -26,6 +26,9 @@ public interface CobHabilitacionCajaRepository extends PagingAndSortingRepositor
 	@Query(value = "SELECT COALESCE(MAX('S'), 'N') FROM cob_habilitaciones_cajas m where m.bs_usuario_id = ?1 and m.bs_cajas_id = ?2 and m.ind_cerrado = 'N'", nativeQuery = true)
 	String validaHabilitacionAbierta(Long idUsuario, Long idCaja);
 
+	@Query(value = "SELECT m FROM CobHabilitacionCaja m where m.bsUsuario.bsEmpresa.id = ?1 and  m.bsUsuario.id = ?2 and m.cobCaja.id = ?3 and m.indCerrado = 'N'")
+	CobHabilitacionCaja retornarHabilitacionAbierta(Long idEmpresa, Long idUsuario, Long idCaja);
+
 	@Query("SELECT m FROM CobHabilitacionCaja m where m.estado = 'ACTIVO' and m.bsUsuario.bsEmpresa.id = ?1")
 	List<CobHabilitacionCaja> buscarCobHabilitacionCajaActivosLista(Long idEmpresa);
 }

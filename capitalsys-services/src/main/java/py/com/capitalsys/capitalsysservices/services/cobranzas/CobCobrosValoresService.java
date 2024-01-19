@@ -18,4 +18,6 @@ public interface CobCobrosValoresService extends CommonService<CobCobrosValores>
 	
 	List<CobCobrosValores> buscarValoresPorComprobanteLista(Long idEmpresa,Long idComprobante, String tipoComprobante);
 
+	List<CobCobrosValores> buscarValoresDepositoLista(Long idEmpresa,Long idDeposito);
+	
 }

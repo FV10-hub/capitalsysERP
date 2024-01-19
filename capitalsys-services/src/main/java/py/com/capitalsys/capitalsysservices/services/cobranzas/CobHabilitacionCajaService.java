@@ -17,4 +17,7 @@ public interface CobHabilitacionCajaService extends CommonService<CobHabilitacio
 	String validaHabilitacionAbierta(Long idUsuario, Long idCaja);
 	
 	List<CobHabilitacionCaja> buscarCobHabilitacionCajaActivosLista(Long idEmpresa);
+
+	CobHabilitacionCaja retornarHabilitacionAbierta(Long idEmpresa, Long idUsuario, Long idCaja);
+	
 }

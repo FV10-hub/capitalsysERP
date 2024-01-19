@@ -25,11 +25,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
-import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.Common;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCobrosValores;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCaja;
@@ -39,8 +37,8 @@ import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCa
 @Table(name = "tes_depositos", 
 uniqueConstraints = 
 @UniqueConstraint(name = 
-"cob_depositos_uniques", columnNames = {
-"nro_boleta", "tes_banco_id", "bs_empresa_id" }))
+"tes_depositos_uniques", columnNames = {
+ "tes_banco_id", "bs_empresa_id","nro_boleta" }))
 public class TesDeposito extends Common implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -70,16 +68,9 @@ public class TesDeposito extends Common implements Serializable {
 	@JoinColumn(name = "cob_habilitacion_id", referencedColumnName = "id", nullable = false)
 	private CobHabilitacionCaja cobHabilitacionCaja;
 	
-	@OneToOne
-	@JoinColumn(name = "bs_talonario_id", referencedColumnName = "id", nullable = true)
-	private BsTalonario bsTalonario;
-	
 	@ManyToOne
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
-	
-	@OneToMany(mappedBy = "tesDeposito", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<CobCobrosValores> cobCobrosValoresList;
 	
 	@PrePersist
 	private void preInsert() {
@@ -93,32 +84,71 @@ public class TesDeposito extends Common implements Serializable {
 	}
 
 	public TesDeposito() {
-		this.cobCobrosValoresList = new ArrayList<>();
 		this.montoTotalDeposito = BigDecimal.ZERO;
 	}
-
 	
-	
-	public void addDetalle(CobCobrosValores detalle) {
-		if (!Objects.isNull(detalle)) {
-			this.cobCobrosValoresList.add(detalle);
-		}
-	}
-	
-	public void setCabeceraADetalle() {
-		if (!Objects.isNull(this.cobCobrosValoresList)) {
-			this.cobCobrosValoresList.forEach(detalle -> {
-				detalle.setTesDeposito(this);
-			});
-		}
+	public Long getId() {
+		return id;
 	}
 
-	public void calcularTotales() {
-		if (!Objects.isNull(this.cobCobrosValoresList)) {
-			this.cobCobrosValoresList.forEach(detalle -> {
-				this.montoTotalDeposito = this.montoTotalDeposito.add(detalle.getMontoValor());
-			});
-		}
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public LocalDate getFechaDeposito() {
+		return fechaDeposito;
+	}
+
+	public void setFechaDeposito(LocalDate fechaDeposito) {
+		this.fechaDeposito = fechaDeposito;
+	}
+
+	public String getObservacion() {
+		return observacion;
+	}
+
+	public void setObservacion(String observacion) {
+		this.observacion = observacion;
+	}
+
+	public Long getNroBoleta() {
+		return nroBoleta;
+	}
+
+	public void setNroBoleta(Long nroBoleta) {
+		this.nroBoleta = nroBoleta;
+	}
+
+	public BigDecimal getMontoTotalDeposito() {
+		return montoTotalDeposito;
+	}
+
+	public void setMontoTotalDeposito(BigDecimal montoTotalDeposito) {
+		this.montoTotalDeposito = montoTotalDeposito;
+	}
+
+	public TesBanco getTesBanco() {
+		return tesBanco;
+	}
+
+	public void setTesBanco(TesBanco tesBanco) {
+		this.tesBanco = tesBanco;
+	}
+
+	public CobHabilitacionCaja getCobHabilitacionCaja() {
+		return cobHabilitacionCaja;
+	}
+
+	public void setCobHabilitacionCaja(CobHabilitacionCaja cobHabilitacionCaja) {
+		this.cobHabilitacionCaja = cobHabilitacionCaja;
+	}
+
+	public BsEmpresa getBsEmpresa() {
+		return bsEmpresa;
+	}
+
+	public void setBsEmpresa(BsEmpresa bsEmpresa) {
+		this.bsEmpresa = bsEmpresa;
 	}
 	
 }

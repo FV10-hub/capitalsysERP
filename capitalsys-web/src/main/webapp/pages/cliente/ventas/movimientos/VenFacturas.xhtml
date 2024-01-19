@@ -134,7 +134,7 @@
 								<p:toolbarGroup>
 									<p:commandButton value="Guardar" icon="pi pi-save"
 										id="btnGuardar"
-										disabled="#{venFacturasController.venFacturaCabecera.venFacturaDetalleList.size() == 0 || venFacturasController.venFacturaCabecera.bsTalonario.id == null}"
+										disabled="#{venFacturasController.venFacturaCabecera.venFacturaDetalleList.size() == 0 || venFacturasController.venFacturaCabecera.bsTalonario.id == null || venFacturasController.estaCobrado}"
 										actionListener="#{venFacturasController.guardar}"
 										update=":form" styleClass="ui-button-success"
 										style="margin-right: .5rem" />
@@ -152,6 +152,7 @@
 										onclick="PF('dlgCobros').show()"
 										styleClass="ui-button-primary" style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
+										disabled="#{venFacturasController.estaCobrado}"
 										rendered="#{venFacturasController.venFacturaCabecera.id != null}"
 										actionListener="#{venFacturasController.delete}"
 										update=":form" styleClass="ui-button-danger"
@@ -742,6 +743,7 @@
 										disabled="#{venFacturasController.estaCobrado}"
 										actionListener="#{venFacturasController.limpiarCobroDetalle}"
 										update=":form:dt-cobros :form:montoSaldoCobroLb" class="ui-button-secondary ml-1" />
+										
 								</div>
 								<div
 									class="ui-fluid formgrid grid flex flex-rowalign-items-center">

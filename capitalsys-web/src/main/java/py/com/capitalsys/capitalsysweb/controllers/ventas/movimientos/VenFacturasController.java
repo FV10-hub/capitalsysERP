@@ -854,6 +854,7 @@ public class VenFacturasController {
 					CobSaldo saldo = new CobSaldo();
 
 					saldo.setIdComprobate(factura.getId());
+					saldo.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 					saldo.setTipoComprobante("FACTURA");
 					saldo.setNroComprobanteCompleto(factura.getNroFacturaCompleto());
 

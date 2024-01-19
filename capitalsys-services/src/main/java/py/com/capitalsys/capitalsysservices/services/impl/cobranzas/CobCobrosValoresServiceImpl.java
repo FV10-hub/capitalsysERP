@@ -37,4 +37,9 @@ public class CobCobrosValoresServiceImpl extends CommonServiceImpl<CobCobrosValo
 		return this.repository.buscarValoresPorComprobanteLista(idEmpresa, idComprobante, tipoComprobante);
 	}
 
+	@Override
+	public List<CobCobrosValores> buscarValoresDepositoLista(Long idEmpresa, Long idDeposito) {
+		return this.repository.buscarValoresDepositoLista(idEmpresa, idDeposito);
+	}
+
 }

@@ -29,5 +29,8 @@ public interface CobCobrosValoresRepository extends PagingAndSortingRepository<C
 	
 	@Query("SELECT m FROM CobCobrosValores m where m.estado = 'ACTIVO' and m.indDepositado = 'N' and m.bsEmpresa.id = ?1 and m.idComprobate = ?2 and m.tipoComprobante = ?3 ")
 	List<CobCobrosValores> buscarValoresPorComprobanteLista(Long idEmpresa,Long idComprobante, String tipoComprobante);
+	
+	@Query("SELECT m FROM CobCobrosValores m where m.estado = 'ACTIVO' and m.indDepositado = 'S' and m.bsEmpresa.id = ?1 and m.tesDeposito.id = ?2 ")
+	List<CobCobrosValores> buscarValoresDepositoLista(Long idEmpresa,Long idDeposito);
 
 }

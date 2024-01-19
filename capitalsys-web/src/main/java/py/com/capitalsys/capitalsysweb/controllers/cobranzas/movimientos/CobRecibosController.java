@@ -19,6 +19,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
@@ -30,19 +31,22 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTimbrado;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTipoComprobante;
+import py.com.capitalsys.capitalsysentities.entities.base.BsTipoValor;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCaja;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCliente;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCobrador;
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCobrosValores;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCaja;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboCabecera;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboDetalle;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobSaldo;
-import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaDetalle;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
+import py.com.capitalsys.capitalsysservices.services.base.BsTipoValorService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCajaService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobClienteService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCobradorService;
+import py.com.capitalsys.capitalsysservices.services.cobranzas.CobCobrosValoresService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobHabilitacionCajaService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobRecibosService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobSaldoService;
@@ -79,17 +83,24 @@ public class CobRecibosController {
 	private CobCaja cobCajaSelected;
 	private CobCliente cobClienteSelected;
 	private CobReciboDetalle detalle;
+	private CobCobrosValores cobCobrosValoresSelected;
 	private LazyDataModel<CobReciboCabecera> lazyModel;
 	private LazyDataModel<CobHabilitacionCaja> lazyModelHabilitacion;
 	private LazyDataModel<CobSaldo> lazyModelSaldos;
 	private LazyDataModel<BsTalonario> lazyModelTalonario;
 	private LazyDataModel<CobCliente> lazyModelCliente;
 	private LazyDataModel<CobCobrador> lazyModelCobCobrador;
+	private LazyDataModel<BsTipoValor> lazyModelTipoValor;
+	
+	private List<CobCobrosValores> cobrosValoresList;
+	public BigDecimal montoTotalCobro = BigDecimal.ZERO;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
 	private boolean esVisibleFormulario = true;
 	private boolean tieneHabilitacionAbiertaRendered;
+	private boolean estaCobrado;
+	private String tipoSaldoAFiltrar;
 
 	private static final String DT_NAME = "dt-recibos";
 
@@ -117,6 +128,12 @@ public class CobRecibosController {
 
 	@ManagedProperty("#{cobSaldoServiceImpl}")
 	private CobSaldoService cobSaldoServiceImpl;
+	
+	@ManagedProperty("#{cobCobrosValoresServiceImpl}")
+	private CobCobrosValoresService cobCobrosValoresServiceImpl;
+
+	@ManagedProperty("#{bsTipoValorServiceImpl}")
+	private BsTipoValorService bsTipoValorServiceImpl;
 
 	// CobSaldoServiceImpl
 
@@ -147,6 +164,8 @@ public class CobRecibosController {
 		this.detalle = null;
 		this.cobHabilitacionCaja = null;
 		this.cobClienteSelected = null;
+		this.cobCobrosValoresSelected = null;
+		
 
 		this.lazyModel = null;
 		this.lazyModelHabilitacion = null;
@@ -154,10 +173,15 @@ public class CobRecibosController {
 		this.lazyModelTalonario = null;
 		this.lazyModelCliente = null;
 		this.lazyModelCobCobrador = null;
+		this.lazyModelTipoValor = null;
 
+		this.estaCobrado = false;
 		this.esNuegoRegistro = true;
 		this.esVisibleFormulario = !esVisibleFormulario;
 		this.estadoList = List.of(Estado.ACTIVO.getEstado(), Estado.INACTIVO.getEstado(), "ANULADO");
+		this.cobrosValoresList = new ArrayList<>();
+		this.tipoSaldoAFiltrar = "";
+		
 	}
 
 	// GETTERS Y SETTERS
@@ -166,6 +190,8 @@ public class CobRecibosController {
 			cobReciboCabecera = new CobReciboCabecera();
 			cobReciboCabecera.setFechaRecibo(LocalDate.now());
 			cobReciboCabecera.setEstado(Estado.ACTIVO.getEstado());
+			cobReciboCabecera.setIndCobrado("N");
+			cobReciboCabecera.setIndImpresoBoolean(false);
 			cobReciboCabecera.setBsEmpresa(new BsEmpresa());
 			cobReciboCabecera.setCobHabilitacionCaja(new CobHabilitacionCaja());
 			cobReciboCabecera.setBsTalonario(new BsTalonario());
@@ -188,6 +214,8 @@ public class CobRecibosController {
 			cobReciboCabeceraSelected = new CobReciboCabecera();
 			cobReciboCabeceraSelected.setFechaRecibo(LocalDate.now());
 			cobReciboCabeceraSelected.setEstado(Estado.ACTIVO.getEstado());
+			cobReciboCabeceraSelected.setIndCobrado("N");
+			cobReciboCabeceraSelected.setIndImpresoBoolean(false);
 			cobReciboCabeceraSelected.setBsEmpresa(new BsEmpresa());
 			cobReciboCabeceraSelected.setCobHabilitacionCaja(new CobHabilitacionCaja());
 			cobReciboCabeceraSelected.setBsTalonario(new BsTalonario());
@@ -205,6 +233,15 @@ public class CobRecibosController {
 		if (!Objects.isNull(cobReciboCabeceraSelected)) {
 			cobReciboCabeceraSelected.getCobReciboDetalleList()
 					.sort(Comparator.comparing(CobReciboDetalle::getNroOrden));
+			this.estaCobrado = cobReciboCabeceraSelected.getIndCobrado().equalsIgnoreCase("S");
+			if (this.estaCobrado) {
+				this.cobrosValoresList = this.cobCobrosValoresServiceImpl.buscarValoresPorComprobanteLista(
+						this.commonsUtilitiesController.getIdEmpresaLogueada(), cobReciboCabeceraSelected.getId(),
+						"RECIBO");
+				this.montoTotalCobro = cobrosValoresList.stream().map(CobCobrosValores::getMontoValor)
+						.reduce(BigDecimal.ZERO, BigDecimal::add);
+				getResultadoResta();
+			}
 			cobReciboCabecera = cobReciboCabeceraSelected;
 			cobReciboCabeceraSelected = null;
 			this.esNuegoRegistro = false;
@@ -309,6 +346,33 @@ public class CobRecibosController {
 		}
 		this.cobClienteSelected = cobClienteSelected;
 	}
+	
+	public CobCobrosValores getCobCobrosValoresSelected() {
+		if (Objects.isNull(cobCobrosValoresSelected)) {
+			cobCobrosValoresSelected = new CobCobrosValores();
+			cobCobrosValoresSelected.setFechaValor(LocalDate.now());
+			cobCobrosValoresSelected.setFechaVencimiento(LocalDate.now());
+			cobCobrosValoresSelected.setIndDepositadoBoolean(false);
+			cobCobrosValoresSelected.setNroValor("0");
+			cobCobrosValoresSelected.setMontoValor(BigDecimal.ZERO);
+			cobCobrosValoresSelected.setBsEmpresa(new BsEmpresa());
+			cobCobrosValoresSelected.setBsTipoValor(new BsTipoValor());
+
+		}
+		return cobCobrosValoresSelected;
+	}
+
+	public void setCobCobrosValoresSelected(CobCobrosValores cobCobrosValoresSelected) {
+		this.cobCobrosValoresSelected = cobCobrosValoresSelected;
+	}
+	
+	public List<CobCobrosValores> getCobrosValoresList() {
+		return cobrosValoresList;
+	}
+
+	public void setCobrosValoresList(List<CobCobrosValores> cobrosValoresList) {
+		this.cobrosValoresList = cobrosValoresList;
+	}
 
 	public boolean isTieneHabilitacionAbiertaRendered() {
 		return tieneHabilitacionAbiertaRendered;
@@ -342,11 +406,40 @@ public class CobRecibosController {
 		this.esVisibleFormulario = esVisibleFormulario;
 	}
 
+	public boolean isEstaCobrado() {
+		return estaCobrado;
+	}
+
+	public void setEstaCobrado(boolean estaCobrado) {
+		this.estaCobrado = estaCobrado;
+	}
+
+	public String getTipoSaldoAFiltrar() {
+		return tipoSaldoAFiltrar;
+	}
+
+	public void setTipoSaldoAFiltrar(String tipoSaldoAFiltrar) {
+		if(!StringUtils.isAllBlank(tipoSaldoAFiltrar)) {
+			lazyModelSaldos = null;
+			getLazyModelSaldos();
+			PrimeFaces.current().ajax().update(":form:manageDetalle" ,":form:dt-saldo");
+		}
+		this.tipoSaldoAFiltrar = tipoSaldoAFiltrar;
+	}
+
 	// LAZY
 	public LazyDataModel<CobReciboCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			lazyModel = new GenericLazyDataModel<CobReciboCabecera>((List<CobReciboCabecera>) cobRecibosServiceImpl
-					.buscarCobReciboCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+			//ordena la lista por fecha y por nroComprobante DESC
+			List<CobReciboCabecera> listaOrdenada = cobRecibosServiceImpl
+			        .buscarCobReciboCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
+			        .stream()
+			        .sorted(
+			            Comparator.comparing(CobReciboCabecera::getFechaRecibo).reversed()
+			            .thenComparing(Comparator.comparing(CobReciboCabecera::getNroReciboCompleto).reversed())
+			        )
+			        .collect(Collectors.toList());
+			lazyModel = new GenericLazyDataModel<CobReciboCabecera>(listaOrdenada);
 		}
 		return lazyModel;
 	}
@@ -374,12 +467,26 @@ public class CobRecibosController {
 			if (!Objects.isNull(this.cobReciboCabecera)) {
 				if (!Objects.isNull(this.cobReciboCabecera.getCobCliente())
 						|| this.cobReciboCabecera.getCobCliente().getId() != null) {
-					listaFiltrada = (List<CobSaldo>) cobSaldoServiceImpl
-							.buscarCobSaldoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
-							.filter(saldo -> saldo.getCobCliente().getId() == this.cobReciboCabecera.getCobCliente()
-									.getId())
-							.filter(saldo -> saldo.getSaldoCuota().compareTo(BigDecimal.ZERO) > 0)
-							.sorted(Comparator.comparing(CobSaldo::getFechaVencimiento)).collect(Collectors.toList());
+					
+					if(!StringUtils.isAllBlank(tipoSaldoAFiltrar) || !(StringUtils.equalsIgnoreCase(tipoSaldoAFiltrar, ""))) {
+						listaFiltrada = (List<CobSaldo>) cobSaldoServiceImpl
+								.buscarCobSaldoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
+								.filter(saldo -> saldo.getCobCliente().getId() == this.cobReciboCabecera.getCobCliente()
+										.getId())
+								.filter(saldo -> saldo.getSaldoCuota().compareTo(BigDecimal.ZERO) > 0)
+								.filter(saldo -> saldo.getTipoComprobante().equalsIgnoreCase(tipoSaldoAFiltrar))
+								.sorted(Comparator.comparing(CobSaldo::getFechaVencimiento)).collect(Collectors.toList());
+						int a = 0;
+					}else {
+						listaFiltrada = (List<CobSaldo>) cobSaldoServiceImpl
+								.buscarCobSaldoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
+								.filter(saldo -> saldo.getCobCliente().getId() == this.cobReciboCabecera.getCobCliente()
+										.getId())
+								.filter(saldo -> saldo.getSaldoCuota().compareTo(BigDecimal.ZERO) > 0)
+								.sorted(Comparator.comparing(CobSaldo::getFechaVencimiento)).collect(Collectors.toList());
+					}
+					
+					
 				} else {
 					listaFiltrada = (List<CobSaldo>) cobSaldoServiceImpl
 							.buscarCobSaldoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()
@@ -433,6 +540,20 @@ public class CobRecibosController {
 
 	public void setLazyModelCobCobrador(LazyDataModel<CobCobrador> lazyModelCobCobrador) {
 		this.lazyModelCobCobrador = lazyModelCobCobrador;
+	}
+	
+	public LazyDataModel<BsTipoValor> getLazyModelTipoValor() {
+		if (Objects.isNull(lazyModelTipoValor)) {
+			lazyModelTipoValor = new GenericLazyDataModel<BsTipoValor>((List<BsTipoValor>) bsTipoValorServiceImpl
+					.buscarTipoValorActivosLista(sessionBean.getUsuarioLogueado().getBsEmpresa().getId()).stream()
+					.filter(tipo -> tipo.getBsModulo().getCodigo().equalsIgnoreCase(Modulos.COBRANZAS.getModulo()))
+					.collect(Collectors.toList()));
+		}
+		return lazyModelTipoValor;
+	}
+
+	public void setLazyModelTipoValor(LazyDataModel<BsTipoValor> lazyModelTipoValor) {
+		this.lazyModelTipoValor = lazyModelTipoValor;
 	}
 
 	// SERVICES
@@ -515,8 +636,88 @@ public class CobRecibosController {
 	public void setCommonsUtilitiesController(CommonsUtilitiesController commonsUtilitiesController) {
 		this.commonsUtilitiesController = commonsUtilitiesController;
 	}
+	
+	public CobCobrosValoresService getCobCobrosValoresServiceImpl() {
+		return cobCobrosValoresServiceImpl;
+	}
+
+	public void setCobCobrosValoresServiceImpl(CobCobrosValoresService cobCobrosValoresServiceImpl) {
+		this.cobCobrosValoresServiceImpl = cobCobrosValoresServiceImpl;
+	}
+
+	public BigDecimal getMontoTotalCobro() {
+		return montoTotalCobro;
+	}
+
+	public void setMontoTotalCobro(BigDecimal montoTotalCobro) {
+		this.montoTotalCobro = montoTotalCobro;
+	}
+
+	public BsTipoValorService getBsTipoValorServiceImpl() {
+		return bsTipoValorServiceImpl;
+	}
+
+	public void setBsTipoValorServiceImpl(BsTipoValorService bsTipoValorServiceImpl) {
+		this.bsTipoValorServiceImpl = bsTipoValorServiceImpl;
+	}
 
 	// METODOS
+	public void addCobroDetalle() {
+		if (!Objects.isNull(cobCobrosValoresSelected)) {
+			cobCobrosValoresSelected.setBsEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa());
+			cobCobrosValoresSelected.setTipoComprobante("RECIBO");
+			Optional<CobCobrosValores> existente = this.cobrosValoresList.stream().filter(det -> {
+				return det.getBsTipoValor().getId() == this.cobCobrosValoresSelected.getBsTipoValor().getId()
+						&& det.getNroValor() == this.cobCobrosValoresSelected.getNroValor();
+			}).findFirst();
+			if (!existente.isPresent()) {
+				if (CollectionUtils.isEmpty(this.cobrosValoresList)) {
+					cobCobrosValoresSelected.setNroOrden(1);
+				} else {
+					Optional<Integer> maxNroOrden = this.cobrosValoresList.stream().map(CobCobrosValores::getNroOrden)
+							.max(Integer::compareTo);
+					if (maxNroOrden.isPresent()) {
+						cobCobrosValoresSelected.setNroOrden(maxNroOrden.get() + 1);
+					} else {
+						cobCobrosValoresSelected.setNroOrden(1);
+					}
+				}
+				this.cobrosValoresList.add(cobCobrosValoresSelected);
+			} else {
+				cobCobrosValoresSelected.setNroOrden(existente.get().getNroOrden());
+				int indice = this.cobrosValoresList.indexOf(existente.get());
+				this.cobrosValoresList.set(indice, cobCobrosValoresSelected);
+			}
+			this.montoTotalCobro = montoTotalCobro.add(cobCobrosValoresSelected.getMontoValor());
+			this.cobReciboCabecera.setIndCobrado("S");
+			cobCobrosValoresSelected = null;
+			getCobCobrosValoresSelected();
+		} else {
+			cobCobrosValoresSelected = null;
+			getCobCobrosValoresSelected();
+		}
+
+		PrimeFaces.current().ajax().update("form:messages", "form:dt-cobros", ":form:manageCobroValor");
+	}
+
+	public void limpiarCobroDetalle() {
+		this.montoTotalCobro = BigDecimal.ZERO;
+		this.cobReciboCabecera.setIndCobrado("N");
+		this.cobrosValoresList = new ArrayList<>();
+		getResultadoResta();
+		PrimeFaces.current().ajax().update("form:messages", "form:dt-cobros");
+	}
+
+	public BigDecimal getResultadoResta() {
+		if (!Objects.isNull(cobReciboCabecera)) {
+			BigDecimal montoTotalFactura = cobReciboCabecera.getMontoTotalRecibo();
+			return montoTotalFactura.subtract(montoTotalCobro);
+		}
+		return BigDecimal.ZERO;
+
+	}
+	
+	
 	public void validarHabilitacion() {
 		String valor = this.cobHabilitacionCajaServiceImpl
 				.validaHabilitacionAbierta(this.sessionBean.getUsuarioLogueado().getId(), this.cobCajaSelected.getId());
@@ -627,6 +828,7 @@ public class CobRecibosController {
 				}
 
 			}
+			
 			if (Objects.isNull(this.cobReciboCabecera.getBsTalonario())
 					|| Objects.isNull(this.cobReciboCabecera.getBsTalonario().getId())) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Talonario.");
@@ -641,7 +843,29 @@ public class CobRecibosController {
 			this.cobReciboCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
 			this.cobReciboCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
 
-			if (!Objects.isNull(this.cobRecibosServiceImpl.save(cobReciboCabecera))) {
+			
+			
+			CobReciboCabecera reciboGuardado = this.cobRecibosServiceImpl.save(cobReciboCabecera);
+			if (!Objects.isNull(reciboGuardado)) {
+				
+				if (CollectionUtils.isNotEmpty(cobrosValoresList) && cobrosValoresList.size() > 0) {
+					if (!(montoTotalCobro.compareTo(reciboGuardado.getMontoTotalRecibo()) == 0)) {
+						CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El cobro debe ser exacto.");
+						return;
+					}
+					this.cobrosValoresList = cobrosValoresList.stream().map(cobro -> {
+						cobro.setUsuarioModificacion(reciboGuardado.getUsuarioModificacion());
+						cobro.setIdComprobate(reciboGuardado.getId());
+						cobro.setNroComprobanteCompleto(reciboGuardado.getNroReciboCompleto());
+						cobro.setTipoComprobante("RECIBO");
+						return cobro;
+					}).collect(Collectors.toList());
+					if (CollectionUtils.isEmpty(this.cobCobrosValoresServiceImpl.saveAll(cobrosValoresList))) {
+						CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+								"No se guardaron los cobros.");
+					}
+				}
+				
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
 						"El registro se guardo correctamente.");
 			} else {

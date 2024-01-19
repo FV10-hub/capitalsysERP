@@ -92,7 +92,8 @@
 									converter="localDateConverter">
 								</h:outputText>
 							</p:column>
-							<p:column headerText="Nro. Recibo" sortBy="#{recibo.nroReciboCompleto}"
+							<p:column headerText="Nro. Recibo"
+								sortBy="#{recibo.nroReciboCompleto}"
 								filterBy="#{recibo.nroReciboCompleto}">
 								<h:outputText value="#{recibo.nroReciboCompleto}" />
 							</p:column>
@@ -133,7 +134,7 @@
 								<p:toolbarGroup>
 									<p:commandButton value="Guardar" icon="pi pi-save"
 										id="btnGuardar"
-										disabled="#{cobRecibosController.cobReciboCabecera.cobReciboDetalleList.size() == 0}"
+										disabled="#{cobRecibosController.cobReciboCabecera.cobReciboDetalleList.size() == 0 || cobRecibosController.estaCobrado}"
 										actionListener="#{cobRecibosController.guardar}"
 										update=":form" styleClass="ui-button-success"
 										style="margin-right: .5rem" />
@@ -142,6 +143,13 @@
 										actionListener="#{cobRecibosController.cleanFields}"
 										update=":form" styleClass="ui-button-info"
 										style="margin-right: .5rem" />
+									<p:commandButton
+										value="#{cobRecibosController.estaCobrado ? 'Cobrado' : 'Cobrar'}"
+										id="btnCobrar" disabled="#{cobRecibosController.estaCobrado}"
+										icon="pi pi-money-bill"
+										update=":form:manageCobroValor"
+										onclick="PF('dlgCobros').show()"
+										styleClass="ui-button-primary" style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
 										rendered="#{cobRecibosController.cobReciboCabecera.id != null}"
 										actionListener="#{cobRecibosController.delete}" update=":form"
@@ -258,6 +266,15 @@
 													process="@this" update=":form:dt-detalle :form:btnGuardar"
 													styleClass="ui-button-primary" style="margin-right: .5rem" />
 											</div>
+											<div class="col-4 md:col-2">
+												<p:selectOneMenu id="tipoSaldoABuscarLb"
+													value="#{cobRecibosController.tipoSaldoAFiltrar}">
+													<f:selectItem itemLabel="TODOS" itemValue=""/>
+													<f:selectItem itemLabel="FACTURAS" itemValue="FACTURA"/>
+		                    						<f:selectItem itemLabel="DESEMSOLSOS" itemValue="DESEMBOLSO"/>
+		                    						<p:ajax update=":form:manageDetalle :form:dt-saldo"></p:ajax>
+												</p:selectOneMenu>
+											</div>
 
 										</div>
 										<h5 class="col-12 md:col-12">Detalle de Cuotas</h5>
@@ -372,7 +389,7 @@
 									oncomplete="PF('dlgAddDetalle').hide()" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{cobRecibosController.setDetalle(null)}"
-									update=":form:dt-detalle" onclick="PF('dlgAddDetalle').hide()"
+									update=":form:dt-detalle :form:tipoSaldoABuscarLb :form:dt-saldo" onclick="PF('dlgAddDetalle').hide()"
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
@@ -381,8 +398,8 @@
 							showEffect="fade" modal="true">
 							<p:dataTable widgetVar="dtSaldo" var="saldo"
 								value="#{cobRecibosController.lazyModelSaldos}" id="dt-saldo"
-								paginator="true" paginatorPosition="bottom"
-								reflow="true" rows="12" scrollable="true" scrollHeight="300"
+								paginator="true" paginatorPosition="bottom" reflow="true"
+								rows="12" scrollable="true" scrollHeight="300"
 								emptyMessage="No hay Registros">
 								<f:facet name="header">
 									<div class="products-table-header">
@@ -550,6 +567,183 @@
 									filterBy="#{talonario.bsTipoComprobante.descripcion}">
 									<h:outputText
 										value="#{talonario.bsTipoComprobante.descripcion}" />
+								</p:column>
+							</p:dataTable>
+						</p:dialog>
+
+						<p:dialog showEffect="fade" modal="true" widgetVar="dlgCobros"
+							responsive="true" width="800">
+							<f:facet name="header">
+								<div class="field flex justify-content-start align-items-center">
+									<p:commandButton value="Agregar Valor" icon="pi pi-plus"
+										disabled="#{cobRecibosController.estaCobrado}"
+										class="ui-button-success" onclick="PF('dlgAddCobro').show()"
+										update=":form:manageCobroValor" />
+									<p:commandButton value="Guardar" icon="pi pi-check"
+										class="ui-button-primary ml-1"
+										onclick="PF('dlgCobros').hide()" update=":form:dt-cobros" />
+									<p:commandButton value="Limpiar Valores" icon="pi pi-times"
+										disabled="#{cobRecibosController.estaCobrado}"
+										actionListener="#{cobRecibosController.limpiarCobroDetalle}"
+										update=":form:dt-cobros :form:montoSaldoCobroLb"
+										class="ui-button-secondary ml-1" />
+								</div>
+								<div
+									class="ui-fluid formgrid grid flex flex-rowalign-items-center">
+									<div class="field grid">
+										<h5 class="ml-2 text-sm">Total a Cobrar:</h5>
+										<h:outputText class="ml-2 text-sm"
+											value="#{cobRecibosController.cobReciboCabecera.montoTotalRecibo}">
+											<f:convertNumber pattern="###,###,###" />
+										</h:outputText>
+									</div>
+									<div class="field grid ml-3">
+										<h5 class="text-sm">Saldo a Cobrar:</h5>
+										<h:outputText class="ml-2 text-sm" id="montoSaldoCobroLb"
+											value="#{cobRecibosController.getResultadoResta()}">
+											<f:convertNumber pattern="###,###,###.##" />
+										</h:outputText>
+									</div>
+								</div>
+							</f:facet>
+							<p:dataTable id="dt-cobros" widgetVar="dtCobroValores"
+								var="cobros" value="#{cobRecibosController.cobrosValoresList}"
+								paginator="true" rows="10" paginatorPosition="bottom"
+								emptyMessage="No hay Registros">
+								<f:facet name="header">
+									<div class="products-table-header">
+										<span class="filter-container ui-input-icon-left"> <i
+											class="pi pi-search"></i> <p:inputText id="globalFilter"
+												onkeyup="PF('dtCobroValores').filter()"
+												placeholder="Buscar..." />
+										</span>
+									</div>
+								</f:facet>
+								<p:column headerText="Nro. Orden" sortBy="#{cobros.nroOrden}"
+									filterBy="#{cobros.nroOrden}">
+									<h:outputText value="#{cobros.nroOrden}" />
+								</p:column>
+								<p:column headerText="Nro. Valor" sortBy="#{cobros.nroValor}">
+									<h:outputText value="#{cobros.nroValor}">
+										<f:convertNumber pattern="###,###,###" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">Fecha Valor</f:facet>
+									<h:outputText value="#{cobros.fechaValor}"
+										converter="localDateConverter">
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">Fecha Vencimiento Valor</f:facet>
+									<f:facet name="footer">
+										<h5>Totales:</h5>
+									</f:facet>
+									<h:outputText value="#{cobros.fechaVencimiento}"
+										converter="localDateConverter">
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Monto Valor">
+									<f:facet name="footer">
+										<h:outputText value="#{cobRecibosController.montoTotalCobro}">
+											<f:convertNumber pattern="###,###,###" />
+										</h:outputText>
+									</f:facet>
+									<h:outputText value="#{cobros.montoValor}">
+										<f:convertNumber pattern="###,###,###" />
+									</h:outputText>
+								</p:column>
+
+							</p:dataTable>
+						</p:dialog>
+
+						<p:dialog showEffect="fade" modal="true" widgetVar="dlgAddCobro"
+							responsive="true">
+							<p:outputPanel id="manageCobroValor" class="ui-fluid">
+								<p:outputPanel>
+									<div class="field">
+										<p:outputLabel for="tipoValorLb">Tipo Valor</p:outputLabel>
+										<p:inputText id="tipoValorLb"
+											placeholder="Pulse F9 para buscar"
+											value="#{cobRecibosController.cobCobrosValoresSelected.bsTipoValor.descripcion}"
+											onkeydown="if (event.keyCode == 120) {
+												PF('dlgTipoValor').show()
+											}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="nroValorLb">Nro Valor</p:outputLabel>
+										<p:inputText id="nroValorLb"
+											value="#{cobRecibosController.cobCobrosValoresSelected.nroValor}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="montoValorLb">Monto Valor</p:outputLabel>
+										<p:inputNumber id="montoValorLb"
+											value="#{cobRecibosController.cobCobrosValoresSelected.montoValor}" />
+									</div>
+									<div class="field">
+										<p:outputLabel for="fechaValorLb">Fecha Valor</p:outputLabel>
+										<p:datePicker id="fechaValorLb" showIcon="true"
+											value="#{cobRecibosController.cobCobrosValoresSelected.fechaValor}"
+											pattern="dd/MM/yyyy">
+										</p:datePicker>
+									</div>
+									<div class="field">
+										<p:outputLabel for="fechaVencimientoLb">Fecha Vencimiento</p:outputLabel>
+										<p:datePicker id="fechaVencimientoLb" showIcon="true"
+											value="#{cobRecibosController.cobCobrosValoresSelected.fechaVencimiento}"
+											pattern="dd/MM/yyyy">
+										</p:datePicker>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+							<f:facet name="footer">
+								<p:commandButton value="Agregar" icon="pi pi-check"
+									actionListener="#{cobRecibosController.addCobroDetalle}"
+									update=":form:dt-cobros :form:montoSaldoCobroLb"
+									oncomplete="PF('dlgAddCobro').hide()" />
+								<p:commandButton value="Cancelar" icon="pi pi-times"
+									actionListener="#{cobRecibosController.setCobCobrosValoresSelected(null)}"
+									update=":form:dt-cobros" onclick="PF('dlgAddCobro').hide()"
+									class="ui-button-secondary" />
+							</f:facet>
+						</p:dialog>
+
+						<p:dialog widgetVar="dlgTipoValor" header="Buscar Tipo Valor"
+							width="650" showEffect="fade" modal="true">
+							<p:dataTable id="dt-tipoValor" widgetVar="dtTipoValor"
+								var="tipoValor"
+								value="#{cobRecibosController.lazyModelTipoValor}"
+								paginator="true" rows="10" paginatorPosition="bottom"
+								emptyMessage="No hay Registros">
+								<f:facet name="header">
+									<div class="products-table-header">
+										<span class="filter-container ui-input-icon-left"> <i
+											class="pi pi-search"></i> <p:inputText id="globalFilter"
+												onkeyup="PF('dtTipoValor').filter()" placeholder="Buscar..." />
+										</span>
+									</div>
+								</f:facet>
+								<p:column style="width:3rem;text-align: center">
+									<p:commandButton oncomplete="PF('dlgTipoValor').hide()"
+										icon="pi pi-check-circle" title="Seleccionar"
+										update=":form:tipoValorLb">
+										<f:setPropertyActionListener value="#{tipoValor}"
+											target="#{cobRecibosController.cobCobrosValoresSelected.bsTipoValor}" />
+									</p:commandButton>
+								</p:column>
+								<p:column headerText="Modulo"
+									sortBy="#{tipoValor.bsModulo.nombre}"
+									filterBy="#{tipoValor.bsModulo.nombre}">
+									<h:outputText value="#{tipoValor.bsModulo.nombre}" />
+								</p:column>
+								<p:column headerText="Codigo" sortBy="#{tipoValor.codTipo}"
+									filterBy="#{tipoValor.codTipo}">
+									<h:outputText value="#{tipoValor.codTipo}" />
+								</p:column>
+								<p:column headerText="Descripcion"
+									sortBy="#{tipoValor.descripcion}"
+									filterBy="#{tipoValor.descripcion}">
+									<h:outputText value="#{tipoValor.descripcion}" />
 								</p:column>
 							</p:dataTable>
 						</p:dialog>
