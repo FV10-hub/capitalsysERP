@@ -30,6 +30,7 @@ import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.Common;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobCliente;
+import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCaja;
 import py.com.capitalsys.capitalsysentities.entities.creditos.CreDesembolsoCabecera;
 
 /*
@@ -106,6 +107,10 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "ven_condicion_venta_id", referencedColumnName = "id", nullable = false)
 	private VenCondicionVenta venCondicionVenta;
+	
+	@OneToOne
+	@JoinColumn(name = "cob_habilitacion_id", referencedColumnName = "id", nullable = false)
+	private CobHabilitacionCaja cobHabilitacionCaja;
 
 	@OneToMany(mappedBy = "venFacturaCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<VenFacturaDetalle> venFacturaDetalleList;
@@ -291,6 +296,14 @@ public class VenFacturaCabecera extends Common implements Serializable {
 
 	public void setIndCobrado(String indCobrado) {
 		this.indCobrado = indCobrado;
+	}
+
+	public CobHabilitacionCaja getCobHabilitacionCaja() {
+		return cobHabilitacionCaja;
+	}
+
+	public void setCobHabilitacionCaja(CobHabilitacionCaja cobHabilitacionCaja) {
+		this.cobHabilitacionCaja = cobHabilitacionCaja;
 	}
 
 	public void addDetalle(VenFacturaDetalle detalle) {

@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysweb.controllers.ventas.movimientos;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
@@ -193,6 +194,13 @@ public class VenFacturasController {
 			venFacturaCabecera.setVenVendedor(new VenVendedor());
 			venFacturaCabecera.getVenVendedor().setBsPersona(new BsPersona());
 
+			if (!this.commonsUtilitiesController.validarSiTengaHabilitacionAbierta()) {
+				this.venFacturaCabecera
+						.setCobHabilitacionCaja(this.commonsUtilitiesController.getHabilitacionAbierta());
+			} else {
+				validarCajaDelUsuario(true);
+			}
+
 		}
 		return venFacturaCabecera;
 	}
@@ -214,6 +222,13 @@ public class VenFacturasController {
 			venFacturaCabeceraSelected.getCobCliente().setBsPersona(new BsPersona());
 			venFacturaCabeceraSelected.setVenVendedor(new VenVendedor());
 			venFacturaCabeceraSelected.getVenVendedor().setBsPersona(new BsPersona());
+
+			if (!this.commonsUtilitiesController.validarSiTengaHabilitacionAbierta()) {
+				this.venFacturaCabeceraSelected
+						.setCobHabilitacionCaja(this.commonsUtilitiesController.getHabilitacionAbierta());
+			} else {
+				validarCajaDelUsuario(true);
+			}
 
 		}
 		return venFacturaCabeceraSelected;
@@ -404,15 +419,13 @@ public class VenFacturasController {
 	// LAZY
 	public LazyDataModel<VenFacturaCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
-			//ordena la lista por fecha y por nroComprobante DESC
+			// ordena la lista por fecha y por nroComprobante DESC
 			List<VenFacturaCabecera> listaOrdenada = venFacturasServiceImpl
-			        .buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
-			        .stream()
-			        .sorted(
-			            Comparator.comparing(VenFacturaCabecera::getFechaFactura).reversed()
-			            .thenComparing(Comparator.comparing(VenFacturaCabecera::getNroFacturaCompleto).reversed())
-			        )
-			        .collect(Collectors.toList());
+					.buscarVenFacturaCabeceraActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada())
+					.stream()
+					.sorted(Comparator.comparing(VenFacturaCabecera::getFechaFactura).reversed()
+							.thenComparing(Comparator.comparing(VenFacturaCabecera::getNroFacturaCompleto).reversed()))
+					.collect(Collectors.toList());
 			lazyModel = new GenericLazyDataModel<VenFacturaCabecera>((List<VenFacturaCabecera>) listaOrdenada);
 		}
 		return lazyModel;
@@ -629,6 +642,24 @@ public class VenFacturasController {
 	}
 
 	// METODOS
+	public void validarCajaDelUsuario(boolean tieneHab) {
+		if (tieneHab) {
+			PrimeFaces.current().executeScript("PF('dlgNoTieneHabilitacion').show()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+			return;
+		}
+	}
+
+	public void redireccionarAHabilitaciones() {
+		try {
+			PrimeFaces.current().executeScript("PF('dlgNoTieneHabilitacion').hide()");
+			CommonUtils.redireccionar("/pages/cliente/cobranzas/definicion/CobHabilitacionCaja.xhtml");
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+		}
+	}
+
 	public void addCobroDetalle() {
 		if (!Objects.isNull(cobCobrosValoresSelected)) {
 			cobCobrosValoresSelected.setBsEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa());

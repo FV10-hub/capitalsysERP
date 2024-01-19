@@ -1,5 +1,6 @@
 package py.com.capitalsys.capitalsysweb.controllers.tesoreria.movimientos;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -118,6 +119,8 @@ public class TesDepositoController {
 
 			if (!this.commonsUtilitiesController.validarSiTengaHabilitacionAbierta()) {
 				this.tesDeposito.setCobHabilitacionCaja(this.commonsUtilitiesController.getHabilitacionAbierta());
+			} else {
+				validarCajaDelUsuario(true);
 			}
 		}
 		return tesDeposito;
@@ -140,6 +143,8 @@ public class TesDepositoController {
 
 			if (!this.commonsUtilitiesController.validarSiTengaHabilitacionAbierta()) {
 				this.tesDeposito.setCobHabilitacionCaja(this.commonsUtilitiesController.getHabilitacionAbierta());
+			} else {
+				validarCajaDelUsuario(true);
 			}
 		}
 		return tesDepositoSelected;
@@ -344,9 +349,28 @@ public class TesDepositoController {
 		PrimeFaces.current().ajax().update(":form:dt-detalle", ":form:btnGuardar", ":form:dt-valor");
 	}
 
+	public void validarCajaDelUsuario(boolean tieneHab) {
+		if (tieneHab) {
+			PrimeFaces.current().executeScript("PF('dlgNoTieneHabilitacion').show()");
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+			return;
+		}
+	}
+	
+	public void redireccionarAHabilitaciones() {
+		try {
+			PrimeFaces.current().executeScript("PF('dlgNoTieneHabilitacion').hide()");
+			CommonUtils.redireccionar("/pages/cliente/cobranzas/definicion/CobHabilitacionCaja.xhtml");
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+		}
+	}
+
 	public void guardar() {
 		try {
-			if (Objects.isNull(this.tesDeposito.getTesBanco()) || Objects.isNull(this.tesDeposito.getTesBanco().getId())) {
+			if (Objects.isNull(this.tesDeposito.getTesBanco())
+					|| Objects.isNull(this.tesDeposito.getTesBanco().getId())) {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un banco.");
 				return;
 			}

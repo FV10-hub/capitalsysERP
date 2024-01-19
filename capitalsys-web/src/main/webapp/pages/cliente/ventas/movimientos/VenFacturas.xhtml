@@ -143,7 +143,8 @@
 										actionListener="#{venFacturasController.cleanFields}"
 										update=":form" styleClass="ui-button-info"
 										style="margin-right: .5rem" />
-									<p:commandButton value="#{venFacturasController.estaCobrado ? 'Cobrado' : 'Cobrar'}" 
+									<p:commandButton
+										value="#{venFacturasController.estaCobrado ? 'Cobrado' : 'Cobrar'}"
 										id="btnCobrar"
 										disabled="#{venFacturasController.venFacturaCabecera.venCondicionVenta.codCondicion != 'CON'}"
 										icon="pi pi-money-bill"
@@ -742,8 +743,9 @@
 									<p:commandButton value="Limpiar Valores" icon="pi pi-times"
 										disabled="#{venFacturasController.estaCobrado}"
 										actionListener="#{venFacturasController.limpiarCobroDetalle}"
-										update=":form:dt-cobros :form:montoSaldoCobroLb" class="ui-button-secondary ml-1" />
-										
+										update=":form:dt-cobros :form:montoSaldoCobroLb"
+										class="ui-button-secondary ml-1" />
+
 								</div>
 								<div
 									class="ui-fluid formgrid grid flex flex-rowalign-items-center">
@@ -903,6 +905,27 @@
 									<h:outputText value="#{tipoValor.descripcion}" />
 								</p:column>
 							</p:dataTable>
+						</p:dialog>
+
+						<p:dialog widgetVar="dlgNoTieneHabilitacion" modal="true"
+							responsive="true" closable="false" width="400" showEffect="fade"
+							hideEffect="fade">
+							<div
+								class="flex flex-column align-items-center align-items-center">
+								<h4>¡Atención!</h4>
+								<i class="pi pi-info-circle ui-color-danger"
+									style="font-size: 5rem; color: #D32F2F;"></i>
+								<h5 class="mt-3">EL USUARIO NO HABILITACION</h5>
+								<p class="mb-0">¡POR FAVOR CREA UNA UNA HABILITACION PARA
+									ESTA OPERACION!</p>
+							</div>
+
+							<f:facet name="footer">
+								<p:commandButton value="Habilitar Caja"
+									icon="pi pi-angle-double-right"
+									styleClass="ui-button-outlined ui-button-info"
+									actionListener="#{venFacturasController.redireccionarAHabilitaciones}" />
+							</f:facet>
 						</p:dialog>
 
 						<!-- DIALOGOS -->
