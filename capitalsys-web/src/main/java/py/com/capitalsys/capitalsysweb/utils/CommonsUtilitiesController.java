@@ -57,6 +57,10 @@ public class CommonsUtilitiesController {
 		return this.sessionBean.getUsuarioLogueado().getBsEmpresa().getId();
 	}
 
+	public String getCodUsuarioLogueada() {
+		return this.sessionBean.getUsuarioLogueado().getCodUsuario();
+	}
+	
 	public CobCaja getCajaUsuarioLogueado() {
 		this.cobCajaSelected = this.cobCajaServiceImpl.usuarioTieneCaja(this.sessionBean.getUsuarioLogueado().getId());
 		return this.cobCajaSelected;
