@@ -109,7 +109,7 @@ public class VenFacturaCabecera extends Common implements Serializable {
 	private VenCondicionVenta venCondicionVenta;
 	
 	@OneToOne
-	@JoinColumn(name = "cob_habilitacion_id", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "cob_habilitacion_caja_id", referencedColumnName = "id", nullable = false)
 	private CobHabilitacionCaja cobHabilitacionCaja;
 
 	@OneToMany(mappedBy = "venFacturaCabecera", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
