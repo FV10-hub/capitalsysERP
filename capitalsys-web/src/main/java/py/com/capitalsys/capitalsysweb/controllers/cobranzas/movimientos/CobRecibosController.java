@@ -476,7 +476,6 @@ public class CobRecibosController {
 								.filter(saldo -> saldo.getSaldoCuota().compareTo(BigDecimal.ZERO) > 0)
 								.filter(saldo -> saldo.getTipoComprobante().equalsIgnoreCase(tipoSaldoAFiltrar))
 								.sorted(Comparator.comparing(CobSaldo::getFechaVencimiento)).collect(Collectors.toList());
-						int a = 0;
 					}else {
 						listaFiltrada = (List<CobSaldo>) cobSaldoServiceImpl
 								.buscarCobSaldoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()).stream()

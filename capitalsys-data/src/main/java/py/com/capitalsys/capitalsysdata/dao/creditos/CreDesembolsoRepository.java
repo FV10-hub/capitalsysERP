@@ -30,4 +30,7 @@ public interface CreDesembolsoRepository extends PagingAndSortingRepository<CreD
 	@Query("SELECT m FROM CreDesembolsoCabecera m where m.estado = 'ACTIVO' and m.indDesembolsado = 'N' and m.bsEmpresa.id = ?1")
 	List<CreDesembolsoCabecera> buscarCreDesembolsoAFacturarLista(Long idEmpresa);
 	
+	@Query("SELECT m FROM CreDesembolsoCabecera m where m.estado = 'ACTIVO' and m.indDesembolsado = 'S' and m.indFacturado = 'S' and m.bsEmpresa.id = ?1 and m.creSolicitudCredito.cobCliente.id = ?2")
+	List<CreDesembolsoCabecera> buscarCreDesembolsoParaPagosTesoreriarLista(Long idEmpresa, Long idCliente);
+	
 }
