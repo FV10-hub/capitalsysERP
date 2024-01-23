@@ -7,16 +7,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
@@ -42,6 +47,7 @@ import py.com.capitalsys.capitalsysservices.services.base.BsTipoValorService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobClienteService;
 import py.com.capitalsys.capitalsysservices.services.compras.ComProveedorService;
 import py.com.capitalsys.capitalsysservices.services.creditos.CreDesembolsoService;
+import py.com.capitalsys.capitalsysservices.services.tesoreria.TesBancoService;
 import py.com.capitalsys.capitalsysservices.services.tesoreria.TesPagoService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
@@ -78,17 +84,19 @@ public class TesPagoController {
 
 	// LAZY
 	private LazyDataModel<TesPagoCabecera> lazyModel;
-	private LazyDataModel<CreDesembolsoCabecera> lazyModelDesembolso;
+	private List<CreDesembolsoCabecera> lazyModelDesembolso;
 	private LazyDataModel<BsTalonario> lazyModelTalonario;
 	private LazyDataModel<CobCliente> lazyModelCliente;
 	private LazyDataModel<ComProveedor> lazyModelProveedor;
 	private LazyDataModel<BsTipoValor> lazyModelTipoValor;
+	private LazyDataModel<TesBanco> lazyModelBanco;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
 	private boolean esVisibleFormulario = true;
 	private boolean estaAutorizado;
 	public BigDecimal montoTotalPago = BigDecimal.ZERO;
+	public BigDecimal montoTotalPagoValores = BigDecimal.ZERO;
 	private String tipoSaldoAFiltrar;
 
 	private static final String DT_NAME = "dt-pagos";
@@ -111,6 +119,9 @@ public class TesPagoController {
 
 	@ManagedProperty("#{comProveedorServiceImpl}")
 	private ComProveedorService comProveedorServiceImpl;
+
+	@ManagedProperty("#{tesBancoServiceImpl}")
+	private TesBancoService tesBancoServiceImpl;
 
 	/**
 	 * Propiedad de la logica de negocio inyectada con JSF y Spring.
@@ -145,6 +156,7 @@ public class TesPagoController {
 		this.lazyModelCliente = null;
 		this.lazyModelProveedor = null;
 		this.lazyModelTipoValor = null;
+		this.lazyModelBanco = null;
 
 		this.esNuegoRegistro = true;
 		this.estaAutorizado = false;
@@ -163,6 +175,7 @@ public class TesPagoController {
 		if (Objects.isNull(tesPagoCabecera)) {
 			tesPagoCabecera = new TesPagoCabecera();
 			tesPagoCabecera.setFechaPago(LocalDate.now());
+			tesPagoCabecera.setTipoOperacion("FACTURA");
 			tesPagoCabecera.setEstado(Estado.ACTIVO.getEstado());
 			tesPagoCabecera.setIndAutorizado("N");
 			tesPagoCabecera.setBsEmpresa(new BsEmpresa());
@@ -205,24 +218,30 @@ public class TesPagoController {
 
 	public void setTesPagoCabeceraSelected(TesPagoCabecera tesPagoCabeceraSelected) {
 		if (!Objects.isNull(tesPagoCabeceraSelected)) {
+
 			tesPagoCabeceraSelected.getTesPagoComprobanteDetallesList()
 					.sort(Comparator.comparing(TesPagoComprobanteDetalle::getNroOrden));
 			tesPagoCabeceraSelected.getTesPagoValoresList().sort(Comparator.comparing(TesPagoValores::getNroOrden));
+
 			this.estaAutorizado = tesPagoCabeceraSelected.getIndAutorizado().equalsIgnoreCase("S");
 			if (this.estaAutorizado) {
 				/*
-				 * this.cobrosValoresList =
+				 * this.tesPagoValoresList =
 				 * this.cobCobrosValoresServiceImpl.buscarValoresPorComprobanteLista(
 				 * this.commonsUtilitiesController.getIdEmpresaLogueada(),
 				 * cobReciboCabeceraSelected.getId(), "RECIBO");
 				 */
 				this.montoTotalPago = BigDecimal.ZERO;/*
-														 * cobrosValoresList.stream().map(CobCobrosValores::
+														 * tesPagoValoresList.stream().map(CobCobrosValores::
 														 * getMontoValor) .reduce(BigDecimal.ZERO, BigDecimal::add);
 														 */
 				// getResultadoResta();
 			}
-			tesPagoCabecera = tesPagoCabeceraSelected;
+			this.tesPagoComprobanteDetallesList = tesPagoCabeceraSelected.getTesPagoComprobanteDetallesList();
+			this.tesPagoValoresList = tesPagoCabeceraSelected.getTesPagoValoresList();
+			this.montoTotalPago = tesPagoCabeceraSelected.getMontoTotalPago();
+			this.montoTotalPagoValores = tesPagoCabeceraSelected.getMontoTotalPago();
+			tesPagoCabecera = tesPagoCabeceraSelected; 
 			tesPagoCabeceraSelected = null;
 			this.esNuegoRegistro = false;
 			this.esVisibleFormulario = true;
@@ -249,6 +268,7 @@ public class TesPagoController {
 			tesPagoValoresSelected.setFechaValor(LocalDate.now());
 			tesPagoValoresSelected.setFechaVencimiento(LocalDate.now());
 			tesPagoValoresSelected.setTesBanco(new TesBanco());
+			tesPagoValoresSelected.getTesBanco().setBsPersona(new BsPersona());
 			tesPagoValoresSelected.setIndEntregadoBoolean(false);
 			tesPagoValoresSelected.setNroValor("0");
 			tesPagoValoresSelected.setMontoValor(BigDecimal.ZERO);
@@ -294,10 +314,12 @@ public class TesPagoController {
 		if (!Objects.isNull(cobClienteSelected)) {
 			this.tesPagoCabecera.setBeneficiario(cobClienteSelected.getBsPersona().getNombreCompleto());
 			this.tesPagoCabecera.setIdBeneficiario(cobClienteSelected.getId());
+			this.cobClienteSelected = cobClienteSelected;
 			lazyModelDesembolso = null;
 			getLazyModelDesembolso();
-			PrimeFaces.current().ajax().update(":form:manageComprobante",":form:dt-desembolso", ":form:dt-comprobantes");
-			//cobClienteSelected = null;
+			PrimeFaces.current().ajax().update(":form:manageComprobante", ":form:dt-desembolso",
+					":form:dt-comprobantes");
+			// cobClienteSelected = null;
 		}
 		this.cobClienteSelected = cobClienteSelected;
 	}
@@ -312,6 +334,17 @@ public class TesPagoController {
 	}
 
 	public void setComProveedorSelected(ComProveedor comProveedorSelected) {
+		if (!Objects.isNull(cobClienteSelected)) {
+			this.tesPagoCabecera.setBeneficiario(comProveedorSelected.getBsPersona().getNombreCompleto());
+			this.tesPagoCabecera.setIdBeneficiario(comProveedorSelected.getId());
+			this.comProveedorSelected = comProveedorSelected;
+			// TODO: aqui recargar los saldos proveedores
+			// lazyModelDesembolso = null;
+			// getLazyModelDesembolso();
+			PrimeFaces.current().ajax().update(":form:manageComprobante", ":form:dt-desembolso",
+					":form:dt-comprobantes");
+
+		}
 		this.comProveedorSelected = comProveedorSelected;
 	}
 
@@ -371,16 +404,34 @@ public class TesPagoController {
 		this.montoTotalPago = montoTotalPago;
 	}
 
+	public BigDecimal getMontoTotalPagoValores() {
+		return montoTotalPagoValores;
+	}
+
+	public void setMontoTotalPagoValores(BigDecimal montoTotalPagoValores) {
+		this.montoTotalPagoValores = montoTotalPagoValores;
+	}
+
+	public TesBancoService getTesBancoServiceImpl() {
+		return tesBancoServiceImpl;
+	}
+
+	public void setTesBancoServiceImpl(TesBancoService tesBancoServiceImpl) {
+		this.tesBancoServiceImpl = tesBancoServiceImpl;
+	}
+
 	public String getTipoSaldoAFiltrar() {
 		return tipoSaldoAFiltrar;
 	}
 
 	public void setTipoSaldoAFiltrar(String tipoSaldoAFiltrar) {
 		if (!StringUtils.isAllBlank(tipoSaldoAFiltrar)) {
-			//lazyModelDesembolso = null;
-			//getLazyModelDesembolso();
+			this.tesPagoCabecera.setTipoOperacion(tipoSaldoAFiltrar);
+			// lazyModelDesembolso = null;
+			// getLazyModelDesembolso();
 			// TODO:aca debo implementar cuando es proveedor traer saldos de compras
-			//PrimeFaces.current().ajax().update(":form:manageComprobante", ":form:dt-comprobantes");
+			// PrimeFaces.current().ajax().update(":form:manageComprobante",
+			// ":form:dt-comprobantes");
 		}
 		this.tipoSaldoAFiltrar = tipoSaldoAFiltrar;
 	}
@@ -389,21 +440,7 @@ public class TesPagoController {
 		return desembolsoList;
 	}
 
-	int a = 0;
-
 	public void setDesembolsoList(List<CreDesembolsoCabecera> desembolsoList) {
-		if (!Objects.isNull(desembolsoList)) {
-			// TODO:hacer lo mismo cuando tengamos saldos de proveedores
-			desembolsoList.stream().forEach((desembolso -> {
-				TesPagoComprobanteDetalle detalle = new TesPagoComprobanteDetalle();
-				detalle.setIdCuotaSaldo(desembolso.getId());
-				detalle.setMontoPagado(desembolso.getMontoTotalCapital());
-				detalle.setNroOrden(a++);
-				detalle.setTipoComprobante("DESEMBOLSO");
-				this.tesPagoComprobanteDetallesList.add(detalle);
-			}));
-		}
-
 		this.desembolsoList = desembolsoList;
 	}
 
@@ -420,25 +457,26 @@ public class TesPagoController {
 		this.lazyModel = lazyModel;
 	}
 
-	public LazyDataModel<CreDesembolsoCabecera> getLazyModelDesembolso() {
-		if (Objects.isNull(lazyModelDesembolso) && !Objects.isNull(this.cobClienteSelected)) {
+	public List<CreDesembolsoCabecera> getLazyModelDesembolso() {
+		if (Objects.isNull(lazyModelDesembolso)) {
 			List<CreDesembolsoCabecera> listaFiltrada = new ArrayList<CreDesembolsoCabecera>();
-			if (!Objects.isNull(this.cobClienteSelected.getId())) {
-				listaFiltrada = (List<CreDesembolsoCabecera>) creDesembolsoServiceImpl.buscarCreDesembolsoParaPagosTesoreriarLista(
-						this.commonsUtilitiesController.getIdEmpresaLogueada(), this.cobClienteSelected.getId());
-				int a = 0;
-				System.out.println("DEBE ESTAR BIEN");
-			}else {
+			if (!Objects.isNull(this.cobClienteSelected)) {
+				if (!Objects.isNull(this.cobClienteSelected.getId())) {
+					listaFiltrada = (List<CreDesembolsoCabecera>) creDesembolsoServiceImpl
+							.buscarCreDesembolsoParaPagosTesoreriarLista(
+									this.commonsUtilitiesController.getIdEmpresaLogueada(),
+									this.cobClienteSelected.getId());
+				}
+			} else {
 				listaFiltrada = creDesembolsoServiceImpl.buscarCreDesembolsoCabeceraActivosLista(
 						this.commonsUtilitiesController.getIdEmpresaLogueada());
-				System.out.println("PASO POR ELSE");
 			}
-			lazyModelDesembolso = new GenericLazyDataModel<CreDesembolsoCabecera>(listaFiltrada);
+			lazyModelDesembolso = listaFiltrada;
 		}
 		return lazyModelDesembolso;
 	}
 
-	public void setLazyModelDesembolso(LazyDataModel<CreDesembolsoCabecera> lazyModelDesembolso) {
+	public void setLazyModelDesembolso(List<CreDesembolsoCabecera> lazyModelDesembolso) {
 		this.lazyModelDesembolso = lazyModelDesembolso;
 	}
 
@@ -493,6 +531,18 @@ public class TesPagoController {
 
 	public void setLazyModelTipoValor(LazyDataModel<BsTipoValor> lazyModelTipoValor) {
 		this.lazyModelTipoValor = lazyModelTipoValor;
+	}
+
+	public LazyDataModel<TesBanco> getLazyModelBanco() {
+		if (Objects.isNull(lazyModelBanco)) {
+			lazyModelBanco = new GenericLazyDataModel<TesBanco>((List<TesBanco>) tesBancoServiceImpl
+					.buscarTesBancoActivosLista(this.commonsUtilitiesController.getIdEmpresaLogueada()));
+		}
+		return lazyModelBanco;
+	}
+
+	public void setLazyModelBanco(LazyDataModel<TesBanco> lazyModelBanco) {
+		this.lazyModelBanco = lazyModelBanco;
 	}
 
 	// SERVICES
@@ -578,20 +628,18 @@ public class TesPagoController {
 		}
 	}
 
-	public void onRowSelect(SelectEvent<TesPagoComprobanteDetalle> event) {
-		this.tesPagoComprobanteDetalleSelected = event.getObject();
-		this.calcularTotalesDetalle();
-		this.tesPagoComprobanteDetalleSelected = null;
-		// getCobCobrosValoresSelected();
-		PrimeFaces.current().ajax().update(":form:dt-comprobantes", ":form:btnGuardar", ":form:btnAddComprobante");
+	public void onRowSelect(SelectEvent<CreDesembolsoCabecera> event) {
+		CreDesembolsoCabecera desembolso = event.getObject();
+		if (desembolso != null) {
+			formatearDesembolsoAcomprobanteDetalle();
+		}
 	}
 
-	public void onRowUnselect(UnselectEvent<TesPagoComprobanteDetalle> event) {
-		this.tesPagoComprobanteDetalleSelected = event.getObject();
-		this.calcularTotalesDetalle();
-		this.tesPagoComprobanteDetalleSelected = null;
-		// getCobCobrosValoresSelected();
-		PrimeFaces.current().ajax().update(":form:dt-comprobantes", ":form:btnGuardar", ":form:btnAddComprobante");
+	public void onRowUnselect(UnselectEvent<CreDesembolsoCabecera> event) {
+		CreDesembolsoCabecera desembolso = event.getObject();
+		if (desembolso != null) {
+			formatearDesembolsoAcomprobanteDetalle();
+		}
 	}
 
 	public void calcularTotalesDetalle() {
@@ -604,6 +652,24 @@ public class TesPagoController {
 
 	}
 
+	public void formatearDesembolsoAcomprobanteDetalle() {
+		this.tesPagoComprobanteDetallesList = new ArrayList<>();
+		// TODO:para acceder al indice
+		IntStream.range(0, desembolsoList.size()).forEach(i -> {
+			CreDesembolsoCabecera desembolso = desembolsoList.get(i);
+
+			TesPagoComprobanteDetalle detalle = new TesPagoComprobanteDetalle();
+			detalle.setIdCuotaSaldo(desembolso.getId());
+			detalle.setMontoPagado(desembolso.getMontoTotalCapital());
+			detalle.setNroOrden(i + 1); // Si deseas empezar desde 1
+			detalle.setTipoComprobante("DESEMBOLSO");
+
+			tesPagoComprobanteDetallesList.add(detalle);
+		});
+		this.calcularTotalesDetalle();
+		PrimeFaces.current().ajax().update(":form:dt-comprobantes", ":form:btnGuardar", ":form:btnAddComprobante");
+	}
+
 	public void limpiarDetalleComprobantes() {
 		this.tesPagoComprobanteDetallesList = new ArrayList<>();
 		this.montoTotalPago = BigDecimal.ZERO;
@@ -611,10 +677,149 @@ public class TesPagoController {
 				":form:dt-valores");
 	}
 
+	public void addValorDetalle() {
+		if (!Objects.isNull(tesPagoValoresSelected)) {
+			tesPagoValoresSelected.setBsEmpresa(this.sessionBean.getUsuarioLogueado().getBsEmpresa());
+			tesPagoValoresSelected.setTipoOperacion(this.tesPagoCabecera.getTipoOperacion());
+			Optional<TesPagoValores> existente = this.tesPagoValoresList.stream().filter(det -> {
+				return det.getBsTipoValor().getId() == this.tesPagoValoresSelected.getBsTipoValor().getId()
+						&& det.getNroValor() == this.tesPagoValoresSelected.getNroValor();
+			}).findFirst();
+			if (!existente.isPresent()) {
+				if (CollectionUtils.isEmpty(this.tesPagoValoresList)) {
+					tesPagoValoresSelected.setNroOrden(1);
+				} else {
+					Optional<Integer> maxNroOrden = this.tesPagoValoresList.stream().map(TesPagoValores::getNroOrden)
+							.max(Integer::compareTo);
+					if (maxNroOrden.isPresent()) {
+						tesPagoValoresSelected.setNroOrden(maxNroOrden.get() + 1);
+					} else {
+						tesPagoValoresSelected.setNroOrden(1);
+					}
+				}
+				this.tesPagoValoresList.add(tesPagoValoresSelected);
+			} else {
+				tesPagoValoresSelected.setNroOrden(existente.get().getNroOrden());
+				int indice = this.tesPagoValoresList.indexOf(existente.get());
+				this.tesPagoValoresList.set(indice, tesPagoValoresSelected);
+			}
+			this.montoTotalPagoValores = montoTotalPagoValores.add(tesPagoValoresSelected.getMontoValor());
+			tesPagoValoresSelected = null;
+			getTesPagoValoresSelected();
+		} else {
+			tesPagoValoresSelected = null;
+			getTesPagoValoresSelected();
+		}
+
+		PrimeFaces.current().ajax().update("form:messages", "dt-valores", ":form:managePagoValor");
+	}
+
+	public void limpiarDetalleValores() {
+		this.montoTotalPagoValores = BigDecimal.ZERO;
+		this.tesPagoValoresList = new ArrayList<>();
+		PrimeFaces.current().ajax().update("form:messages", "dt-valores");
+	}
+
 	public void guardar() {
+
+		try {
+			if (this.montoTotalPagoValores.compareTo(this.montoTotalPago) != 0) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"El monto en valores y en comprobantes debe coincidir.");
+				return;
+			}
+			if (Objects.isNull(this.tesPagoCabecera.getBsTalonario())
+					|| Objects.isNull(this.tesPagoCabecera.getBsTalonario().getId())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Debe seleccionar un Talonario.");
+				return;
+			}
+			this.tesPagoCabecera.setUsuarioModificacion(sessionBean.getUsuarioLogueado().getCodUsuario());
+			this.tesPagoCabecera.setBsEmpresa(sessionBean.getUsuarioLogueado().getBsEmpresa());
+			if (CollectionUtils.isNotEmpty(tesPagoComprobanteDetallesList) && tesPagoComprobanteDetallesList.size() > 0
+					|| CollectionUtils.isNotEmpty(tesPagoValoresList) && tesPagoValoresList.size() > 0) {
+				this.tesPagoCabecera.getTesPagoComprobanteDetallesList().addAll(tesPagoComprobanteDetallesList);
+				this.tesPagoCabecera.getTesPagoValoresList().addAll(tesPagoValoresList);
+				this.tesPagoCabecera.setCabeceraADetalle();
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						"Debe cargar comprobantes y valores.");
+				return;
+			}
+
+			if (Objects.isNull(this.tesPagoCabecera.getId())) {
+				try {
+					this.tesPagoCabecera.setNroPago(this.tesPagoServiceImpl.calcularNroPagoDisponible(
+							commonsUtilitiesController.getIdEmpresaLogueada(),
+							this.tesPagoCabecera.getBsTalonario().getId()));
+					String formato = "%s-%s-%09d";
+					this.tesPagoCabecera.setNroPagoCompleto(String.format(formato,
+							this.tesPagoCabecera.getBsTalonario().getBsTimbrado().getCodEstablecimiento(),
+							this.tesPagoCabecera.getBsTalonario().getBsTimbrado().getCodExpedicion(),
+							this.tesPagoCabecera.getNroPago()));
+
+				} catch (Exception e) {
+					LOGGER.error("Ocurrio un error al obtener la habilitacion. O calcular el nroPago disponible.",
+							System.err);
+					e.printStackTrace(System.err);
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+							e.getMessage().substring(0, e.getMessage().length()) + "...");
+				}
+
+			}
+			if (!Objects.isNull(this.tesPagoServiceImpl.save(tesPagoCabecera))) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se guardo correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo insertar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+
+			Throwable cause = e.getCause();
+			while (cause != null) {
+				if (cause instanceof ConstraintViolationException) {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "El Pago ya fue creado.");
+					break;
+				}
+				cause = cause.getCause();
+			}
+
+			if (cause == null) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+						e.getMessage().substring(0, e.getMessage().length()) + "...");
+			}
+
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		}
 	}
 
 	public void delete() {
+		try {
+			if (Objects.isNull(this.tesPagoCabecera.isIndImpresoBoolean())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Ya fue Impreso.");
+				return;
+			}
+			if (Objects.isNull(this.tesPagoCabecera.isIndAutorizadoBoolean())) {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "Ya fue Autorizado.");
+				return;
+			}
+			if (!Objects.isNull(this.tesPagoCabecera)) {
+				this.tesPagoServiceImpl.deleteById(this.tesPagoCabecera.getId());
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡EXITOSO!",
+						"El registro se elimino correctamente.");
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!", "No se pudo eliminar el registro.");
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+		}
 	}
-
 }

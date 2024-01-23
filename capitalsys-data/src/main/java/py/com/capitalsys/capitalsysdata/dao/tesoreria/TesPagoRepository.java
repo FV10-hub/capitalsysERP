@@ -16,6 +16,9 @@ public interface TesPagoRepository extends PagingAndSortingRepository<TesPagoCab
 
 	@Query("SELECT m FROM TesPagoCabecera m")
 	List<TesPagoCabecera> buscarTodosLista();
+	
+	@Query(value = "SELECT COALESCE(MAX(m.nro_pago), 0) + 1 FROM tes_pagos_cabecera m where m.bs_empresa_id = ?1 and m.bs_talonario_id = ?2", nativeQuery = true)
+	Long calcularNroPagoDisponible(Long idEmpresa, Long idTalonario);
 
 	@Query("SELECT m FROM TesPagoCabecera m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1")
 	List<TesPagoCabecera> buscarTesPagoCabeceraActivosLista(Long idEmpresa);
@@ -25,5 +28,13 @@ public interface TesPagoRepository extends PagingAndSortingRepository<TesPagoCab
 	
 	@Query("SELECT m FROM TesPagoCabecera m where m.estado = 'ACTIVO' and m.bsEmpresa.id = ?1 and m.tipoOperacion = ?2")
 	List<TesPagoCabecera> buscarTesPagoCabeceraPorTipoOperacionLista(Long idEmpresa, String tipoOperacion);
+	
+	/*@Query("SELECT DISTINCT tc FROM TesPagoCabecera tc "
+	        + "LEFT JOIN FETCH tc.tesPagoComprobanteDetallesList detalles "
+	        + "LEFT JOIN FETCH tc.tesPagoValoresList valores "
+	        + "WHERE tc.bsEmpresa.id = ?1 and tc.id = ?2 ")
+	TesPagoCabecera recuperarPagosConDetalle(Long idEmpresa, Long idPago);*/
+
+
 	
 }

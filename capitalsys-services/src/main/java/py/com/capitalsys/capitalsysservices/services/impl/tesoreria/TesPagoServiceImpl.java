@@ -30,4 +30,14 @@ public class TesPagoServiceImpl extends CommonServiceImpl<TesPagoCabecera, TesPa
 		return this.repository.buscarTesPagoCabeceraPorTipoOperacionLista(idEmpresa, tipoOperacion);
 	}
 
+	@Override
+	public Long calcularNroPagoDisponible(Long idEmpresa, Long idTalonario) {
+		return this.repository.calcularNroPagoDisponible(idEmpresa, idTalonario);
+	}
+
+	/*@Override
+	public TesPagoCabecera recuperarPagosConDetalle(Long idEmpresa, Long idPago) {
+		return this.repository.recuperarPagosConDetalle(idEmpresa, idPago);
+	}*/
+
 }

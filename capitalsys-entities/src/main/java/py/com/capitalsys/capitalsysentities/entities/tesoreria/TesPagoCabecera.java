@@ -28,6 +28,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
 import py.com.capitalsys.capitalsysentities.entities.base.Common;
@@ -51,7 +54,7 @@ public class TesPagoCabecera extends Common implements Serializable {
 	@Column(name = "observacion")
 	private String observacion;
 
-	@Column(name = "nro_recibo")
+	@Column(name = "nro_pago")
 	private Long nroPago;
 
 	@Column(name = "nro_pago_completo")
@@ -94,10 +97,12 @@ public class TesPagoCabecera extends Common implements Serializable {
 	@JoinColumn(name = "bs_empresa_id", referencedColumnName = "id", nullable = false)
 	private BsEmpresa bsEmpresa;
 
-	@OneToMany(mappedBy = "tesPagoCabecera", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "tesPagoCabecera", cascade = CascadeType.ALL)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<TesPagoComprobanteDetalle> tesPagoComprobanteDetallesList;
 
-	@OneToMany(mappedBy = "tesPagoCabecera", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "tesPagoCabecera", cascade = CascadeType.ALL)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<TesPagoValores> tesPagoValoresList;
 
 	@PrePersist
