@@ -3,8 +3,10 @@ package py.com.capitalsys.capitalsysweb.controllers.ventas.movimientos;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
+import py.com.capitalsys.capitalsysentities.dto.ParametrosReporte;
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsIva;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
@@ -44,6 +47,7 @@ import py.com.capitalsys.capitalsysentities.entities.ventas.VenCondicionVenta;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaCabecera;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenFacturaDetalle;
 import py.com.capitalsys.capitalsysentities.entities.ventas.VenVendedor;
+import py.com.capitalsys.capitalsysservices.services.UtilsService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.base.BsTipoValorService;
@@ -56,9 +60,11 @@ import py.com.capitalsys.capitalsysservices.services.ventas.VenCondicionVentaSer
 import py.com.capitalsys.capitalsysservices.services.ventas.VenFacturasService;
 import py.com.capitalsys.capitalsysservices.services.ventas.VenVendedorService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
+import py.com.capitalsys.capitalsysweb.utils.ApplicationConstant;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.CommonsUtilitiesController;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
+import py.com.capitalsys.capitalsysweb.utils.GenerarReporte;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 import py.com.capitalsys.capitalsysweb.utils.Modulos;
 
@@ -92,6 +98,7 @@ public class VenFacturasController {
 	List<CobSaldo> listaSaldoAGenerar;
 	private List<CobCobrosValores> cobrosValoresList;
 	public BigDecimal montoTotalCobro = BigDecimal.ZERO;
+	private ParametrosReporte parametrosReporte;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
@@ -143,6 +150,12 @@ public class VenFacturasController {
 	@ManagedProperty("#{commonsUtilitiesController}")
 	private CommonsUtilitiesController commonsUtilitiesController;
 
+	@ManagedProperty("#{utilsService}")
+	private UtilsService utilsService;
+
+	@ManagedProperty("#{generarReporte}")
+	private GenerarReporte generarReporte;
+
 	@PostConstruct
 	public void init() {
 		this.cleanFields();
@@ -165,6 +178,7 @@ public class VenFacturasController {
 		this.lazyModelVenCondicionVenta = null;
 		this.cobCobrosValoresSelected = null;
 		this.lazyModelTipoValor = null;
+		this.parametrosReporte = null;
 
 		this.esNuegoRegistro = true;
 		this.estaCobrado = false;
@@ -416,6 +430,20 @@ public class VenFacturasController {
 		this.estaCobrado = estaCobrado;
 	}
 
+	public ParametrosReporte getParametrosReporte() {
+		if (Objects.isNull(parametrosReporte)) {
+			parametrosReporte = new ParametrosReporte();
+			parametrosReporte.setCodModulo(Modulos.VENTAS.getModulo());
+			parametrosReporte.setReporte("VenFactura");
+			parametrosReporte.setFormato("PDF");
+		}
+		return parametrosReporte;
+	}
+
+	public void setParametrosReporte(ParametrosReporte parametrosReporte) {
+		this.parametrosReporte = parametrosReporte;
+	}
+
 	// LAZY
 	public LazyDataModel<VenFacturaCabecera> getLazyModel() {
 		if (Objects.isNull(lazyModel)) {
@@ -639,6 +667,22 @@ public class VenFacturasController {
 
 	public void setBsTipoValorServiceImpl(BsTipoValorService bsTipoValorServiceImpl) {
 		this.bsTipoValorServiceImpl = bsTipoValorServiceImpl;
+	}
+
+	public UtilsService getUtilsService() {
+		return utilsService;
+	}
+
+	public void setUtilsService(UtilsService utilsService) {
+		this.utilsService = utilsService;
+	}
+	
+	public GenerarReporte getGenerarReporte() {
+		return generarReporte;
+	}
+
+	public void setGenerarReporte(GenerarReporte generarReporte) {
+		this.generarReporte = generarReporte;
 	}
 
 	// METODOS
@@ -1066,4 +1110,71 @@ public class VenFacturasController {
 
 	}
 
+	public void imprimir() {
+		try {
+			getParametrosReporte();
+			this.prepareParams();
+			if (!(Objects.isNull(parametrosReporte) && Objects.isNull(parametrosReporte.getFormato()))
+					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getParametros())
+					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getValores())) {
+				this.generarReporte.descargarReporte(parametrosReporte);
+				if (this.utilsService.actualizarRegistro("ven_facturas_cabecera", "ind_impreso = 'S'",
+						" bs_empresa_id = " + commonsUtilitiesController.getIdEmpresaLogueada() + " and id = "	+ this.venFacturaCabecera.getId())) {
+					this.cleanFields();
+					PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
+				} else {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
+							"No se pudo actualizar el registro.");
+				}
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
+						"Debes seccionar los parametros validos.");
+			}
+			
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+
+		}
+	}
+
+	/*
+	 * Recordar que el orden en la que se agregan los valores en las listas SI
+	 * importan ya que en el backend se procesa como llave valor y va ir pareando en
+	 * el mismo orden
+	 */
+	private void prepareParams() {
+		// basicos
+		// Obtener la fecha y hora actual
+		LocalDateTime now = LocalDateTime.now();
+
+		DateTimeFormatter formatterDiaHora = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+		String formattedDateTimeDiaHora = now.format(formatterDiaHora);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMAGEN_PATH);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_NOMBRE_IMAGEN);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMPRESO_POR);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DIA_HORA);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DESC_EMPRESA);
+
+		this.parametrosReporte.getValores().add(ApplicationConstant.PATH_IMAGEN_EMPRESA);
+		this.parametrosReporte.getValores().add(ApplicationConstant.IMAGEN_EMPRESA_NAME);
+		this.parametrosReporte.getValores()
+				.add(this.sessionBean.getUsuarioLogueado().getBsPersona().getNombreCompleto());
+		this.parametrosReporte.getValores().add(formattedDateTimeDiaHora);
+		this.parametrosReporte.getValores()
+				.add(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getNombreFantasia());
+		// basico
+
+		DateTimeFormatter formatToDateParam = DateTimeFormatter.ofPattern("dd/MM/yyy");
+		// key
+		this.parametrosReporte.getParametros().add("p_empresa_id");
+		this.parametrosReporte.getParametros().add("p_factura_id");
+
+		// values
+		this.parametrosReporte.getValores().add(this.commonsUtilitiesController.getIdEmpresaLogueada());
+		this.parametrosReporte.getValores().add(this.venFacturaCabecera.getId());
+
+	}
 }

@@ -152,8 +152,16 @@
 										update=":form:manageCobroValor"
 										onclick="PF('dlgCobros').show()"
 										styleClass="ui-button-primary" style="margin-right: .5rem" />
+									<p:commandButton
+										value="#{venFacturasController.venFacturaCabecera.indImpresoBoolean ? 'Impreso' : 'Imprimir'}"
+										ajax="false"
+										id="btnImprimir" 
+										disabled="#{venFacturasController.venFacturaCabecera.indImpresoBoolean}"
+										actionListener="#{venFacturasController.imprimir}"
+										icon="pi pi-file-pdf" update=":form:messages :form:dt-facturas"
+										styleClass="ui-button-warning" style="margin-right: .5rem" />	
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
-										disabled="#{venFacturasController.estaCobrado}"
+										disabled="#{venFacturasController.estaCobrado || venFacturasController.venFacturaCabecera.indImpresoBoolean}"
 										rendered="#{venFacturasController.venFacturaCabecera.id != null}"
 										actionListener="#{venFacturasController.delete}"
 										update=":form" styleClass="ui-button-danger"
@@ -229,7 +237,7 @@
 													styleClass="col-12 mb-2 md:col-6 mb-md-0">Impreso?</p:outputLabel>
 												<div class="col-12 md:col-4">
 													<p:toggleSwitch id="impresoLb" onIcon="pi pi-check"
-														offIcon="pi pi-times"
+														offIcon="pi pi-times" disabled="true"
 														value="#{venFacturasController.venFacturaCabecera.indImpresoBoolean}" />
 												</div>
 											</div>
