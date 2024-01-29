@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -15,6 +17,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +40,11 @@ public class GenerarReporte {
 	private ReportesServiceClient reportesServiceClientImpl;
 
 	public void descargarReporte(ParametrosReporte params) {
-		/*params.setCodModulo("BASE");
-		params.setFormato("PDF");
-		params.setReporte("StoArticulos");
-		params.setParametros(new ArrayList<String>());
-		params.setValores(new ArrayList<Object>());
-		*/
+		/*
+		 * params.setCodModulo("BASE"); params.setFormato("PDF");
+		 * params.setReporte("StoArticulos"); params.setParametros(new
+		 * ArrayList<String>()); params.setValores(new ArrayList<Object>());
+		 */
 
 		// Llama al servicio y obtén la respuesta
 		Response response = this.reportesServiceClientImpl.generarReporte(params);
@@ -121,5 +124,46 @@ public class GenerarReporte {
 		// del servlet
 		servletResponse.setStatus(response.getStatus());
 	}
+
+	public StreamedContent getFileToDownload(ParametrosReporte params) {
+
+		Response response = this.reportesServiceClientImpl.generarReporte(params);
+		if (response.getStatus() == 200) {
+			configureResponseForDownload(response);
+			// Obtiene el contexto externo de JSF
+			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
+			// Lógica para generar el archivo y obtener el InputStream
+			InputStream inputStream = (InputStream) response.getEntity();
+
+			// Obtener el valor del encabezado Content-Type
+			String contentType = response.getHeaderString("Content-Type");
+
+			// Obtener el valor del encabezado Content-Disposition
+			String contentDisposition = response.getHeaderString("Content-Disposition");
+			String filename = extractFilename(contentDisposition);
+
+			// Configura el StreamedContent
+			return DefaultStreamedContent
+					.builder()
+					.name(filename)
+					.contentType(contentType)
+					.stream(() -> inputStream).build();
+
+		}
+		return null;
+
+	}
+	
+	private static String extractFilename(String contentDisposition) {
+        Pattern pattern = Pattern.compile("filename=\"(.*?)\"");
+        Matcher matcher = pattern.matcher(contentDisposition);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null; 
+    }
 
 }

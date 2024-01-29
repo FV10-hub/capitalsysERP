@@ -44,6 +44,37 @@
 	<ui:define name="title">Facturas Venta</ui:define>
 	<ui:define name="content">
 		<h:form id="form">
+			<script type="text/javascript">
+				window.onload = function() {
+					// Esperar hasta que se complete la carga dinámica del botón
+					const observer = new MutationObserver(function(mutations) {
+						mutations.forEach(function(mutation) {
+							// Verificar si el botón está ahora en el DOM
+							const boton = document
+									.getElementById('form:btnImprimirReporte');
+							if (boton) {
+								console.log('Botón encontrado:', boton);
+								boton.addEventListener('click', function() {
+									console.log('PASOO');
+									setTimeout(function() {
+										PF('imprimirDialog').hide();
+										PrimeFaces.current().ajax().update(
+												':form:messages',
+												':form:dt-facturas');
+									}, 1000);
+								});
+
+								observer.disconnect(); // Detener la observación después de encontrar el botón
+							}
+						});
+					});
+					observer.observe(document.body, {
+						childList : true,
+						subtree : true
+					});
+
+				};
+			</script>
 			<div class="grid crud-demo">
 				<div class="col-12">
 					<div class="card">
@@ -51,7 +82,7 @@
 						<p:toolbar styleClass="mb-4"
 							rendered="#{not venFacturasController.esVisibleFormulario}">
 							<p:toolbarGroup>
-								<p:commandButton value="Nuevo" icon="pi pi-plus"
+								<p:commandButton value="Nuevo" icon="pi pi-plus" id="btnNuevo"
 									actionListener="#{venFacturasController.setEsVisibleFormulario(true)}"
 									update=":form" styleClass="ui-button-success"
 									style="margin-right: .5rem" />
@@ -138,7 +169,7 @@
 										actionListener="#{venFacturasController.guardar}"
 										update=":form" styleClass="ui-button-success"
 										style="margin-right: .5rem" />
-									<p:commandButton value="Cancelar"
+									<p:commandButton value="Cancelar" id="btnCancelar"
 										icon="pi pi-arrow-circle-left"
 										actionListener="#{venFacturasController.cleanFields}"
 										update=":form" styleClass="ui-button-info"
@@ -154,12 +185,10 @@
 										styleClass="ui-button-primary" style="margin-right: .5rem" />
 									<p:commandButton
 										value="#{venFacturasController.venFacturaCabecera.indImpresoBoolean ? 'Impreso' : 'Imprimir'}"
-										ajax="false"
-										id="btnImprimir" 
+										id="btnImprimir" onclick="PF('imprimirDialog').show()"
 										disabled="#{venFacturasController.venFacturaCabecera.indImpresoBoolean}"
-										actionListener="#{venFacturasController.imprimir}"
-										icon="pi pi-file-pdf" update=":form:messages :form:dt-facturas"
-										styleClass="ui-button-warning" style="margin-right: .5rem" />	
+										icon="pi pi-file-pdf" styleClass="ui-button-warning"
+										style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
 										disabled="#{venFacturasController.estaCobrado || venFacturasController.venFacturaCabecera.indImpresoBoolean}"
 										rendered="#{venFacturasController.venFacturaCabecera.id != null}"
@@ -961,9 +990,29 @@
 								styleClass="ui-button-secondary" icon="pi pi-times"
 								onclick="PF('deleteFacturaDialog').hide()" />
 						</p:confirmDialog>
+
+						<p:confirmDialog widgetVar="imprimirDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea Imprimir?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check" ajax="false"
+								id="btnImprimirReporte" onclick="handleImprimirButtonClick();"
+								actionListener="#{venFacturasController.imprimir}">
+							</p:commandButton>
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('imprimirDialog').hide()" />
+						</p:confirmDialog>
 					</div>
 				</div>
 			</div>
+			<script>
+				function handleImprimirButtonClick() {
+					setTimeout(function() {
+						PF('imprimirDialog').hide();
+						window.location.reload();
+					}, 500);
+				}
+			</script>
 		</h:form>
 	</ui:define>
 

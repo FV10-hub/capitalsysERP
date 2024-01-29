@@ -1120,16 +1120,18 @@ public class VenFacturasController {
 				this.generarReporte.descargarReporte(parametrosReporte);
 				if (this.utilsService.actualizarRegistro("ven_facturas_cabecera", "ind_impreso = 'S'",
 						" bs_empresa_id = " + commonsUtilitiesController.getIdEmpresaLogueada() + " and id = "	+ this.venFacturaCabecera.getId())) {
-					this.cleanFields();
-					PrimeFaces.current().ajax().update("form:messages", "form:" + DT_NAME);
 				} else {
 					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
 							"No se pudo actualizar el registro.");
+					return;
 				}
 			} else {
 				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
 						"Debes seccionar los parametros validos.");
+				return;
 			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update(":form");
 			
 		} catch (Exception e) {
 			LOGGER.error("Ocurrio un error al Guardar", System.err);
