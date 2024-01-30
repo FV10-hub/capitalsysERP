@@ -970,7 +970,7 @@ public class CobRecibosController {
 					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getParametros())
 					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getValores())) {
 				this.generarReporte.descargarReporte(parametrosReporte);
-				if (this.utilsService.actualizarRegistro("cob_recibos_cabecera", "ind_impreso = 'N'",
+				if (this.utilsService.actualizarRegistro("cob_recibos_cabecera", "ind_impreso = 'S'",
 						" bs_empresa_id = " + commonsUtilitiesController.getIdEmpresaLogueada() + " and id = "	+ this.cobReciboCabecera.getId())) {
 				} else {
 					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
