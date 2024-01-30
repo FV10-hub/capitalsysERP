@@ -44,6 +44,36 @@
 	<ui:define name="title">Reicbos</ui:define>
 	<ui:define name="content">
 		<h:form id="form">
+			<script type="text/javascript">
+				window.onload = function() {
+					// Esperar hasta que se complete la carga dinámica del botón
+					const observer = new MutationObserver(function(mutations) {
+						mutations.forEach(function(mutation) {
+							// Verificar si el botón está ahora en el DOM
+							const boton = document
+									.getElementById('form:btnImprimirReporte');
+							if (boton) {
+								boton.addEventListener('click', function() {
+									console.log('PASOO');
+									setTimeout(function() {
+										PF('imprimirDialog').hide();
+										PrimeFaces.current().ajax().update(
+												':form:messages',
+												':form:dt-recibos');
+									}, 1000);
+								});
+
+								observer.disconnect(); // Detener la observación después de encontrar el botón
+							}
+						});
+					});
+					observer.observe(document.body, {
+						childList : true,
+						subtree : true
+					});
+
+				};
+			</script>
 			<div class="grid crud-demo">
 				<div class="col-12">
 					<div class="card">
@@ -146,10 +176,15 @@
 									<p:commandButton
 										value="#{cobRecibosController.estaCobrado ? 'Cobrado' : 'Cobrar'}"
 										id="btnCobrar" disabled="#{cobRecibosController.estaCobrado}"
-										icon="pi pi-money-bill"
-										update=":form:manageCobroValor"
+										icon="pi pi-money-bill" update=":form:manageCobroValor"
 										onclick="PF('dlgCobros').show()"
 										styleClass="ui-button-primary" style="margin-right: .5rem" />
+									<p:commandButton
+										value="#{cobRecibosController.cobReciboCabecera.indImpresoBoolean ? 'Impreso' : 'Imprimir'}"
+										id="btnImprimir" onclick="PF('imprimirDialog').show()"
+										disabled="#{cobRecibosController.cobReciboCabecera.indImpresoBoolean}"
+										icon="pi pi-file-pdf" styleClass="ui-button-warning"
+										style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
 										rendered="#{cobRecibosController.cobReciboCabecera.id != null}"
 										actionListener="#{cobRecibosController.delete}" update=":form"
@@ -269,10 +304,11 @@
 											<div class="col-4 md:col-2">
 												<p:selectOneMenu id="tipoSaldoABuscarLb"
 													value="#{cobRecibosController.tipoSaldoAFiltrar}">
-													<f:selectItem itemLabel="TODOS" itemValue=""/>
-													<f:selectItem itemLabel="FACTURAS" itemValue="FACTURA"/>
-		                    						<f:selectItem itemLabel="DESEMSOLSOS" itemValue="DESEMBOLSO"/>
-		                    						<p:ajax update=":form:manageDetalle :form:dt-saldo"></p:ajax>
+													<f:selectItem itemLabel="TODOS" itemValue="" />
+													<f:selectItem itemLabel="FACTURAS" itemValue="FACTURA" />
+													<f:selectItem itemLabel="DESEMSOLSOS"
+														itemValue="DESEMBOLSO" />
+													<p:ajax update=":form:manageDetalle :form:dt-saldo"></p:ajax>
 												</p:selectOneMenu>
 											</div>
 
@@ -389,7 +425,8 @@
 									oncomplete="PF('dlgAddDetalle').hide()" />
 								<p:commandButton value="Cancelar" icon="pi pi-times"
 									actionListener="#{cobRecibosController.setDetalle(null)}"
-									update=":form:dt-detalle :form:tipoSaldoABuscarLb :form:dt-saldo" onclick="PF('dlgAddDetalle').hide()"
+									update=":form:dt-detalle :form:tipoSaldoABuscarLb :form:dt-saldo"
+									onclick="PF('dlgAddDetalle').hide()"
 									class="ui-button-secondary" />
 							</f:facet>
 						</p:dialog>
@@ -794,9 +831,29 @@
 								styleClass="ui-button-secondary" icon="pi pi-times"
 								onclick="PF('deleteFacturaDialog').hide()" />
 						</p:confirmDialog>
+
+						<p:confirmDialog widgetVar="imprimirDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea Imprimir?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check" ajax="false"
+								id="btnImprimirReporte" onclick="handleImprimirButtonClick();"
+								actionListener="#{cobRecibosController.imprimir}">
+							</p:commandButton>
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('imprimirDialog').hide()" />
+						</p:confirmDialog>
 					</div>
 				</div>
 			</div>
+			<script>
+				function handleImprimirButtonClick() {
+					setTimeout(function() {
+						PF('imprimirDialog').hide();
+						window.location.reload();
+					}, 1000);
+				}
+			</script>
 		</h:form>
 	</ui:define>
 

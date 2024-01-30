@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
+import py.com.capitalsys.capitalsysentities.dto.ParametrosReporte;
 import py.com.capitalsys.capitalsysentities.entities.base.BsEmpresa;
 import py.com.capitalsys.capitalsysentities.entities.base.BsPersona;
 import py.com.capitalsys.capitalsysentities.entities.base.BsTalonario;
@@ -40,6 +42,7 @@ import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobHabilitacionCa
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboCabecera;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobReciboDetalle;
 import py.com.capitalsys.capitalsysentities.entities.cobranzas.CobSaldo;
+import py.com.capitalsys.capitalsysservices.services.UtilsService;
 import py.com.capitalsys.capitalsysservices.services.base.BsModuloService;
 import py.com.capitalsys.capitalsysservices.services.base.BsParametroService;
 import py.com.capitalsys.capitalsysservices.services.base.BsTipoValorService;
@@ -51,9 +54,11 @@ import py.com.capitalsys.capitalsysservices.services.cobranzas.CobHabilitacionCa
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobRecibosService;
 import py.com.capitalsys.capitalsysservices.services.cobranzas.CobSaldoService;
 import py.com.capitalsys.capitalsysweb.session.SessionBean;
+import py.com.capitalsys.capitalsysweb.utils.ApplicationConstant;
 import py.com.capitalsys.capitalsysweb.utils.CommonUtils;
 import py.com.capitalsys.capitalsysweb.utils.CommonsUtilitiesController;
 import py.com.capitalsys.capitalsysweb.utils.Estado;
+import py.com.capitalsys.capitalsysweb.utils.GenerarReporte;
 import py.com.capitalsys.capitalsysweb.utils.GenericLazyDataModel;
 import py.com.capitalsys.capitalsysweb.utils.Modulos;
 
@@ -94,6 +99,7 @@ public class CobRecibosController {
 	
 	private List<CobCobrosValores> cobrosValoresList;
 	public BigDecimal montoTotalCobro = BigDecimal.ZERO;
+	private ParametrosReporte parametrosReporte;
 
 	private List<String> estadoList;
 	private boolean esNuegoRegistro;
@@ -145,6 +151,12 @@ public class CobRecibosController {
 
 	@ManagedProperty("#{commonsUtilitiesController}")
 	private CommonsUtilitiesController commonsUtilitiesController;
+	
+	@ManagedProperty("#{utilsService}")
+	private UtilsService utilsService;
+
+	@ManagedProperty("#{generarReporte}")
+	private GenerarReporte generarReporte;
 
 	@PostConstruct
 	public void init() {
@@ -426,6 +438,20 @@ public class CobRecibosController {
 		}
 		this.tipoSaldoAFiltrar = tipoSaldoAFiltrar;
 	}
+	
+	public ParametrosReporte getParametrosReporte() {
+		if (Objects.isNull(parametrosReporte)) {
+			parametrosReporte = new ParametrosReporte();
+			parametrosReporte.setCodModulo(Modulos.COBRANZAS.getModulo());
+			parametrosReporte.setReporte("CobRecibo");
+			parametrosReporte.setFormato("PDF");
+		}
+		return parametrosReporte;
+	}
+
+	public void setParametrosReporte(ParametrosReporte parametrosReporte) {
+		this.parametrosReporte = parametrosReporte;
+	}
 
 	// LAZY
 	public LazyDataModel<CobReciboCabecera> getLazyModel() {
@@ -658,6 +684,22 @@ public class CobRecibosController {
 
 	public void setBsTipoValorServiceImpl(BsTipoValorService bsTipoValorServiceImpl) {
 		this.bsTipoValorServiceImpl = bsTipoValorServiceImpl;
+	}
+
+	public UtilsService getUtilsService() {
+		return utilsService;
+	}
+
+	public void setUtilsService(UtilsService utilsService) {
+		this.utilsService = utilsService;
+	}
+
+	public GenerarReporte getGenerarReporte() {
+		return generarReporte;
+	}
+
+	public void setGenerarReporte(GenerarReporte generarReporte) {
+		this.generarReporte = generarReporte;
 	}
 
 	// METODOS
@@ -917,6 +959,76 @@ public class CobRecibosController {
 			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
 					e.getMessage().substring(0, e.getMessage().length()) + "...");
 		}
+
+	}
+	
+	public void imprimir() {
+		try {
+			getParametrosReporte();
+			this.prepareParams();
+			if (!(Objects.isNull(parametrosReporte) && Objects.isNull(parametrosReporte.getFormato()))
+					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getParametros())
+					&& CollectionUtils.isNotEmpty(this.parametrosReporte.getValores())) {
+				this.generarReporte.descargarReporte(parametrosReporte);
+				if (this.utilsService.actualizarRegistro("cob_recibos_cabecera", "ind_impreso = 'N'",
+						" bs_empresa_id = " + commonsUtilitiesController.getIdEmpresaLogueada() + " and id = "	+ this.cobReciboCabecera.getId())) {
+				} else {
+					CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
+							"No se pudo actualizar el registro.");
+					return;
+				}
+			} else {
+				CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_INFO, "¡CUIDADO!",
+						"Debes seccionar los parametros validos.");
+				return;
+			}
+			this.cleanFields();
+			PrimeFaces.current().ajax().update(":form");
+			
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al Guardar", System.err);
+			e.printStackTrace(System.err);
+			CommonUtils.mostrarMensaje(FacesMessage.SEVERITY_ERROR, "¡ERROR!",
+					e.getMessage().substring(0, e.getMessage().length()) + "...");
+
+		}
+	}
+
+	/*
+	 * Recordar que el orden en la que se agregan los valores en las listas SI
+	 * importan ya que en el backend se procesa como llave valor y va ir pareando en
+	 * el mismo orden
+	 */
+	private void prepareParams() {
+		// basicos
+		// Obtener la fecha y hora actual
+		LocalDateTime now = LocalDateTime.now();
+
+		DateTimeFormatter formatterDiaHora = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+		String formattedDateTimeDiaHora = now.format(formatterDiaHora);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMAGEN_PATH);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_NOMBRE_IMAGEN);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_IMPRESO_POR);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DIA_HORA);
+		this.parametrosReporte.getParametros().add(ApplicationConstant.REPORT_PARAM_DESC_EMPRESA);
+
+		this.parametrosReporte.getValores().add(ApplicationConstant.PATH_IMAGEN_EMPRESA);
+		this.parametrosReporte.getValores().add(ApplicationConstant.IMAGEN_EMPRESA_NAME);
+		this.parametrosReporte.getValores()
+				.add(this.sessionBean.getUsuarioLogueado().getBsPersona().getNombreCompleto());
+		this.parametrosReporte.getValores().add(formattedDateTimeDiaHora);
+		this.parametrosReporte.getValores()
+				.add(this.sessionBean.getUsuarioLogueado().getBsEmpresa().getNombreFantasia());
+		// basico
+
+		DateTimeFormatter formatToDateParam = DateTimeFormatter.ofPattern("dd/MM/yyy");
+		// key
+		this.parametrosReporte.getParametros().add("p_empresa_id");
+		this.parametrosReporte.getParametros().add("p_recibo_id");
+
+		// values
+		this.parametrosReporte.getValores().add(this.commonsUtilitiesController.getIdEmpresaLogueada());
+		this.parametrosReporte.getValores().add(this.cobReciboCabecera.getId());
 
 	}
 
