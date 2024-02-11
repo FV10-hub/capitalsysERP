@@ -44,6 +44,34 @@
 	<ui:define name="title">Pagos</ui:define>
 	<ui:define name="content">
 		<h:form id="form">
+		<script type="text/javascript">
+				window.onload = function() {
+					// Esperar hasta que se complete la carga dinámica del botón
+					const observer = new MutationObserver(function(mutations) {
+						mutations.forEach(function(mutation) {
+							// Verificar si el botón está ahora en el DOM
+							const boton = document
+									.getElementById('form:btnImpContrato');
+							const botonPagare = document
+							.getElementById('form:btnImpPagare');
+							if (boton) {
+								boton.addEventListener('click', function() {
+								});
+								
+								botonPagare.addEventListener('click', function() {
+								});
+
+								observer.disconnect(); // Detener la observación después de encontrar el botón
+							}
+						});
+					});
+					observer.observe(document.body, {
+						childList : true,
+						subtree : true
+					});
+
+				};
+			</script>
 			<div class="grid crud-demo">
 				<div class="col-12">
 					<div class="card">
@@ -127,7 +155,7 @@
 								<p:toolbarGroup>
 									<p:commandButton value="Guardar" icon="pi pi-save"
 										id="btnGuardar"
-										disabled="#{tesPagoController.tesPagoValoresList.size() == 0}"
+										disabled="#{tesPagoController.tesPagoValoresList.size() == 0 || tesPagoController.tesPagoCabecera.indImpresoBoolean}"
 										actionListener="#{tesPagoController.guardar}" update=":form"
 										styleClass="ui-button-success" style="margin-right: .5rem" />
 									<p:commandButton value="Cancelar"
@@ -138,17 +166,18 @@
 									<p:commandButton
 										value="#{tesPagoController.estaAutorizado ? 'Imprimir' : 'Contrato'}"
 										id="btnImpContrato" disabled="#{tesPagoController.estaAutorizado}"
-										icon="pi pi-file-pdf" update=":form:"
-										onclick="PF('dlgCobros').show()"
+										icon="pi pi-file-pdf"
+										onclick="PF('imprimirDialog').show()"
 										styleClass="ui-button-warning" style="margin-right: .5rem" />
 									<p:commandButton
 										value="#{tesPagoController.estaAutorizado ? 'Imprimir' : 'Pagare'}"
-										id="btnImpPagare" disabled="#{tesPagoController.estaAutorizado}"
-										icon="pi pi-file-pdf" update=":form:"
-										onclick="PF('dlgCobros').show()"
+										id="btnImpPagare" disabled="#{tesPagoController.tesPagoCabecera.indImpresoBoolean}"
+										icon="pi pi-file-pdf"
+										onclick="PF('imprimirPagareDialog').show()"
 										styleClass="ui-button-warning" style="margin-right: .5rem" />
 									<p:commandButton value="Eliminar" icon="pi pi-trash"
 										rendered="#{tesPagoController.tesPagoCabecera.id != null}"
+										disabled="#{tesPagoController.tesPagoCabecera.indImpresoBoolean}"
 										actionListener="#{tesPagoController.delete}" update=":form"
 										styleClass="ui-button-danger" style="margin-right: .5rem" />
 
@@ -824,9 +853,48 @@
 								styleClass="ui-button-secondary" icon="pi pi-times"
 								onclick="PF('deleteFacturaDialog').hide()" />
 						</p:confirmDialog>
+						
+						<p:confirmDialog widgetVar="imprimirDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea Imprimir?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check" ajax="false"
+								id="btnImprimirContratoReporte" onclick="handleImprimirButtonClick();"
+								actionListener="#{tesPagoController.imprimir('CONTRATO')}">
+							</p:commandButton>
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('imprimirDialog').hide()" />
+						</p:confirmDialog>
+						
+						<p:confirmDialog widgetVar="imprimirPagareDialog" showEffect="fade"
+							width="300" message="Esta seguro que desea Imprimir?"
+							header="Confirmacion" severity="warn">
+							<p:commandButton value="Si" icon="pi pi-check" ajax="false"
+								id="btnImprimirReporte" onclick="handleImprimirPagareButtonClick();"
+								actionListener="#{tesPagoController.imprimir('PAGARE')}">
+							</p:commandButton>
+							<p:commandButton value="No" type="button"
+								styleClass="ui-button-secondary" icon="pi pi-times"
+								onclick="PF('imprimirPagareDialog').hide()" />
+						</p:confirmDialog>
+						
 					</div>
 				</div>
 			</div>
+			<script>
+				function handleImprimirButtonClick() {
+					setTimeout(function() {
+						PF('imprimirDialog').hide();
+						window.location.reload();
+					}, 1500);
+				}
+				function handleImprimirPagareButtonClick() {
+					setTimeout(function() {
+						PF('imprimirPagareDialog').hide();
+						window.location.reload();
+					}, 1500);
+				}
+			</script>
 		</h:form>
 	</ui:define>
 
