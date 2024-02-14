@@ -97,6 +97,7 @@ public class GenerarReporte {
 
 			FacesContext.getCurrentInstance().responseComplete();
 		} else {
+			System.out.println("LA RESPUESTA FUE::::::: " + response);
 			System.out.println("Error en la solicitud: " + response.getStatus());
 			LOGGER.error("Error en la solicitud: " + response.getStatus());
 		}

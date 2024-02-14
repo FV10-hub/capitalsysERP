@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  capitalsys-web:
+    build: .
+    container_name: capitalsys-web-app
+    env_file:
+      - ./.env
+    ports:
+      - "8090:8090"
+    networks:
+      - spring
+      
+networks:
+  spring:
+    name: spring
+    external: true      
